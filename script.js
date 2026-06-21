@@ -1,7 +1,7 @@
 /**
  * نظام حاسبة التفاعل التراكمي المحمي للأدمن السبعة - تحالف HFo
  * وضع الزائر: مشاهدة صرفة بدون أي تحكم أو صلاحيات تصدير لوحات شرف
- * المالك والمتحكم الرئيسي والمطور: Abo S3D HFo 806
+ * إعداد وإشراف وتطوير - 806 Abo S3D - HFo
  */
 
 const CALCULATOR_WEIGHTS = {
@@ -31,7 +31,7 @@ let members = [];
 let auditLogs = [];
 let currentEditMemberOldData = { duel: 0, tech: 0, desert: 0, valley: 0, season: 0 };
 
-// بيانات تجريبية لـ 10 أعضاء
+// بيانات تجريبية لـ 10 أعضاء كشوفات التحالف الرسمية
 const defaultMembers = [
     { id: "1", name: "فارس_HFo", duel: 14400000, tech: 12000, desert: 1, valley: 1, season: 1 },
     { id: "2", name: "المدمر_01", duel: 7200000, tech: 6000, desert: 1, valley: 1, season: 0 },
@@ -78,7 +78,6 @@ function setupEventListeners() {
     document.getElementById('closeAuditModalBtn').addEventListener('click', () => document.getElementById('auditModal').style.display='none');
 }
 
-// نظام التحقق الصارم من هوية الرموز السرية للإدارة
 function handleAdminLogin() {
     let pinInput = prompt("الرجاء إدخال الرمز السري الخاص بالأدمن:");
     if (!pinInput) return;
@@ -130,16 +129,12 @@ function handleAdminLogout() {
     calculateScoresAndRender();
 }
 
-// العزل التام والمطلق لأزرار لوحة الشرف والتعديل والإضافة عن الزائر
 function applyVisibilityRules() {
     const isAuthorized = (currentAdminRole === "admin" || currentAdminRole === "owner");
-    
-    // إخفاء أو إظهار أزرار اللوحة الرئيسية ديناميكياً
     document.getElementById('openAddModalBtn').style.display = isAuthorized ? 'inline-block' : 'none';
     document.getElementById('exportHonorBtn').style.display = isAuthorized ? 'inline-block' : 'none';
     document.getElementById('viewAuditLogBtn').style.display = isAuthorized ? 'inline-block' : 'none';
     
-    // التحكم في عمود الإجراءات بالجدول
     const ths = document.getElementsByClassName('action-th');
     for(let th of ths) { th.style.display = isAuthorized ? 'table-cell' : 'none'; }
 }
@@ -294,29 +289,176 @@ function openAuditModal() {
     document.getElementById('auditModal').style.display = 'flex';
 }
 
+// توليد صورة اللوحة الشرفية الملحمية الخالية من الحدود لأسماء الصدارة الممتدة للمركز الـ 10 كاملاً
 function generateHonorRollImage() {
-    if (currentAdminRole === "viewer") return; // جدار حماية لمنع الزائر من تشغيل الدالة برمجياً
-    const canvas = document.createElement('canvas'); canvas.width = 800; canvas.height = 1000; const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = '#eab308'; ctx.lineWidth = 8; ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
-    ctx.fillStyle = '#1e293b'; ctx.fillRect(40, 40, canvas.width - 80, 160);
-    ctx.fillStyle = '#eab308'; ctx.font = 'bold 34px Arial, sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText('لوحة الشرف الأسبوعية - تحالف HFo', canvas.width / 2, 105);
-    ctx.fillStyle = '#94a3b8'; ctx.font = '20px Arial, sans-serif';
-    ctx.fillText('إشراف وتطوير القائد العام: Abo S3D HFo 806', canvas.width / 2, 155);
+    if (currentAdminRole === "viewer") return;
+    if (members.length === 0) {
+        alert("لا توجد بيانات كافية لتوليد لوحة الشرف.");
+        return;
+    }
 
-    const podiumY = 480; const top3 = members.slice(0, 3);
-    if (top3[1]) { ctx.fillStyle = '#475569'; ctx.fillRect(150, podiumY, 150, 120); ctx.fillStyle = '#cbd5e1'; ctx.font = 'bold 22px Arial, sans-serif'; ctx.fillText(top3[1].name, 225, podiumY - 40); ctx.fillText(`${top3[1].finalScore} ن`, 225, podiumY - 10); }
-    if (top3[0]) { ctx.fillStyle = '#ca8a04'; ctx.fillRect(325, podiumY - 50, 150, 170); ctx.fillStyle = '#eab308'; ctx.font = 'bold 26px Arial, sans-serif'; ctx.fillText(top3[0].name, 400, podiumY - 95); ctx.fillText(`${top3[0].finalScore} ن`, 400, podiumY - 65); }
-    if (top3[2]) { ctx.fillStyle = '#78350f'; ctx.fillRect(500, podiumY, 150, 120); ctx.fillStyle = '#b45309'; ctx.font = 'bold 22px Arial, sans-serif'; ctx.fillText(top3[2].name, 575, podiumY - 40); ctx.fillText(`${top3[2].finalScore} ن`, 575, podiumY - 10); }
+    const canvas = document.createElement('canvas');
+    canvas.width = 1200; 
+    canvas.height = 760; // زيادة الارتفاع ليتسع للمراكز العشرة كاملة براحة تامة
+    const ctx = canvas.getContext('2d');
 
-    ctx.fillStyle = '#1e293b'; ctx.fillRect(60, 640, canvas.width - 120, 260);
-    ctx.fillStyle = '#eab308'; ctx.font = 'bold 20px Arial, sans-serif'; ctx.textAlign = 'right'; ctx.fillText('فرسان التفاعل الإضافية للأسبوع الحالي:', canvas.width - 80, 685);
-    const runners = members.slice(3, 8); let startY = 725; ctx.font = '18px Arial, sans-serif'; ctx.fillStyle = '#f8fafc';
-    runners.forEach((m, idx) => { ctx.textAlign = 'right'; ctx.fillText(`${idx + 4}. ${m.name}`, canvas.width - 90, startY); ctx.textAlign = 'left'; ctx.fillText(`${m.finalScore} نقطة`, 90, startY); startY += 35; });
+    // 1. تدرج الخلفية العام (عمق عسكري مظلم وحماسي)
+    let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    bgGrad.addColorStop(0, '#110c08'); 
+    bgGrad.addColorStop(0.5, '#0d131f'); 
+    bgGrad.addColorStop(1, '#08090d');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = '#94a3b8'; ctx.font = '15px Arial, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('تطوير وإشراف - 806 Abo S3D - HFo', canvas.width / 2, 955);
-    const imageURI = canvas.toDataURL('image/png'); const link = document.createElement('a'); link.download = `لوحة_شرف_تحالف_HFo.png`; link.href = imageURI; document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    // تأثير التوهج الشعاعي الخلفي للمركز الأول البطل
+    let glowGrad = ctx.createRadialGradient(canvas.width/2, 210, 20, canvas.width/2, 210, 250);
+    glowGrad.addColorStop(0, 'rgba(234, 179, 8, 0.15)');
+    glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = glowGrad;
+    ctx.fillRect(0, 100, canvas.width, 350);
+
+    // رسم إطار خارجي خشبي داكن مع حواف عسكرية
+    ctx.strokeStyle = '#1e1610';
+    ctx.lineWidth = 16;
+    ctx.strokeRect(8, 8, canvas.width - 16, canvas.height - 16);
+    
+    ctx.strokeStyle = '#ca8a04'; 
+    ctx.lineWidth = 2;
+    ctx.strokeRect(18, 18, canvas.width - 36, canvas.height - 36);
+
+    // 2. هيدر اللوحة المطور (HFo لوحة شرف مبارزة التحالف)
+    ctx.fillStyle = '#1c140e';
+    ctx.strokeStyle = '#ca8a04';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(320, 20);
+    ctx.lineTo(880, 20);
+    ctx.lineTo(830, 110);
+    ctx.lineTo(370, 110);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#ca8a04';
+    ctx.fillRect(320, 20, 10, 10); ctx.fillRect(870, 20, 10, 10);
+
+    // نصوص الهيدر المحدثة بدقة مع الظلال الفخمة
+    ctx.fillStyle = '#facc15';
+    ctx.font = 'bold 28px Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+    ctx.shadowBlur = 4;
+    ctx.fillText('HFo لوحة شرف مبارزة التحالف', canvas.width / 2, 65);
+
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = 'bold 14px Arial';
+    ctx.fillText('Abo S3D - HFo 806 إعداد وإشراف وتطوير', canvas.width / 2, 95);
+    ctx.shadowBlur = 0; 
+
+    // 3. رسم الصدارة الكبرى طائرة بدون أي حدود دائرية مقيدة للأسماء (Top 3)
+    const top3 = members.slice(0, 3);
+    const centerY = 215;
+
+    // [المركز الثاني - الفضي المتوهج بالبريق الأزرق] - اليسار
+    if (top3[1]) {
+        let x = 320, y = centerY;
+        ctx.fillStyle = '#38bdf8'; ctx.font = 'bold 16px Arial'; ctx.fillText('#2 الفارس الفضي', x, y - 25);
+        ctx.fillStyle = '#f8fafc'; ctx.font = 'bold 22px Arial'; ctx.fillText(top3[1].name, x, y + 8);
+        ctx.fillStyle = '#94a3b8'; ctx.font = 'bold 14px Arial'; ctx.fillText(`${top3[1].finalScore} pts`, x, y + 33);
+    }
+
+    // [المركز الأول - التاج الذهبي الأسطوري المشع] - المنتصف
+    if (top3[0]) {
+        let x = 600, y = centerY - 15;
+        ctx.fillStyle = '#eab308'; ctx.font = 'bold 20px Arial'; ctx.fillText('👑 بطل الجبهة #1', x, y - 30);
+        ctx.fillStyle = '#facc15'; ctx.font = 'bold 26px Arial'; ctx.fillText(top3[0].name, x, y + 10);
+        ctx.fillStyle = '#4ade80'; ctx.font = 'bold 16px Arial'; ctx.fillText(`${top3[0].finalScore} pts`, x, y + 38);
+    }
+
+    // [المركز الثالث - البرونزي الناري اللامع] - اليمين
+    if (top3[2]) {
+        let x = 880, y = centerY;
+        ctx.fillStyle = '#f97316'; ctx.font = 'bold 16px Arial'; ctx.fillText('#3 الفارس البرونزي', x, y - 25);
+        ctx.fillStyle = '#f8fafc'; ctx.font = 'bold 22px Arial'; ctx.fillText(top3[2].name, x, y + 8);
+        ctx.fillStyle = '#94a3b8'; ctx.font = 'bold 14px Arial'; ctx.fillText(`${top3[2].finalScore} pts`, x, y + 33);
+    }
+
+    // 4. جدول تصنيف فرسان التحالف من المركز 4 وحتى العاشر بالتمام والكمال
+    const tableX = 150;
+    const tableY = 325;
+    const tableW = 900;
+    const rowH = 38;
+
+    // خلفية الجدول الداكنة المحاطة بإطار فولاذي
+    ctx.fillStyle = 'rgba(17, 20, 28, 0.88)';
+    ctx.fillRect(tableX, tableY, tableW, rowH * 7 + 40);
+    ctx.strokeStyle = '#2e3d52';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(tableX, tableY, tableW, rowH * 7 + 40);
+
+    // ترويسة الجدول الداخلي لعرض الرتب
+    ctx.fillStyle = 'rgba(28, 35, 48, 0.95)';
+    ctx.fillRect(tableX, tableY, tableW, 35);
+    ctx.fillStyle = '#ca8a04';
+    ctx.font = 'bold 13px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('الرتبة', tableX + 50, tableY + 22);
+    ctx.fillText('شعار التفاعل', tableX + 180, tableY + 22);
+    ctx.fillText('اسم الفارس المستبسل', tableX + 450, tableY + 22);
+    ctx.fillText('النقاط التراكمية المحققة', tableX + 780, tableY + 22);
+
+    // سحب وحقن البيانات آلياً من الكشوفات حتى السطر رقم 10 الشامل
+    const runners = members.slice(3, 10);
+    let currentY = tableY + 62;
+
+    runners.forEach((m, idx) => {
+        const actualRank = idx + 4;
+
+        // تأثير الأسطر التبادلية لحفظ دقة القراءة
+        if (idx % 2 === 0) {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.02)';
+            ctx.fillRect(tableX + 5, currentY - 20, tableW - 10, rowH);
+        }
+
+        ctx.textAlign = 'center';
+        // طباعة رقم الترتيب حتى 10
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = 'bold 14px Arial';
+        ctx.fillText(`#${actualRank}`, tableX + 50, currentY);
+
+        // محاكاة الشعار المعدني الصغير
+        ctx.fillStyle = actualRank < 7 ? '#ca8a04' : '#475569';
+        ctx.beginPath();
+        ctx.arc(tableX + 180, currentY - 4, 8, 0, Math.PI * 2);
+        ctx.fill();
+
+        // طباعة الاسم كاملاً بشكل واضح بدون خطوط دائرية محيطة
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = 'bold 15px Arial';
+        ctx.fillText(m.name, tableX + 450, currentY);
+
+        // طباعة النقاط التراكمية النهائية
+        ctx.fillStyle = '#facc15';
+        ctx.font = 'bold 14px Arial';
+        ctx.fillText(`${m.finalScore.toLocaleString()} pts`, tableX + 780, currentY);
+
+        currentY += rowH;
+    });
+
+    // التوقيع النهائي المعتمد أسفل اللوحة
+    ctx.fillStyle = '#475569';
+    ctx.font = '11px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('إعداد وإشراف وتطوير - 806 Abo S3D - HFo © 2026', canvas.width / 2, canvas.height - 25);
+
+    // تصدير فوري وتنزيل مباشر للصورة الناتجة بامتداد PNG
+    const imageURI = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.download = `لوحة_شرف_مبارزة_التحالف_HFo.png`;
+    link.href = imageURI;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
 function escapeHtml(text) { const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }; return String(text).replace(/[&<>"']/g, m => map[m]); }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تفاعل تحالف HFo - نتائج تفاعل الفرسان</title>
+    <title>لوحة تفاعل تحالف HFo - الأرشفة المؤتمتة</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,7 +12,7 @@
     <header class="main-header">
         <div class="logo-container">
             <h1>تحالف <span class="alliance-brand">HFo</span></h1>
-            <p>نظام العداد التراكمي المحمي - شاشة عرض النتائج الرسمية للأعضاء</p>
+            <p>نظام العداد التراكمي المحمي - التصفير التلقائي والأرشفة الموسمية المحمية</p>
             <div class="header-copyright">إعداد وإشراف وتطوير - 806 Abo S3D - HFo</div>
         </div>
     </header>
@@ -26,12 +26,15 @@
                 <button id="logoutAdminBtn" class="btn btn-danger" style="display: none;">🔒 تسجيل الخروج</button>
                 <span id="adminStatusBadge" class="status-badge badge-locked">الوضع الحالي: مشاهدة فقط 👁️</span>
             </div>
+            <div class="time-display-container">
+                <span id="liveTimeBadge" class="time-badge">---</span>
+            </div>
             <div class="owner-badge-container" id="ownerZone" style="display: none;">
                 <span class="status-badge btn-gold">👑 صلاحية المالك نافذة (Abo S3D)</span>
             </div>
         </section>
 
-        <!-- لوحة الإحصائيات العامة (متاحة للجميع للمشاهدة) -->
+        <!-- لوحة الإحصائيات العامة -->
         <section class="stats-grid" id="statsGrid">
             <div class="stat-card">
                 <h3>إجمالي الأعضاء</h3>
@@ -47,19 +50,27 @@
             </div>
         </section>
 
-        <!-- أدوات التحكم والبحث (تظهر الأزرار فيها للأدمن فقط ديناميكياً) -->
+        <!-- أدوات التحكم والبحث والتصدير -->
         <section class="control-panel">
             <div class="search-box">
                 <input type="text" id="searchInput" placeholder="ابحث عن عضو في كشوفات التحالف...">
             </div>
             <div class="action-buttons">
                 <button id="openAddModalBtn" class="btn btn-primary" style="display: none;">➕ إضافة عضو جديد</button>
-                <button id="exportHonorBtn" class="btn btn-gold" style="display: none;">📊 تصدير صورة لوحة الشرف</button>
+                <button id="exportHonorBtn" class="btn btn-gold" style="display: none;">🏅 تصدير صورة لوحة الشرف</button>
+                <button id="exportTableImgBtn" class="btn btn-info" style="display: none;">📊 تصدير كشف الأسبوع كصورة</button>
+                <button id="exportCsvBtn" class="btn btn-success" style="display: none;">📥 تصدير كشف الأسبوع (CSV)</button>
+                <label for="importCsvInput" id="importCsvLabel" class="btn btn-secondary" style="display: none; cursor: pointer; margin: 0;">
+                    📤 استيراد كشف احتياطي (CSV)
+                    <input type="file" id="importCsvInput" accept=".csv" style="display: none;">
+                </label>
+                <button id="weeklyReportBtn" class="btn btn-email" style="display: none;">📧 إرسال تقرير الأسبوع بريدياً</button>
+                <button id="viewArchiveBtn" class="btn btn-gold" style="display: none; background-color: #6d28d9; border: 1px solid #7c3aed;">🗂️ أرشيف الأسابيع للموسم</button>
                 <button id="viewAuditLogBtn" class="btn btn-secondary" style="display: none;">📑 سجل تدقيق العمليات</button>
             </div>
         </section>
 
-        <!-- جدول عرض الأعضاء وترتيبهم (متاح للمشاهدة، وتظهر الإجراءات للأدمن فقط) -->
+        <!-- جدول عرض الأعضاء وترتيبهم -->
         <section class="table-container">
             <table>
                 <thead>
@@ -71,18 +82,18 @@
                         <th>حضور الصحراء</th>
                         <th>حضور الوادي</th>
                         <th>حروب الموسم</th>
-                        <th>إجمالي النقاط</th>
+                        <th>إجمالي النقاط الأسبوعي</th>
                         <th class="action-th" style="display: none;">إجراءات الأدمن</th>
                     </tr>
                 </thead>
                 <tbody id="membersTableBody">
-                    <!-- يتم توليد الأسطر برمجياً عبر الجافا سكريبت -->
+                    <!-- يتم توليد الأسطر برمجياً -->
                 </tbody>
             </table>
         </section>
     </div>
 
-    <!-- النافذة المنبثقة لحقن وتحديث النقاط (للإدارة فقط) -->
+    <!-- النافذة المنبثقة لحقن وتحديث النقاط -->
     <div id="memberModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" id="closeModalBtn">&times;</span>
@@ -125,16 +136,16 @@
                     <span class="current-badge" id="currentSeasonBadge">الحضور الحالي: 0</span>
                 </div>
 
-                <button type="submit" class="btn btn-block btn-primary" id="saveMemberBtn">تحديث واتشاف المجموع التراكمي</button>
+                <button type="submit" class="btn btn-block btn-primary" id="saveMemberBtn">تحديث واحتساب المجموع التراكمي</button>
             </form>
         </div>
     </div>
 
-    <!-- نافذة سجل التدقيق والعمليات الشاملة (للإدارة فقط) -->
+    <!-- نافذة سجل التدقيق والعمليات الشاملة -->
     <div id="auditModal" class="modal">
-        <div class="modal-content" style="max-width: 750px;">
+        <div class="modal-content" style="max-width: 850px;">
             <span class="close-modal" id="closeAuditModalBtn">&times;</span>
-            <h2 style="color: var(--gold-primary); margin-bottom:15px;">📑 سجل العمليات والتدقيق الفوري للأدمن</h2>
+            <h2 style="color: var(--gold-primary); margin-bottom:15px;">📑 سجل العمليات والتدقيق الفوري (صلاحية المالك)</h2>
             <div class="table-container" style="max-height: 450px; overflow-y: auto;">
                 <table style="font-size: 0.85rem;">
                     <thead>
@@ -142,7 +153,7 @@
                             <th>الأدمن المسؤول</th>
                             <th>نوع العملية</th>
                             <th>تفاصيل التعديل الدقيقة</th>
-                            <th>الوقت والتاريخ</th>
+                            <th>اليوم والتاريخ والوقت</th>
                         </tr>
                     </thead>
                     <tbody id="auditLogTableBody">
@@ -153,12 +164,29 @@
         </div>
     </div>
 
-    <div id="honorRollContainer" style="display:none;"></div>
-
-    <!-- تذييل الصفحة الثابت للحقوق الفكرية المحدثة -->
-    <footer class="main-footer">
-        <p>إعداد وإشراف وتطوير - 806 Abo S3D - HFo © 2026</p>
-    </footer>
+    <!-- نافذة مستعرض أرشيف الموسم (لـ Abo S3D فقط) -->
+    <div id="archiveModal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <span class="close-modal" id="closeArchiveModalBtn">&times;</span>
+            <h2 style="color: var(--gold-primary); margin-bottom:15px;">🗂️ سجل الأرشيف المحفوظ التلقائي (حصاد نهاية الموسم)</h2>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:15px;">هنا تجد كشوفات كافة الأسابيع المصفّرة والمحفوظة برمجياً يوم الإثنين الساعة 5:00 صباحاً بشكل أوتوماتيكي.</p>
+            <div class="table-container" style="max-height: 450px; overflow-y: auto;">
+                <table style="font-size: 0.85rem;">
+                    <thead>
+                        <tr>
+                            <th>الأسبوع المؤرشف</th>
+                            <th>النطاق الزمني المفصل للأسبوع</th>
+                            <th>إجمالي الفرسان</th>
+                            <th>إجراءات استعادة الحصاد</th>
+                        </tr>
+                    </thead>
+                    <tbody id="archiveTableBody">
+                        <!-- توليد قائمة الأسابيع تلقائياً -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>

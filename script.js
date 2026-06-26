@@ -14,12 +14,12 @@ const CALCULATOR_WEIGHTS = {
 };
 
 const ALLIANCE_ADMINS = {
-    "Abo S3D": { pin: "8061", role: "owner" }, 
-    "الهفوف": { pin: "8062", role: "admin" },
-    "AhmedBj": { pin: "8063", role: "admin" },
+    "Abo S3D": { pin: "1403", role: "owner" }, 
+    "الهفوف": { pin: "1992", role: "admin" },
+    "AhmedBj": { pin: "2580", role: "admin" },
     "saloohka1": { pin: "8064", role: "admin" },
-    "STEEV": { pin: "8065", role: "admin" },
-    "Rooz5": { pin: "8066", role: "admin" },
+    "STEEV": { pin: "1747", role: "admin" },
+    "Rooz5": { pin: "2023", role: "admin" },
     "Abu som3a": { pin: "8067", role: "admin" }
 };
 

@@ -13,15 +13,15 @@ const CALCULATOR_WEIGHTS = {
     SEASON_WAR_VAL: 50           
 };
 
-// هيكل الأدمن السبعة الرسمي مع الرموز السرية الصارمة
+// هيكل الأدمن السبعة الرسمي مع الرموز السرية
 const ALLIANCE_ADMINS = {
-    "Abo S3D": { pin: "8061", role: "owner" }, 
-    "الهفوف": { pin: "8062", role: "admin" },
-    "AhmedBj": { pin: "8063", role: "admin" },
-    "saloohka1": { pin: "8064", role: "admin" },
-    "STEEV": { pin: "8065", role: "admin" },
-    "Rooz5": { pin: "8066", role: "admin" },
-    "Abu som3a": { pin: "8067", role: "admin" }
+    "Abo S3D": { pin: "1403", role: "owner" }, 
+    "الهفوف": { pin: "1992", role: "admin" },
+    "AhmedBj": { pin: "2580", role: "admin" },
+    "saloohka1": { pin: "0555", role: "admin" },
+    "STEEV": { pin: "1747", role: "admin" },
+    "Rooz5": { pin: "2023", role: "admin" },
+    "Abu som3a": { pin: "1984", role: "admin" }
 };
 
 let currentLoggedInAdmin = null; 
@@ -126,12 +126,13 @@ document.addEventListener('DOMContentLoaded', () => {
     startLiveClockAndAutomation();
 });
 
+// دالة التهيئة المحدثة لفرض حقن القائمة الـ 83 رسمياً فوق الكشوفات التخزينية القديمة بالمتصفح
 function initApp() {
-    members = JSON.parse(localStorage.getItem('hfo_strict_members')) || [...defaultMembers];
+    members = [...defaultMembers]; // فرض تحميل الـ 83 اسماً مباشرة
     auditLogs = JSON.parse(localStorage.getItem('hfo_strict_logs')) || [];
     seasonalArchive = JSON.parse(localStorage.getItem('hfo_seasonal_archive')) || [];
     
-    saveToStorage();
+    saveToStorage(); // قفل وحفظ البيانات الجديدة في المتصفح
     calculateScoresAndRender();
     applyVisibilityRules();
 }

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تفاعل تحالف HFo - الأرشفة المؤتمتة</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- الشعار والعنوان الرئيسي مع الحقوق الفكرية القيادية -->
+    <header class="main-header">
+        <div class="logo-container">
+            <h1>تحالف <span class="alliance-brand">HFo</span></h1>
+            <p>نظام العداد التراكمي المحمي - التصفير التلقائي والأرشفة الموسمية المحمية</p>
+            <div class="header-copyright">إعداد وإشراف وتطوير - 806 Abo S3D - HFo</div>
+        </div>
+    </header>
+
+    <div class="container">
+        
+        <!-- لوحة التحكم في الصلاحيات والدخول الثابتة -->
+        <section class="control-panelAdmin">
+            <div class="admin-auth">
+                <button id="loginAdminBtn" class="btn btn-secondary">🔐 تسجيل دخول الإدارة</button>
+                <button id="logoutAdminBtn" class="btn btn-danger" style="display: none;">🔒 تسجيل الخروج</button>
+                <span id="adminStatusBadge" class="status-badge badge-locked">الوضع الحالي: مشاهدة فقط 👁️</span>
+            </div>
+            <div class="time-display-container">
+                <span id="liveTimeBadge" class="time-badge">---</span>
+            </div>
+            <div class="owner-badge-container" id="ownerZone" style="display: none;">
+                <span class="status-badge btn-gold">👑 صلاحية المالك نافذة (Abo S3D)</span>
+            </div>
+        </section>
+
+        <!-- لوحة الإحصائيات العامة -->
+        <section class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <h3>إجمالي الأعضاء</h3>
+                <p id="statTotalMembers">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>متوسط نقاط التحالف</h3>
+                <p id="statAverageScore">0</p>
+            </div>
+            <div class="stat-card highlight-positive">
+                <h3>بطل الأسبوع الحالي</h3>
+                <p id="statTopMember">-</p>
+            </div>
+        </section>
+
+        <!-- أدوات التحكم والبحث والتصدير -->
+        <section class="control-panel">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="ابحث عن عضو في كشوفات التحالف...">
+            </div>
+            <div class="action-buttons">
+                <button id="openAddModalBtn" class="btn btn-primary" style="display: none;">➕ إضافة عضو جديد</button>
+                <button id="exportHonorBtn" class="btn btn-gold" style="display: none;">🏅 تصدير صورة لوحة الشرف</button>
+                <button id="exportTableImgBtn" class="btn btn-info" style="display: none;">📊 تصدير كشف الأسبوع كصورة</button>
+                <button id="exportCsvBtn" class="btn btn-success" style="display: none;">📥 تصدير كشف الأسبوع (CSV)</button>
+                <label for="importCsvInput" id="importCsvLabel" class="btn btn-secondary" style="display: none; cursor: pointer; margin: 0;">
+                    📤 استيراد كشف احتياطي (CSV)
+                    <input type="file" id="importCsvInput" accept=".csv" style="display: none;">
+                </label>
+                <button id="weeklyReportBtn" class="btn btn-email" style="display: none;">📧 إرسال تقرير الأسبوع بريدياً</button>
+                <button id="viewArchiveBtn" class="btn btn-gold" style="display: none; background-color: #6d28d9; border: 1px solid #7c3aed;">🗂️ أرشيف الأسابيع للموسم</button>
+                <button id="viewAuditLogBtn" class="btn btn-secondary" style="display: none;">📑 سجل تدقيق العمليات</button>
+            </div>
+        </section>
+
+        <!-- جدول عرض الأعضاء وترتيبهم -->
+        <section class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>الترتيب</th>
+                        <th>الاسم</th>
+                        <th>نقاط المبارزة التراكمية</th>
+                        <th>نقاط التقنية التراكمية</th>
+                        <th>حضور الصحراء</th>
+                        <th>حضور الوادي</th>
+                        <th>حروب الموسم</th>
+                        <th>إجمالي النقاط الأسبوعي</th>
+                        <th class="action-th" style="display: none;">إجراءات الأدمن</th>
+                    </tr>
+                </thead>
+                <tbody id="membersTableBody">
+                    <!-- يتم توليد الأسطر برمجياً عبر ملف الجافا سكريبت -->
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <!-- النافذة المنبثقة لحقن وتحديث النقاط -->
+    <div id="memberModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeModalBtn">&times;</span>
+            <h2 id="modalTitle">حقن النقاط اليومية</h2>
+            <form id="memberForm">
+                <input type="hidden" id="memberId">
+                
+                <div class="form-group">
+                    <label for="memberName">اسم العضو:</label>
+                    <input type="text" id="memberName" required placeholder="أدخل اسم العضو">
+                </div>
+
+                <div class="form-group">
+                    <label for="allianceDuel">النقاط المراد **إضافتها** لمبارزة التحالف اليوم:</label>
+                    <input type="number" id="allianceDuel" min="0" required value="0">
+                    <span class="current-badge" id="currentDuelBadge">الرصيد الحالي: 0</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="techDonations">النقاط المراد **إضافتها** لتبرع التقنية اليوم:</label>
+                    <input type="number" id="techDonations" min="0" required value="0">
+                    <span class="current-badge" id="currentTechBadge">الرصيد الحالي: 0</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="desertStorm">مرات حضور معركة عاصفة الصحراء المراد **إضافتها**:</label>
+                    <input type="number" id="desertStorm" min="0" required value="0">
+                    <span class="current-badge" id="currentDesertBadge">الحضور الحالي: 0</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="valleyBattle">مرات حضور معركة الوادي المراد **إضافتها**:</label>
+                    <input type="number" id="valleyBattle" min="0" required value="0">
+                    <span class="current-badge" id="currentValleyBadge">الحضور الحالي: 0</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="seasonWars">مرات حضور حروب الموسم المراد **إضافتها**:</label>
+                    <input type="number" id="seasonWars" min="0" required value="0">
+                    <span class="current-badge" id="currentSeasonBadge">الحضور الحالي: 0</span>
+                </div>
+
+                <button type="submit" class="btn btn-block btn-primary" id="saveMemberBtn">تحديث واحتساب المجموع التراكمي</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- نافذة سجل التدقيق والعمليات الشاملة -->
+    <div id="auditModal" class="modal">
+        <div class="modal-content" style="max-width: 850px;">
+            <span class="close-modal" id="closeAuditModalBtn">&times;</span>
+            <h2 style="color: var(--gold-primary); margin-bottom:15px;">📑 سجل العمليات والتدقيق الفوري (صلاحية المالك)</h2>
+            <div class="table-container" style="max-height: 450px; overflow-y: auto;">
+                <table style="font-size: 0.85rem;">
+                    <thead>
+                        <tr>
+                            <th>الأدمن المسؤول</th>
+                            <th>نوع العملية</th>
+                            <th>تفاصيل التعديل الدقيقة</th>
+                            <th>اليوم والتاريخ والوقت</th>
+                        </tr>
+                    </thead>
+                    <tbody id="auditLogTableBody">
+                        <!-- يتم التوليد تلقائياً -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة مستعرض أرشيف الموسم (لـ Abo S3D فقط) -->
+    <div id="archiveModal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <span class="close-modal" id="closeArchiveModalBtn">&times;</span>
+            <h2 style="color: var(--gold-primary); margin-bottom:15px;">🗂️ سجل الأرشيف المحفوظ التلقائي (حصاد نهاية الموسم)</h2>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:15px;">هنا تجد كشوفات كافة الأسابيع المصفّرة والمحفوظة برمجياً يوم الإثنين الساعة 5:00 صباحاً بشكل أوتوماتيكي.</p>
+            <div class="table-container" style="max-height: 450px; overflow-y: auto;">
+                <table style="font-size: 0.85rem;">
+                    <thead>
+                        <tr>
+                            <th>الأسبوع المؤرشف</th>
+                            <th>النطاق الزمني المفصل للأسبوع</th>
+                            <th>إجمالي الفرسان</th>
+                            <th>إجراءات استعادة الحصاد</th>
+                        </tr>
+                    </thead>
+                    <tbody id="archiveTableBody">
+                        <!-- توليد قائمة الأسابيع تلقائياً -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

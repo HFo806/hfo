@@ -1,0 +1,556 @@
+/**
+ * نظام حاسبة التفاعل التراكمي المحمي للأدمن السبعة - تحالف HFo
+ * وضع الزائر: مشاهدة صرفة للرابط دون أي أزرار أو صلاحيات تصدير.
+ * الصلاحيات الكبرى (لوحة الشرف، كشف الأسبوع المصور، الـ CSV والتقارير) محصورة للمالك Abo S3D فقط.
+ * إعداد وإشراف وتطوير - 806 Abo S3D - HFo
+ */
+
+const CALCULATOR_WEIGHTS = {
+    DUEL_POINTS_DIVIDER: 100000, 
+    TECH_POINTS_DIVIDER: 100,    
+    DESERT_ATTEND_VAL: 30,       
+    VALLEY_ATTEND_VAL: 30,       
+    SEASON_WAR_VAL: 50           
+};
+
+// هيكل الأدمن السبعة الرسمي مع الرموز السرية الصارمة
+const ALLIANCE_ADMINS = {
+    "Abo S3D": { pin: "8061", role: "owner" }, 
+    "الهفوف": { pin: "8062", role: "admin" },
+    "AhmedBj": { pin: "8063", role: "admin" },
+    "saloohka1": { pin: "8064", role: "admin" },
+    "STEEV": { pin: "8065", role: "admin" },
+    "Rooz5": { pin: "8066", role: "admin" },
+    "Abu som3a": { pin: "8067", role: "admin" }
+};
+
+let currentLoggedInAdmin = null; 
+let currentAdminRole = "viewer"; 
+
+let members = [];
+let auditLogs = [];
+let seasonalArchive = []; 
+
+let currentEditMemberOldData = { duel: 0, tech: 0, desert: 0, valley: 0, season: 0 };
+
+// القائمة الرسمية المركبة والكاملة لفرسان تحالف HFo الـ 83
+const defaultMembers = [
+    { id: "m1", name: "AhmedBj", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m2", name: "STEEV", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m3", name: "Abu Ya rab", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m4", name: "Haidar Qadi", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m5", name: "aHmEd7272", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m6", name: "فيصل q8", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m7", name: "صقوري ٢", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m8", name: "shorog", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m9", name: "ammar saheb", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m10", name: "azizyhia08", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m11", name: "BadR91", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m12", name: "FAROQ", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m13", name: "الهفوف", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m14", name: "saloohka1", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m15", name: "Dhooom11", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m16", name: "Yassermn", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m17", name: "Rana2030", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m18", name: "Theyab1", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m19", name: "KHALED ALMAHMEED", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m20", name: "hameed1991", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m21", name: "فـأرس", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m22", name: "أبـو خديجة", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m23", name: "الجنزوري", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m24", name: "omerat", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m25", name: "حنونه Hnaln", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m26", name: "SAMI KUWAIT", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m27", name: "Kanderiano", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m28", name: "ᴹᴬᴿᵀᴺx", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m29", name: "آلعـاديات", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m30", name: "Um duraa", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m31", name: "Aboaser", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m32", name: "Abu som3a", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m33", name: "Abdarebar", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m34", name: "Hmoody00", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m35", name: "سلوان 56", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m36", name: "slMan", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m37", name: "Fofo20", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m38", name: "Azzam18", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m39", name: "مالكm", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m40", name: "MINA 82", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m41", name: "reezoo", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m42", name: "Elmghraby", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m43", name: "Abo Njm", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m44", name: "abedzaiter", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m45", name: "TORANKUSU", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m46", name: "الصقر ٢", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m47", name: "M elknany", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m48", name: "ساترن", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m49", name: "آل نعيمي", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m50", name: "صدام حميد", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m51", name: "Ali0alajmi", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m52", name: "rami911", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m53", name: "ERAGONZ", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m54", name: "ALMAQAM", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m55", name: "33غيث", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m56", name: "Rm72", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m57", name: "Mohammed988", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m58", name: "حسن HASSAN 0", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m59", name: "FoLLow", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m60", name: "Silent death", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m61", name: "Rooz5", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m62", name: "Nőőr sy", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m63", name: "ميار1", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m64", name: "SULAIMAN707", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m65", name: "q77q", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m66", name: "ابن قبان", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m67", name: "hemaa150", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m68", name: "لوين", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m69", name: "rami0005", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m70", name: "BLACK RM", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m71", name: "Turki546432", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m72", name: "Ř Ä", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m73", name: "خالد 31dz", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m74", name: "الشمري kald", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m75", name: "القايد٣٣", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m76", name: "KHALID ALSHAMMARI7", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m77", name: "BUNNY3", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m78", name: "Bebozzz", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m79", name: "Osamayousef", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m80", name: "Fermanxxx", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m81", name: "Darwiich", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m82", name: "برايڤت", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m83", name: "Abo S3D", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 }
+];
+
+document.addEventListener('DOMContentLoaded', () => {
+    initApp();
+    setupEventListeners();
+    startLiveClockAndAutomation();
+});
+
+function initApp() {
+    members = JSON.parse(localStorage.getItem('hfo_strict_members')) || [...defaultMembers];
+    auditLogs = JSON.parse(localStorage.getItem('hfo_strict_logs')) || [];
+    seasonalArchive = JSON.parse(localStorage.getItem('hfo_seasonal_archive')) || [];
+    
+    saveToStorage();
+    calculateScoresAndRender();
+    applyVisibilityRules();
+}
+
+function saveToStorage() {
+    localStorage.setItem('hfo_strict_members', JSON.stringify(members));
+    localStorage.setItem('hfo_strict_logs', JSON.stringify(auditLogs));
+    localStorage.setItem('hfo_seasonal_archive', JSON.stringify(seasonalArchive));
+}
+
+function setupEventListeners() {
+    document.getElementById('loginAdminBtn').addEventListener('click', handleAdminLogin);
+    document.getElementById('logoutAdminBtn').addEventListener('click', handleAdminLogout);
+    document.getElementById('openAddModalBtn').addEventListener('click', () => openModal());
+    document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+    document.getElementById('memberForm').addEventListener('submit', handleFormSubmit);
+    document.getElementById('searchInput').addEventListener('input', (e) => calculateScoresAndRender(e.target.value));
+    document.getElementById('exportHonorBtn').addEventListener('click', generateHonorRollImage);
+    document.getElementById('exportTableImgBtn').addEventListener('click', generateWeeklyTableImage); 
+    
+    document.getElementById('viewAuditLogBtn').addEventListener('click', openAuditModal);
+    document.getElementById('closeAuditModalBtn').addEventListener('click', () => document.getElementById('auditModal').style.display='none');
+    
+    document.getElementById('viewArchiveBtn').addEventListener('click', openArchiveModal);
+    document.getElementById('closeArchiveModalBtn').addEventListener('click', () => document.getElementById('archiveModal').style.display='none');
+
+    document.getElementById('exportCsvBtn').addEventListener('click', exportToCSV);
+    document.getElementById('importCsvInput').addEventListener('change', importFromCSV);
+    document.getElementById('weeklyReportBtn').addEventListener('click', prepareWeeklyMailReport);
+}
+
+function getFormattedDateTime() {
+    const now = new Date();
+    const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+    const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    return `${days[now.getDay()]}، ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} | ${now.toLocaleTimeString('ar-EG')}`;
+}
+
+function getWeeklyDateRangeString() {
+    const now = new Date();
+    const currentDay = now.getDay(); 
+    const distanceToMonday = currentDay === 0 ? -6 : 1 - currentDay; 
+    const monday = new Date(now); monday.setDate(now.getDate() + distanceToMonday);
+    const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+    const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    return `${monday.getDate()} ${months[monday.getMonth()]} - ${sunday.getDate()} ${months[sunday.getMonth()]}`;
+}
+
+function getWeekNumber() {
+    const now = new Date(); const oneJan = new Date(now.getFullYear(), 0, 1);
+    return Math.ceil((Math.floor((now - oneJan) / 86400000) + oneJan.getDay() + 1) / 7);
+}
+
+function startLiveClockAndAutomation() {
+    const clockElement = document.getElementById('liveTimeBadge');
+    let lastResetWeek = localStorage.getItem('hfo_last_reset_week') || "";
+
+    setInterval(() => {
+        const now = new Date();
+        clockElement.textContent = getFormattedDateTime();
+
+        const currentDay = now.getDay(); 
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+        const currentWeekStr = `${now.getFullYear()}-W${getWeekNumber()}`;
+
+        if (currentDay === 1 && currentHour === 5 && currentMinute === 0 && lastResetWeek !== currentWeekStr) {
+            executeAutomaticWeeklyReset(currentWeekStr);
+            lastResetWeek = currentWeekStr;
+            localStorage.setItem('hfo_last_reset_week', currentWeekStr);
+        }
+    }, 1000);
+}
+
+function executeAutomaticWeeklyReset(weekId) {
+    const archiveItem = {
+        archiveId: Date.now().toString(),
+        weekCode: weekId,
+        weekLabel: `الأسبوع رقم (${getWeekNumber()})`,
+        dateRange: getWeeklyDateRangeString(),
+        totalMembersCount: members.length,
+        dataSnapshot: JSON.parse(JSON.stringify(members))
+    };
+    
+    seasonalArchive.unshift(archiveItem);
+
+    members.forEach(m => {
+        m.duel = 0; m.tech = 0; m.desert = 0; m.valley = 0; m.season = 0; m.finalScore = 0;
+    });
+
+    auditLogs.unshift({
+        operator: "نظام الأتمتة المؤتمت",
+        action: "تصفير وأرشفة أسبوعية أوتوماتيكية",
+        details: `تم الإغلاق الفوري وحفظ كشوفات الأسبوع ${weekId} بالأرشيف بنجاح عند الساعة 5:00 صباحاً.`,
+        datetime: getFormattedDateTime()
+    });
+
+    saveToStorage();
+    calculateScoresAndRender();
+}
+
+function handleAdminLogin() {
+    let pinInput = prompt("الرجاء إدخال الرمز السري الخاص بالأدمن:");
+    if (!pinInput) return;
+    let foundAdmin = null; let adminName = null;
+    for (const [name, info] of Object.entries(ALLIANCE_ADMINS)) {
+        if (info.pin === pinInput) { foundAdmin = info; adminName = name; break; }
+    }
+    if (foundAdmin) {
+        currentLoggedInAdmin = adminName; currentAdminRole = foundAdmin.role;
+        alert(`مرحباً بالأدمن: [${adminName}]. تم فتح الصلاحيات المخصصة لك.`);
+        document.getElementById('loginAdminBtn').style.display = 'none';
+        document.getElementById('logoutAdminBtn').style.display = 'inline-block';
+        document.getElementById('adminStatusBadge').textContent = `الأدمن الحالي: ${adminName} ✨`;
+        document.getElementById('adminStatusBadge').className = "status-badge badge-unlocked";
+        if (currentAdminRole === "owner") document.getElementById('ownerZone').style.display = 'block';
+    } else { alert("الرمز السري غير صحيح!"); }
+    applyVisibilityRules(); calculateScoresAndRender();
+}
+
+function handleAdminLogout() {
+    currentLoggedInAdmin = null; currentAdminRole = "viewer";
+    document.getElementById('loginAdminBtn').style.display = 'inline-block';
+    document.getElementById('logoutAdminBtn').style.display = 'none';
+    document.getElementById('adminStatusBadge').textContent = "الوضع الحالي: مشاهدة فقط 👁️";
+    document.getElementById('adminStatusBadge').className = "status-badge badge-locked";
+    document.getElementById('ownerZone').style.display = 'none';
+    applyVisibilityRules(); calculateScoresAndRender();
+}
+
+function applyVisibilityRules() {
+    const isAuthorizedAdmin = (currentAdminRole === "admin" || currentAdminRole === "owner");
+    const isOwnerOnly = (currentAdminRole === "owner"); 
+    
+    document.getElementById('openAddModalBtn').style.display = isAuthorizedAdmin ? 'inline-block' : 'none';
+    document.getElementById('exportHonorBtn').style.display = isOwnerOnly ? 'inline-block' : 'none';
+    document.getElementById('exportTableImgBtn').style.display = isOwnerOnly ? 'inline-block' : 'none'; 
+    document.getElementById('viewAuditLogBtn').style.display = isOwnerOnly ? 'inline-block' : 'none';
+    document.getElementById('viewArchiveBtn').style.display = isOwnerOnly ? 'inline-block' : 'none'; 
+    document.getElementById('exportCsvBtn').style.display = isOwnerOnly ? 'inline-block' : 'none';
+    document.getElementById('importCsvLabel').style.display = isOwnerOnly ? 'inline-block' : 'none';
+    document.getElementById('weeklyReportBtn').style.display = isOwnerOnly ? 'inline-block' : 'none';
+    
+    const ths = document.getElementsByClassName('action-th');
+    for(let th of ths) { th.style.display = isAuthorizedAdmin ? 'table-cell' : 'none'; }
+}
+
+function calculateScoresAndRender(filterKeyword = '') {
+    members.forEach(member => {
+        const dScore = (parseInt(member.duel) || 0) / CALCULATOR_WEIGHTS.DUEL_POINTS_DIVIDER;
+        const tScore = (parseInt(member.tech) || 0) / CALCULATOR_WEIGHTS.TECH_POINTS_DIVIDER;
+        const desertScore = (parseInt(member.desert) || 0) * CALCULATOR_WEIGHTS.DESERT_ATTEND_VAL;
+        const valleyScore = (parseInt(member.valley) || 0) * CALCULATOR_WEIGHTS.VALLEY_ATTEND_VAL;
+        const seasonScore = (parseInt(member.season) || 0) * CALCULATOR_WEIGHTS.SEASON_WAR_VAL;
+        member.finalScore = Math.round(dScore + tScore + desertScore + valleyScore + seasonScore);
+    });
+
+    members.sort((a, b) => b.finalScore - a.finalScore);
+    document.getElementById('statTotalMembers').textContent = members.length;
+    const sum = members.reduce((acc, m) => acc + m.finalScore, 0);
+    document.getElementById('statAverageScore').textContent = members.length ? Math.round(sum / members.length) : 0;
+    if(members[0]) document.getElementById('statTopMember').textContent = `${members[0].name} (${members[0].finalScore} ن)`;
+
+    let displayedMembers = members.filter(m => m.name.toLowerCase().includes(filterKeyword.toLowerCase()));
+    const tbody = document.getElementById('membersTableBody'); tbody.innerHTML = '';
+    const isAuthorizedAdmin = (currentAdminRole === "admin" || currentAdminRole === "owner");
+
+    displayedMembers.forEach((member, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><span class="rank-badge">${index + 1}</span></td>
+            <td style="font-weight: bold; color: var(--text-light);">${escapeHtml(member.name)}</td>
+            <td>${Number(member.duel).toLocaleString()}</td>
+            <td>${Number(member.tech).toLocaleString()}</td>
+            <td>${member.desert} معركة</td>
+            <td>${member.valley} معركة</td>
+            <td>${member.season || 0} مشاركة</td>
+            <td class="final-score-cell">${member.finalScore} ن</td>
+            ${isAuthorizedAdmin ? `<td>
+                <button class="btn btn-info" style="padding: 4px 8px; font-size:0.8rem;" onclick="editMember('${member.id}')">➕ حقن نقاط</button>
+                ${currentAdminRole === 'owner' ? `<button class="btn btn-danger" style="padding: 4px 8px; font-size:0.8rem;" onclick="deleteMember('${member.id}')">حذف</button>` : ''}
+            </td>` : ''}
+        `;
+        tbody.appendChild(tr);
+    });
+    applyVisibilityRules();
+}
+
+function handleFormSubmit(e) {
+    e.preventDefault(); if (!currentLoggedInAdmin) return;
+    const id = document.getElementById('memberId').value; const name = document.getElementById('memberName').value.trim();
+    const inputDuel = parseInt(document.getElementById('allianceDuel').value) || 0; const inputTech = parseInt(document.getElementById('techDonations').value) || 0;
+    const inputDesert = parseInt(document.getElementById('desertStorm').value) || 0; const inputValley = parseInt(document.getElementById('valleyBattle').value) || 0;
+    const inputSeason = parseInt(document.getElementById('seasonWars').value) || 0;
+    const currentTimestamp = getFormattedDateTime(); 
+
+    if (id) {
+        const index = members.findIndex(m => m.id === id);
+        if (index !== -1) {
+            members[index].duel = currentEditMemberOldData.duel + inputDuel; members[index].tech = currentEditMemberOldData.tech + inputTech;
+            members[index].desert = currentEditMemberOldData.desert + inputDesert; members[index].valley = currentEditMemberOldData.valley + inputValley;
+            members[index].season = currentEditMemberOldData.season + inputSeason;
+            auditLogs.unshift({ operator: currentLoggedInAdmin, action: "حقن نقاط تراكمية", details: `إضافة للعضو [${name}]: مبارزة (+${inputDuel.toLocaleString()})`, datetime: currentTimestamp });
+        }
+    } else {
+        members.push({ id: Date.now().toString(), name, duel: inputDuel, tech: inputTech, desert: inputDesert, valley: inputValley, season: inputSeason });
+        auditLogs.unshift({ operator: currentLoggedInAdmin, action: "إضافة عضو جديد", details: `تسجيل العضو [${name}]`, datetime: currentTimestamp });
+    }
+    saveToStorage(); calculateScoresAndRender(); closeModal();
+}
+
+function openModal(member = null) {
+    const modal = document.getElementById('memberModal'); document.getElementById('memberForm').reset(); document.getElementById('memberId').value = '';
+    if (member) {
+        document.getElementById('modalTitle').textContent = `حقن نقاط جديدة لـ: ${member.name}`;
+        document.getElementById('memberId').value = member.id; document.getElementById('memberName').value = member.name; document.getElementById('memberName').readOnly = true;
+        currentEditMemberOldData = { duel: parseInt(member.duel) || 0, tech: parseInt(member.tech) || 0, desert: parseInt(member.desert) || 0, valley: parseInt(member.valley) || 0, season: parseInt(member.season) || 0 };
+        document.getElementById('currentDuelBadge').textContent = `الرصيد الحالي: ${currentEditMemberOldData.duel.toLocaleString()}`;
+        document.getElementById('currentTechBadge').textContent = `الرصيد الحالي: ${currentEditMemberOldData.tech.toLocaleString()}`;
+        document.getElementById('currentDesertBadge').textContent = `الحضور الحالي: ${currentEditMemberOldData.desert}`;
+        document.getElementById('currentValleyBadge').textContent = `الحضور الحالي: ${currentEditMemberOldData.valley}`;
+        document.getElementById('currentSeasonBadge').textContent = `الحضور الحالي: ${currentEditMemberOldData.season}`;
+    } else {
+        document.getElementById('modalTitle').textContent = 'إضافة عضو جديد لكشوفات التحالف'; document.getElementById('memberName').readOnly = false;
+        currentEditMemberOldData = { duel: 0, tech: 0, desert: 0, valley: 0, season: 0 };
+    }
+    modal.style.display = 'flex';
+}
+
+function closeModal() { document.getElementById('memberModal').style.display = 'none'; }
+window.editMember = function(id) { const member = members.find(m => m.id === id); if (member) openModal(member); };
+
+window.deleteMember = function(id) {
+    if (currentAdminRole !== 'owner') return;
+    const member = members.find(m => m.id === id);
+    if (member && confirm(`هل تود حذف العضو (${member.name}) نهائياً؟`)) {
+        auditLogs.unshift({ operator: currentLoggedInAdmin, action: "طرد وحذف عضو", details: `مسح العضو [${member.name}] نهائياً`, datetime: getFormattedDateTime() });
+        members = members.filter(m => m.id !== id); saveToStorage(); calculateScoresAndRender();
+    }
+};
+
+function openAuditModal() {
+    if (currentAdminRole !== 'owner') return;
+    const tbody = document.getElementById('auditLogTableBody'); tbody.innerHTML = '';
+    auditLogs.forEach(log => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td style="color:var(--gold-primary); font-weight:bold;">${escapeHtml(log.operator)}</td><td><b>${log.action}</b></td><td style="color:#cbd5e1;">${log.details}</td><td style="color:var(--text-muted); font-size:0.8rem; font-weight:600;">${log.datetime}</td>`;
+        tbody.appendChild(tr);
+    });
+    document.getElementById('auditModal').style.display = 'flex';
+}
+
+function openArchiveModal() {
+    if (currentAdminRole !== 'owner') return;
+    const tbody = document.getElementById('archiveTableBody'); tbody.innerHTML = '';
+
+    if (seasonalArchive.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">الأرشيف فارغ حالياً.</td></tr>`;
+    } else {
+        seasonalArchive.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="color:var(--gold-primary); font-weight:bold;">${item.weekLabel}</td>
+                <td><b>${item.dateRange}</b></td>
+                <td>${item.totalMembersCount} عضو قتالي</td>
+                <td>
+                    <button class="btn btn-success" style="padding:4px 10px; font-size:0.8rem;" onclick="downloadArchiveAsCSV('${item.archiveId}')">📥 تحميل التقرير (CSV)</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+    document.getElementById('archiveModal').style.display = 'flex';
+}
+
+window.downloadArchiveAsCSV = function(archiveId) {
+    if (currentAdminRole !== 'owner') return;
+    const archiveItem = seasonalArchive.find(a => a.archiveId === archiveId);
+    if (!archiveItem) return;
+
+    let csvContent = "\uFEFF# كشف أسبوعي مؤرشف سابقاً لتقييم الموسم - " + archiveItem.weekLabel + " [النطاق الزمني: " + archiveItem.dateRange + "]\n";
+    csvContent += "الترتيب,الاسم,نقاط المبارزة التراكمية,نقاط التبرع التراكمية,حضور الصحراء,حضور الوادي,حروب الموسم,المجموع الفعلي المحقق\n";
+    
+    archiveItem.dataSnapshot.forEach((m, idx) => {
+        csvContent += `${idx + 1},"${m.name}",${m.duel},${m.tech},${m.desert},${m.valley},${m.season || 0},${m.finalScore}\n`;
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a"); link.setAttribute("href", url); link.setAttribute("download", `أرشيف_تحالف_HFo_${archiveItem.weekCode}.csv`);
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+};
+
+function generateWeeklyTableImage() {
+    if (currentAdminRole !== "owner") return; if (members.length === 0) return;
+    const canvas = document.createElement('canvas'); const headerH = 160; const rowH = 45; const footerH = 70;
+    canvas.width = 1400; canvas.height = headerH + (members.length * rowH) + footerH + 40; const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = '#eab308'; ctx.lineWidth = 8; ctx.strokeRect(12, 10, canvas.width - 24, canvas.height - 20);
+    ctx.fillStyle = '#1c140e'; ctx.fillRect(35, 30, canvas.width - 70, 110);
+    ctx.strokeStyle = '#eab308'; ctx.lineWidth = 2; ctx.strokeRect(35, 30, canvas.width - 70, 110);
+    ctx.fillStyle = '#facc15'; ctx.font = 'bold 30px Arial'; ctx.textAlign = 'center';
+    ctx.fillText(`كشف تقرير التفاعل الأسبوعي الشامل - تحالف HFo`, canvas.width / 2, 75);
+    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 16px Arial';
+    ctx.fillText(`نطاق الحساب الدوري للأسبوع الحالي: ${getWeeklyDateRangeString()}`, canvas.width / 2, 112);
+    const startY = 165; ctx.fillStyle = '#1e293b'; ctx.fillRect(35, startY, canvas.width - 70, 40);
+    ctx.strokeStyle = '#475569'; ctx.strokeRect(35, startY, canvas.width - 70, 40);
+    ctx.fillStyle = '#eab308'; ctx.font = 'bold 14px Arial'; ctx.textAlign = 'right';
+    const cols = [50, 260, 480, 680, 840, 980, 1120, 1280];
+    ctx.fillText('الترتيب', canvas.width - cols[0], startY + 26); ctx.fillText('اسم عضو التحالف', canvas.width - cols[1], startY + 26);
+    ctx.fillText('نقاط مبارزة التحالف التراكمية', canvas.width - cols[2], startY + 26); ctx.fillText('نقاط تبرع تقنية التحالف', canvas.width - cols[3], startY + 26);
+    ctx.fillText('حضور عاصفة الصحراء', canvas.width - cols[4], startY + 26); ctx.fillText('حضور معركة الوادي', canvas.width - cols[5], startY + 26);
+    ctx.fillText('حروب الموسم', canvas.width - cols[6], startY + 26); ctx.fillText('المجموع الإجمالي الكلي', canvas.width - cols[7], startY + 26);
+    let nextY = startY + 40; ctx.font = 'bold 15px Arial';
+    members.forEach((m, idx) => {
+        if (idx % 2 === 0) { ctx.fillStyle = 'rgba(255, 255, 255, 0.03)'; ctx.fillRect(35, nextY, canvas.width - 70, rowH); }
+        ctx.fillStyle = '#94a3b8'; ctx.fillText(`#${idx + 1}`, canvas.width - cols[0], nextY + 28);
+        ctx.fillStyle = '#ffffff'; ctx.fillText(m.name, canvas.width - cols[1], nextY + 28);
+        ctx.fillStyle = '#cbd5e1'; ctx.fillText(Number(m.duel).toLocaleString(), canvas.width - cols[2], nextY + 28);
+        ctx.fillText(Number(m.tech).toLocaleString(), canvas.width - cols[3], nextY + 28);
+        ctx.fillText(`${m.desert} معركة`, canvas.width - cols[4], nextY + 28); ctx.fillText(`${m.valley} معركة`, canvas.width - cols[5], nextY + 28);
+        ctx.fillText(`${m.season || 0} مشاركة`, canvas.width - cols[6], nextY + 28);
+        ctx.fillStyle = '#facc15'; ctx.font = 'bold 16px Arial'; ctx.fillText(`${m.finalScore} نقطة`, canvas.width - cols[7], nextY + 28);
+        ctx.font = 'bold 15px Arial'; ctx.strokeStyle = 'rgba(51, 65, 85, 0.4)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(35, nextY + rowH); ctx.lineTo(canvas.width - 35, nextY + rowH); ctx.stroke(); nextY += rowH;
+    });
+    ctx.fillStyle = '#94a3b8'; ctx.font = 'bold 13px Arial'; ctx.textAlign = 'center';
+    ctx.fillText(`إعداد وإشراف وإغلاق أسبوعي بواسطة المالك: 806 Abo S3D - HFo © 2026  |  توقيت التصدير والأرشفة: ${getFormattedDateTime()}`, canvas.width / 2, canvas.height - 35);
+    const imageURI = canvas.toDataURL('image/png'); const link = document.createElement('a');
+    link.download = `كشف_تفاعل_التحالف_الأسبوع_${getWeekNumber()}_رسمي.png`; link.href = imageURI;
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+}
+
+function generateHonorRollImage() {
+    if (currentAdminRole !== "owner") return; if (members.length === 0) return;
+    const canvas = document.createElement('canvas'); canvas.width = 1200; canvas.height = 760; const ctx = canvas.getContext('2d');
+    let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height); bgGrad.addColorStop(0, '#110c08'); bgGrad.addColorStop(0.5, '#0d131f'); bgGrad.addColorStop(1, '#08090d');
+    ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    let glowGrad = ctx.createRadialGradient(canvas.width/2, 210, 20, canvas.width/2, 210, 250); glowGrad.addColorStop(0, 'rgba(234, 179, 8, 0.15)'); glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = glowGrad; ctx.fillRect(0, 100, canvas.width, 350);
+    ctx.strokeStyle = '#1e1610'; ctx.lineWidth = 16; ctx.strokeRect(8, 8, canvas.width - 16, canvas.height - 16);
+    ctx.strokeStyle = '#ca8a04'; ctx.lineWidth = 2; ctx.strokeRect(18, 18, canvas.width - 36, canvas.height - 36);
+    ctx.fillStyle = '#1c140e'; ctx.strokeStyle = '#ca8a04'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(320, 20); ctx.lineTo(880, 20); ctx.lineTo(830, 110); ctx.lineTo(370, 110); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#ca8a04'; ctx.fillRect(320, 20, 10, 10); ctx.fillRect(870, 20, 10, 10);
+    ctx.fillStyle = '#facc15'; ctx.font = 'bold 28px Arial, sans-serif'; ctx.textAlign = 'center'; ctx.shadowColor = 'rgba(0, 0, 0, 0.9)'; ctx.shadowBlur = 4;
+    ctx.fillText('لوحة شرف مبارزة التحالف HFo', canvas.width / 2, 65);
+    ctx.fillStyle = '#94a3b8'; ctx.font = 'bold 14px Arial'; ctx.fillText(`نطاق تقييم الأسبوع: ${getWeeklyDateRangeString()}`, canvas.width / 2, 95); ctx.shadowBlur = 0; 
+    const top3 = members.slice(0, 3); const centerY = 215;
+    if (top3[1]) { let x = 320, y = centerY; ctx.fillStyle = '#38bdf8'; ctx.font = 'bold 16px Arial'; ctx.fillText('#2 الفارس الفضي', x, y - 25); ctx.fillStyle = '#f8fafc'; ctx.font = 'bold 22px Arial'; ctx.fillText(top3[1].name, x, y + 8); ctx.fillStyle = '#94a3b8'; ctx.font = 'bold 14px Arial'; ctx.fillText(`${top3[1].finalScore} pts`, x, y + 33); }
+    if (top3[0]) { let x = 600, y = centerY - 15; ctx.fillStyle = '#eab308'; ctx.font = 'bold 20px Arial'; ctx.fillText('👑 بطل الجبهة #1', x, y - 30); ctx.fillStyle = '#facc15'; ctx.font = 'bold 26px Arial'; ctx.fillText(top3[0].name, x, y + 10); ctx.fillStyle = '#4ade80'; ctx.font = 'bold 16px Arial'; ctx.fillText(`${top3[0].finalScore} pts`, x, y + 38); }
+    if (top3[2]) { let x = 880, y = centerY; ctx.fillStyle = '#f97316'; ctx.font = 'bold 16px Arial'; ctx.fillText('#3 الفارس البرونزي', x, y - 25); ctx.fillStyle = '#f8fafc'; ctx.font = 'bold 22px Arial'; ctx.fillText(top3[2].name, x, y + 8); ctx.fillStyle = '#94a3b8'; ctx.font = 'bold 14px Arial'; ctx.fillText(`${top3[2].finalScore} pts`, x, y + 33); }
+    const tableX = 150; const tableY = 325; const tableW = 900; const rowH = 38;
+    ctx.fillStyle = 'rgba(17, 20, 28, 0.88)'; ctx.fillRect(tableX, tableY, tableW, rowH * 7 + 40);
+    ctx.strokeStyle = '#2e3d52'; ctx.strokeRect(tableX, tableY, tableW, rowH * 7 + 40);
+    ctx.fillStyle = 'rgba(28, 35, 48, 0.95)'; ctx.fillRect(tableX, tableY, tableW, 35);
+    ctx.fillStyle = '#ca8a04'; ctx.font = 'bold 13px Arial'; ctx.textAlign = 'center';
+    ctx.fillText('الرتبة', tableX + 50, tableY + 22); ctx.fillText('شعار التفاعل', tableX + 180, tableY + 22);
+    ctx.fillText('اسم الفارس المستبسل', tableX + 450, tableY + 22); ctx.fillText('النقاط التراكمية المحققة', tableX + 780, tableY + 22);
+    const runners = members.slice(3, 10); let currentY = tableY + 62;
+    runners.forEach((m, idx) => {
+        const actualRank = idx + 4;
+        if (idx % 2 === 0) { ctx.fillStyle = 'rgba(255, 255, 255, 0.02)'; ctx.fillRect(tableX + 5, currentY - 20, tableW - 10, rowH); }
+        ctx.textAlign = 'center'; ctx.fillStyle = '#94a3b8'; ctx.font = 'bold 14px Arial'; ctx.fillText(`#${actualRank}`, tableX + 50, currentY);
+        ctx.fillStyle = actualRank < 7 ? '#ca8a04' : '#475569'; ctx.beginPath(); ctx.arc(tableX + 180, currentY - 4, 8, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#f8fafc'; ctx.font = 'bold 15px Arial'; ctx.fillText(m.name, tableX + 450, currentY);
+        ctx.fillStyle = '#facc15'; ctx.font = 'bold 14px Arial'; ctx.fillText(`${m.finalScore.toLocaleString()} pts`, tableX + 780, currentY);
+        currentY += rowH;
+    });
+    ctx.fillStyle = '#475569'; ctx.font = '11px Arial'; ctx.textAlign = 'center';
+    ctx.fillText(`إعداد وإشراف وتطوير - 806 Abo S3D - HFo © 2026  |  تاريخ التصدير: ${getFormattedDateTime()}`, canvas.width / 2, canvas.height - 25);
+    const imageURI = canvas.toDataURL('image/png'); const link = document.createElement('a'); link.download = `لوحة_شرف_مبارزة_التحالف_HFo.png`; link.href = imageURI;
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+}
+
+function exportToCSV() {
+    if (currentAdminRole !== "owner") return;
+    const timeStampLabel = getFormattedDateTime().replace(/\|/g, "-").replace(/:/g, "."); const weekNum = getWeekNumber();
+    const rangeStr = getWeeklyDateRangeString().replace(/ /g, "_");
+    let csvContent = "\uFEFF# تقرير تفاعل تحالف HFo الدوري - نطاق الحساب: " + getWeeklyDateRangeString() + " - المستخرج في: " + timeStampLabel + "\n";
+    csvContent += "الترتيب الأسبوعي,الاسم,مبارزة التحالف (الرصيد التراكمي),تبرع التقنية (الرصيد التراكمي),عاصفة الصحراء,معركة الوادي,حروب الموسم,إجمالي النقاط الفعلي الحركي\n";
+    members.forEach((m, index) => { csvContent += `${index + 1},"${m.name}",${m.duel},${m.tech},${m.desert},${m.valley},${m.season || 0},${m.finalScore}\n`; });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob);
+    const link = document.createElement("a"); link.setAttribute("href", url); link.setAttribute("download", `كشف_تفاعل_${rangeStr}.csv`);
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+}
+
+function importFromCSV(e) {
+    if (currentAdminRole !== "owner") return;
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        try {
+            const lines = evt.target.result.split('\n'); const newMembers = []; let startRow = lines[0].startsWith('#') || lines[0].startsWith('\uFEFF#') ? 2 : 1;
+            for (let i = startRow; i < lines.length; i++) {
+                const line = lines[i].trim(); if (!line) continue;
+                const columns = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                if (columns.length >= 7) {
+                    newMembers.push({ id: (Date.now() + i).toString(), name: columns[1].replace(/^"|"$/g, '').trim(), duel: parseInt(columns[2]) || 0, tech: parseInt(columns[3]) || 0, desert: parseInt(columns[4]) || 0, valley: parseInt(columns[5]) || 0, season: parseInt(columns[6]) || 0 });
+                }
+            }
+            if (newMembers.length > 0 && confirm(`تم رصد ${newMembers.length} عضو. استبدال الكشوفات؟`)) { members = newMembers; saveToStorage(); calculateScoresAndRender(); alert("تم استيراد البيانات."); }
+        } catch (error) { alert('خطأ في الملف.'); }
+        e.target.value = '';
+    };
+    reader.readAsText(file, 'UTF-8');
+}
+
+function prepareWeeklyMailReport() {
+    if (currentAdminRole !== "owner") return;
+    const emailTarget = "s.jlaighm@gmail.com"; const currentFullTime = getFormattedDateTime();
+    const subject = encodeURIComponent(`تقرير كشف تفاعل تحالف HFo الدوري - نطاق الحساب: ${getWeeklyDateRangeString()}`);
+    let bodyText = `تحية طيبة،\n\nنرفق لكم الكشف الأسبوعي لنقاط تفاعل تحالف HFo.\nنطاق التقييم: ${getWeeklyDateRangeString()}\nتوقيت استخراج الكشف النهائي: ${currentFullTime}\n\n`;
+    bodyText += `--------------------------------------------------------\nالترتيب الأسبوعي | اسم الفارس | إجمالي النقاط المحققة\n--------------------------------------------------------\n`;
+    members.forEach((m, index) => { bodyText += `#${index + 1} - ${m.name} | النتيجة: ${m.finalScore} نقطة\n`; });
+    bodyText += `--------------------------------------------------------\nإشراف وتوجيه القائد المالك: Abo S3D.\n`;
+    window.location.href = `mailto:${emailTarget}?subject=${subject}&body=${encodeURIComponent(bodyText)}`;
+    auditLogs.unshift({ operator: "Abo S3D", action: "تصدير تقرير بريدي", details: `إرسال الكشف الأسبوعي بريدياً لنطاق الأسبوع الحالي`, datetime: currentFullTime });
+    saveToStorage();
+}
+
+function escapeHtml(text) { const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }; return String(text).replace(/[&<>"']/g, m => map[m]); }

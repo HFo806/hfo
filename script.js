@@ -1,6 +1,6 @@
 /**
- * نظام حاسبة التفاعل التراكمي المحمي للأدمن السبعة - تحالف HFo
- * نسخة الربط السحابي الفوري الكامل عبر Google Sheets & Apps Script API
+ * نظام حاسبة التفاعل التراكمي المحمي - تحالف HFo
+ * نسخة الربط السحابي الفوري الكاملة 
  * إعداد وإشراف وتطوير - 806 Abo S3D - HFo
  */
 
@@ -12,11 +12,10 @@ const CALCULATOR_WEIGHTS = {
     SEASON_WAR_VAL: 50           
 };
 
-// 👑 الروابط السحابية الرسمية لتحالفك
-const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqi_eTk0Wd2W0aELh6dUD6p2cTEC7i8pylEEKxTU3kaVOcqmi6ptLYXaTouomM7-diWeuwWIxnomKy/pub?gid=24547307&single=true&output=csv";
+// 👑 رابط الـ Web App الخاص بك لإرسال البيانات وحفظها سحابياً في الشيت
 const GOOGLE_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzDAcDk2o7UvKLA35PvGouXBQBlYS8P69FVjMShdCoIWuv6GJHJYbtL-KCeNpD531bv/exec";
 
-// هيكل الأدمن السبعة الرسمي مع الرموز السرية المحدثة المعتمَدة
+// هيكل الأدمن السبعة الرسمي مع الرموز السرية المحدثة المعتمدة
 const ALLIANCE_ADMINS = {
     "Abo S3D": { pin: "1403", role: "owner" }, 
     "الهفوف": { pin: "1992", role: "admin" },
@@ -34,80 +33,121 @@ let currentLoggedInAdmin = null;
 let currentAdminRole = "viewer"; 
 let currentEditMemberOldData = { duel: 0, tech: 0, desert: 0, valley: 0, season: 0 };
 
+// القائمة الرسمية المركبة والكاملة لفرسان تحالف HFo الـ 83 لضمان ظهورها فوراً
+const defaultMembers = [
+    { id: "m1", name: "AhmedBj", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m2", name: "STEEV", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m3", name: "Abu Ya rab", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m4", name: "Haidar Qadi", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m5", name: "aHmEd7272", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m6", name: "فيصل q8", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m7", name: "صقوري ٢", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m8", name: "shorog", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m9", name: "ammar saheb", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m10", name: "azizyhia08", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m11", name: "BadR91", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m12", name: "FAROQ", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m13", name: "الهفوف", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m14", name: "saloohka1", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m15", name: "Dhooom11", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m16", name: "Yassermn", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m17", name: "رنا 2030", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m18", name: "Theyab1", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m19", name: "KHALED ALMAHMEED", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m20", name: "hameed1991", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m21", name: "فـأرس", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m22", name: "أبـو خديجة", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m23", name: "الجنزوري", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m24", name: "omerat", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m25", name: "حنونه Hnaln", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m26", name: "SAMI KUWAIT", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m27", name: "Kanderiano", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m28", name: "ᴹᴬᴿᵀᴺx", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m29", name: "آلعـاديات", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m30", name: "Um duraa", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m31", name: "Aboaser", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m32", name: "Abu som3a", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m33", name: "Abdarebar", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m34", name: "Hmoody00", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m35", name: "سلوان 56", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m36", name: "slMan", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m37", name: "Fofo20", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m38", name: "Azzam18", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m39", name: "مالكm", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m40", name: "MINA 82", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m41", name: "reezoo", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m42", name: "Elmghraby", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m43", name: "Abo Njm", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m44", name: "abedzaiter", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m45", name: "TORANKUSU", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m46", name: "الصقر ٢", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m47", name: "M elknany", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m48", name: "ساترن", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m49", name: "آل نعيمي", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m50", name: "صدام حميد", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m51", name: "Ali0alajmi", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m52", name: "rami911", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m53", name: "ERAGONZ", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m54", name: "ALMAQAM", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m55", name: "33غيث", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m56", name: "Rm72", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m57", name: "Mohammed988", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m58", name: "حسن HASSAN 0", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m59", name: "FoLLow", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m60", name: "Silent death", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m61", name: "Rooz5", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m62", name: "Nőőr sy", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m63", name: "ميار1", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m64", name: "SULAIMAN707", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m65", name: "q77q", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m66", name: "ابن قبان", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m67", name: "hemaa150", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m68", name: "لوين", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m69", name: "rami0005", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m70", name: "BLACK RM", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m71", name: "Turki546432", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m72", name: "Ř Ä", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m73", name: "خالد 31dz", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m74", name: "الشمري kald", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m75", name: "القايد٣٣", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m76", name: "KHALID ALSHAMMARI7", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m77", name: "BUNNY3", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m78", name: "Bebozzz", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m79", name: "Osamayousef", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m80", name: "Fermanxxx", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m81", name: "Darwiich", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m82", name: "برايڤت", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m83", name: "Abo S3D", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 }
+];
+
 document.addEventListener('DOMContentLoaded', () => {
     initApp();
     setupEventListeners();
     startLiveClockAndAutomation();
 });
 
+// دالة مصلحة: تضمن قراءة المتصفح للأسماء الـ 83 من الكود فوراً دون تجميد
 function initApp() {
-    fetchCloudDataAndRender();
+    const VERSION_KEY = "hfo_v5_hard_coded_names";
+    const localVersion = localStorage.getItem('hfo_app_version');
+    const localData = localStorage.getItem('hfo_strict_members');
+    
+    if (localVersion !== VERSION_KEY || !localData) {
+        members = [...defaultMembers];
+        localStorage.setItem('hfo_app_version', VERSION_KEY);
+        saveToStorage();
+    } else {
+        members = JSON.parse(localData);
+    }
+    
     auditLogs = JSON.parse(localStorage.getItem('hfo_strict_logs')) || [];
     seasonalArchive = JSON.parse(localStorage.getItem('hfo_seasonal_archive')) || [];
+    calculateScoresAndRender();
     applyVisibilityRules();
 }
 
-// دالة القراءة المرنة: تقرأ شيت وتتعامل مع الأعمدة بذكاء سواء كانت تحتوي على معرفات أو أسماء فقط
-function fetchCloudDataAndRender() {
-    fetch(GOOGLE_SHEET_CSV_URL + "&t=" + Date.now())
-    .then(response => response.text())
-    .then(csvText => {
-        const lines = csvText.split('\n');
-        const cloudMembers = [];
-        
-        // نبدأ من الصف الأول لمعرفة العناوين وضمان عدم سقوط أي اسم
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (!line) continue;
-            
-            // تقسيم السطر مع مراعاة الفواصل
-            const columns = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-            if (columns.length === 0) continue;
-
-            let cell1 = columns[0] ? columns[0].replace(/^"|"$/g, '').trim() : "";
-            
-            // تخطي السطر الرئيسي للعناوين إذا وُجد
-            if (cell1.toLowerCase() === "id" || cell1 === "الاسم" || cell1.toLowerCase() === "name") continue;
-
-            // آلية فحص ذكية: إذا كان العمود الأول يحتوي على نص الاسم وليس معرّف رقمي m1
-            let memberId, memberName;
-            if (cell1.startsWith("m") && !isNaN(cell1.substring(1))) {
-                memberId = cell1;
-                memberName = columns[1] ? columns[1].replace(/^"|"$/g, '').trim() : "عضو غير معروف";
-            } else {
-                memberId = "m" + (i + 1);
-                memberName = cell1; 
-            }
-
-            // سحب بقية عدادات النقاط سحابياً في حال وجودها بالشيت
-            let dVal = columns[2] ? parseInt(columns[2].replace(/[^\d]/g, '')) || 0 : 0;
-            let tVal = columns[3] ? parseInt(columns[3].replace(/[^\d]/g, '')) || 0 : 0;
-            let deVal = columns[4] ? parseInt(columns[4].replace(/[^\d]/g, '')) || 0 : 0;
-            let vVal = columns[5] ? parseInt(columns[5].replace(/[^\d]/g, '')) || 0 : 0;
-            let sVal = columns[6] ? parseInt(columns[6].replace(/[^\d]/g, '')) || 0 : 0;
-
-            if (memberName) {
-                cloudMembers.push({
-                    id: memberId,
-                    name: memberName,
-                    duel: dVal,
-                    tech: tVal,
-                    desert: deVal,
-                    valley: vVal,
-                    season: sVal
-                });
-            }
-        }
-        
-        if (cloudMembers.length > 0) {
-            members = cloudMembers;
-            calculateScoresAndRender();
-        }
-    })
-    .catch(err => console.error("خطأ أثناء سحب البيانات السحابية:", err));
-}
-
 function saveToStorage() {
+    localStorage.setItem('hfo_strict_members', JSON.stringify(members));
     localStorage.setItem('hfo_strict_logs', JSON.stringify(auditLogs));
     localStorage.setItem('hfo_seasonal_archive', JSON.stringify(seasonalArchive));
 }
@@ -192,7 +232,7 @@ function executeAutomaticWeeklyReset(weekId) {
     auditLogs.unshift({
         operator: "نظام الأتمتة المؤتمت",
         action: "أرشفة أسبوعية أوتوماتيكية",
-        details: `تم حفظ كشوفات الأسبوع الحالية ${weekId} في الأرشيف الداخلي للمتصفح بنجاح.`,
+        details: `تم حفظ كشوفات الأسبوع الحالية ${weekId} في الأرشيف بنجاح.`,
         datetime: getFormattedDateTime()
     });
     calculateScoresAndRender();
@@ -207,7 +247,7 @@ function handleAdminLogin() {
     }
     if (foundAdmin) {
         currentLoggedInAdmin = adminName; currentAdminRole = foundAdmin.role;
-        alert(`مرحباً بالأدمن: [${adminName}]. تم تفعيل قنوات الربط السحابي الآمن والمدخلات الفورية.`);
+        alert(`مرحباً بالأدمن: [${adminName}]. تم فتح نظام لوحة التحكم بنجاح.`);
         document.getElementById('loginAdminBtn').style.display = 'none';
         document.getElementById('logoutAdminBtn').style.display = 'inline-block';
         document.getElementById('adminStatusBadge').textContent = `الأدمن الحالي: ${adminName} ✨`;
@@ -330,14 +370,12 @@ function handleFormSubmit(e) {
             members[index].season += inputSeason;
         }
         
-        auditLogs.unshift({ operator: currentLoggedInAdmin, action: "حقن نقاط سحابية", details: `حقن نقاط للعضو [${name}] ومزامنتها مع جوجل شيت`, datetime: currentTimestamp });
-        localStorage.setItem('hfo_strict_logs', JSON.stringify(auditLogs));
+        auditLogs.unshift({ operator: currentLoggedInAdmin, action: "حقن نقاط سحابية", details: `حقن نقاط للعضو [${name}] ومزامنتها مع شيت جوجل`, datetime: currentTimestamp });
+        saveToStorage();
         calculateScoresAndRender();
         closeModal();
-        
-        setTimeout(fetchCloudDataAndRender, 1500);
     }).catch(err => {
-        alert("حدث خطأ أثناء الاتصال السحابي، سيتم الحفظ محلياً.");
+        alert("حدث خطأ أثناء الاتصال السحابي.");
         console.error(err);
     });
 }
@@ -364,7 +402,7 @@ function closeModal() { const modal = document.getElementById('memberModal'); if
 window.editMember = function(id) { const member = members.find(m => m.id === id); if (member) openModal(member); };
 
 window.deleteMember = function(id) {
-    alert("الحذف الفعلي يتم من داخل شيت جوجل لحماية أمن النظام البنائي.");
+    alert("الحذف يتم يدوياً لحماية أمن النظام البنائي.");
 };
 
 function openAuditModal() {

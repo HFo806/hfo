@@ -13,7 +13,7 @@ const CALCULATOR_WEIGHTS = {
     SEASON_WAR_VAL: 50           
 };
 
-// هيكل الأدمن السبعة الرسمي مع الرموز السرية
+// هيكل الأدمن السبعة الرسمي مع الرموز السرية المحدثة
 const ALLIANCE_ADMINS = {
     "Abo S3D": { pin: "1403", role: "owner" }, 
     "الهفوف": { pin: "1992", role: "admin" },
@@ -126,20 +126,21 @@ document.addEventListener('DOMContentLoaded', () => {
     startLiveClockAndAutomation();
 });
 
-// دالة التهيئة المصلحة والمحمية ذاتياً ضد التجميد وضياع البيانات
+// دالة تهيئة متطورة تضمن كسر الكاش وتحديث جيت هاب تزامناً مع حفظ المدخلات
 function initApp() {
     try {
+        const VERSION_KEY = "hfo_v4_pins_fix"; 
+        const localVersion = localStorage.getItem('hfo_app_version');
         const localData = localStorage.getItem('hfo_strict_members');
         
-        // فحص ذكي: إذا كانت ذاكرة المتصفح فارغة أو تحتوي على كود قديم مشوه (أقل من حجم القائمة الحالية)
-        if (!localData || JSON.parse(localData).length < 80) {
+        if (localVersion !== VERSION_KEY || !localData || JSON.parse(localData).length < 80) {
             members = [...defaultMembers];
+            localStorage.setItem('hfo_app_version', VERSION_KEY);
             saveToStorage();
         } else {
             members = JSON.parse(localData);
         }
     } catch (e) {
-        // حماية ضد تلف الـ JSON المخزن سابقاً
         members = [...defaultMembers];
         saveToStorage();
     }
@@ -149,6 +150,10 @@ function initApp() {
     
     calculateScoresAndRender();
     applyVisibilityRules();
+}
+
+function updateLocalStorageDataOnly() {
+    localStorage.setItem('hfo_strict_members', JSON.stringify(members));
 }
 
 function saveToStorage() {
@@ -356,13 +361,16 @@ function handleFormSubmit(e) {
             members[index].duel = currentEditMemberOldData.duel + inputDuel; members[index].tech = currentEditMemberOldData.tech + inputTech;
             members[index].desert = currentEditMemberOldData.desert + inputDesert; members[index].valley = currentEditMemberOldData.valley + inputValley;
             members[index].season = currentEditMemberOldData.season + inputSeason;
-            auditLogs.unshift({ operator: currentLoggedInAdmin, action: "حقن نقاط تراكمية", details: `إضافة للعضو [${name}]: مبارزة (+${inputDuel.toLocaleString()})`, datetime: currentTimestamp });
+            auditLogs.unshift({ operator: currentLoggedInAdmin, action: "حقن نقاط تراكمية", details: `إضافة للعضو [${name}]: مبارزة (+${inputDuel.toLocaleString()}) ، تقنية (+${inputTech.toLocaleString()})`, datetime: currentTimestamp });
         }
     } else {
         members.push({ id: Date.now().toString(), name, duel: inputDuel, tech: inputTech, desert: inputDesert, valley: inputValley, season: inputSeason });
         auditLogs.unshift({ operator: currentLoggedInAdmin, action: "إضافة عضو جديد", details: `تسجيل العضو [${name}]`, datetime: currentTimestamp });
     }
-    saveToStorage(); calculateScoresAndRender(); closeModal();
+    updateLocalStorageDataOnly(); 
+    localStorage.setItem('hfo_strict_logs', JSON.stringify(auditLogs));
+    calculateScoresAndRender(); 
+    closeModal();
 }
 
 function openModal(member = null) {

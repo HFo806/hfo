@@ -37,6 +37,7 @@ let currentEditMemberOldData = { duel: 0, tech: 0, desert: 0, valley: 0, season:
 const defaultMembers = [
     { id: "m1", name: "AhmedBj", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
     { id: "m2", name: "STEEV", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m3", name: "Abu Ya rab", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
     { id: "m4", name: "Haidar Qadi", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
     { id: "m5", name: "aHmEd7272", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
     { id: "m6", name: "فيصل q8", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
@@ -50,7 +51,7 @@ const defaultMembers = [
     { id: "m14", name: "saloohka1", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
     { id: "m15", name: "Dhooom11", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
     { id: "m16", name: "Yassermn", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
-    { id: "m17", name: "رنا 2030", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 }, 
+    { id: "m17", name: "رنا 2030", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
     { id: "m18", name: "Theyab1", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
     { id: "m19", name: "KHALED ALMAHMEED", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
     { id: "m20", name: "hameed1991", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
@@ -119,15 +120,26 @@ const defaultMembers = [
     { id: "m83", name: "Abo S3D", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 }
 ];
 
-// دالة التهيئة الذكية المحدثة والمحمية ضد الكتابة الفوقية العشوائية
+document.addEventListener('DOMContentLoaded', () => {
+    initApp();
+    setupEventListeners();
+    startLiveClockAndAutomation();
+});
+
+// دالة التهيئة المصلحة والمحمية ذاتياً ضد التجميد وضياع البيانات
 function initApp() {
-    const localData = localStorage.getItem('hfo_strict_members');
-    
-    if (localData) {
-        // إذا كانت هناك بيانات مسجلة مسبقاً، يقرأها النظام لحمايتها من الضياع عند عمل Refresh
-        members = JSON.parse(localData);
-    } else {
-        // في أول تشغيل للموقع فقط، يتم حقن الكشوفات الـ 83 مصفّرة
+    try {
+        const localData = localStorage.getItem('hfo_strict_members');
+        
+        // فحص ذكي: إذا كانت ذاكرة المتصفح فارغة أو تحتوي على كود قديم مشوه (أقل من حجم القائمة الحالية)
+        if (!localData || JSON.parse(localData).length < 80) {
+            members = [...defaultMembers];
+            saveToStorage();
+        } else {
+            members = JSON.parse(localData);
+        }
+    } catch (e) {
+        // حماية ضد تلف الـ JSON المخزن سابقاً
         members = [...defaultMembers];
         saveToStorage();
     }
@@ -194,7 +206,7 @@ function startLiveClockAndAutomation() {
 
     setInterval(() => {
         const now = new Date();
-        clockElement.textContent = getFormattedDateTime();
+        if (clockElement) clockElement.textContent = getFormattedDateTime();
 
         const currentDay = now.getDay(); 
         const currentHour = now.getHours();
@@ -293,13 +305,20 @@ function calculateScoresAndRender(filterKeyword = '') {
     });
 
     members.sort((a, b) => b.finalScore - a.finalScore);
-    document.getElementById('statTotalMembers').textContent = members.length;
+    
+    const totalEl = document.getElementById('statTotalMembers');
+    const avgEl = document.getElementById('statAverageScore');
+    const topEl = document.getElementById('statTopMember');
+
+    if(totalEl) totalEl.textContent = members.length;
     const sum = members.reduce((acc, m) => acc + m.finalScore, 0);
-    document.getElementById('statAverageScore').textContent = members.length ? Math.round(sum / members.length) : 0;
-    if(members[0]) document.getElementById('statTopMember').textContent = `${members[0].name} (${members[0].finalScore} ن)`;
+    if(avgEl) avgEl.textContent = members.length ? Math.round(sum / members.length) : 0;
+    if(members[0] && topEl) topEl.textContent = `${members[0].name} (${members[0].finalScore} ن)`;
 
     let displayedMembers = members.filter(m => m.name.toLowerCase().includes(filterKeyword.toLowerCase()));
-    const tbody = document.getElementById('membersTableBody'); tbody.innerHTML = '';
+    const tbody = document.getElementById('membersTableBody'); 
+    if(!tbody) return;
+    tbody.innerHTML = '';
     const isAuthorizedAdmin = (currentAdminRole === "admin" || currentAdminRole === "owner");
 
     displayedMembers.forEach((member, index) => {
@@ -361,10 +380,10 @@ function openModal(member = null) {
         document.getElementById('modalTitle').textContent = 'إضافة عضو جديد لكشوفات التحالف'; document.getElementById('memberName').readOnly = false;
         currentEditMemberOldData = { duel: 0, tech: 0, desert: 0, valley: 0, season: 0 };
     }
-    modal.style.display = 'flex';
+    if(modal) modal.style.display = 'flex';
 }
 
-function closeModal() { document.getElementById('memberModal').style.display = 'none'; }
+function closeModal() { const modal = document.getElementById('memberModal'); if(modal) modal.style.display = 'none'; }
 window.editMember = function(id) { const member = members.find(m => m.id === id); if (member) openModal(member); };
 
 window.deleteMember = function(id) {
@@ -378,18 +397,20 @@ window.deleteMember = function(id) {
 
 function openAuditModal() {
     if (currentAdminRole !== 'owner') return;
-    const tbody = document.getElementById('auditLogTableBody'); tbody.innerHTML = '';
+    const tbody = document.getElementById('auditLogTableBody'); if(!tbody) return;
+    tbody.innerHTML = '';
     auditLogs.forEach(log => {
         const tr = document.createElement('tr');
         tr.innerHTML = `<td style="color:var(--gold-primary); font-weight:bold;">${escapeHtml(log.operator)}</td><td><b>${log.action}</b></td><td style="color:#cbd5e1;">${log.details}</td><td style="color:var(--text-muted); font-size:0.8rem; font-weight:600;">${log.datetime}</td>`;
         tbody.appendChild(tr);
     });
-    document.getElementById('auditModal').style.display = 'flex';
+    const modal = document.getElementById('auditModal'); if(modal) modal.style.display = 'flex';
 }
 
 function openArchiveModal() {
     if (currentAdminRole !== 'owner') return;
-    const tbody = document.getElementById('archiveTableBody'); tbody.innerHTML = '';
+    const tbody = document.getElementById('archiveTableBody'); if(!tbody) return;
+    tbody.innerHTML = '';
 
     if (seasonalArchive.length === 0) {
         tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">الأرشيف فارغ حالياً.</td></tr>`;
@@ -407,7 +428,7 @@ function openArchiveModal() {
             tbody.appendChild(tr);
         });
     }
-    document.getElementById('archiveModal').style.display = 'flex';
+    const modal = document.getElementById('archiveModal'); if(modal) modal.style.display = 'flex';
 }
 
 window.downloadArchiveAsCSV = function(archiveId) {

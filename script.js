@@ -33,11 +33,10 @@ let seasonalArchive = [];
 
 let currentEditMemberOldData = { duel: 0, tech: 0, desert: 0, valley: 0, season: 0 };
 
-// القائمة الرسمية المركبة والكاملة لفرسان تحالف HFo الـ 83
+// القائمة الرسمية المركبة والكاملة لفرسان تحالف HFo الـ 83 مجهزة بالتصفير الأولي
 const defaultMembers = [
     { id: "m1", name: "AhmedBj", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
     { id: "m2", name: "STEEV", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
-    { id: "m3", name: "Abu Ya rab", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
     { id: "m4", name: "Haidar Qadi", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
     { id: "m5", name: "aHmEd7272", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
     { id: "m6", name: "فيصل q8", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
@@ -51,7 +50,7 @@ const defaultMembers = [
     { id: "m14", name: "saloohka1", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
     { id: "m15", name: "Dhooom11", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
     { id: "m16", name: "Yassermn", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
-    { id: "m17", name: "رنا 2030", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m17", name: "رنا 2030", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 }, 
     { id: "m18", name: "Theyab1", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
     { id: "m19", name: "KHALED ALMAHMEED", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
     { id: "m20", name: "hameed1991", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
@@ -120,19 +119,22 @@ const defaultMembers = [
     { id: "m83", name: "Abo S3D", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 }
 ];
 
-document.addEventListener('DOMContentLoaded', () => {
-    initApp();
-    setupEventListeners();
-    startLiveClockAndAutomation();
-});
-
-// دالة التهيئة المحدثة لفرض حقن القائمة الـ 83 رسمياً فوق الكشوفات التخزينية القديمة بالمتصفح
+// دالة التهيئة الذكية المحدثة والمحمية ضد الكتابة الفوقية العشوائية
 function initApp() {
-    members = [...defaultMembers]; // فرض تحميل الـ 83 اسماً مباشرة
+    const localData = localStorage.getItem('hfo_strict_members');
+    
+    if (localData) {
+        // إذا كانت هناك بيانات مسجلة مسبقاً، يقرأها النظام لحمايتها من الضياع عند عمل Refresh
+        members = JSON.parse(localData);
+    } else {
+        // في أول تشغيل للموقع فقط، يتم حقن الكشوفات الـ 83 مصفّرة
+        members = [...defaultMembers];
+        saveToStorage();
+    }
+    
     auditLogs = JSON.parse(localStorage.getItem('hfo_strict_logs')) || [];
     seasonalArchive = JSON.parse(localStorage.getItem('hfo_seasonal_archive')) || [];
     
-    saveToStorage(); // قفل وحفظ البيانات الجديدة في المتصفح
     calculateScoresAndRender();
     applyVisibilityRules();
 }

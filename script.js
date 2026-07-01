@@ -14,7 +14,7 @@ const CALCULATOR_WEIGHTS = {
 
 // 👑 تم دمج رابط جوجل شيت الحي والخاص بك هنا برمجياً
 const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqi_eTk0Wd2W0aELh6dUD6p2cTEC7i8pylEEKxTU3kaVOcqmi6ptLYXaTouomM7-diWeuwWIxnomKy/pub?gid=24547307&single=true&output=csv";
-const GOOGLE_SCRIPT_WEB_APP_URL = "ضع_رابط_تطبيق_الويب_WEB_APP_هنا";
+const GOOGLE_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzDAcDk2o7UvKLA35PvGouXBQBlYS8P69FVjMShdCoIWuv6GJHJYbtL-KCeNpD531bv/exec";
 
 // هيكل الأدمن السبعة الرسمي مع الرموز السرية المحدثة المعتمَدة
 const ALLIANCE_ADMINS = {

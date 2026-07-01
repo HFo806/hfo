@@ -51,7 +51,7 @@ const defaultMembers = [
     { id: "m14", name: "saloohka1", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
     { id: "m15", name: "Dhooom11", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
     { id: "m16", name: "Yassermn", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
-    { id: "m17", name: "Rana2030", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
+    { id: "m17", name: "رنا 2030", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
     { id: "m18", name: "Theyab1", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
     { id: "m19", name: "KHALED ALMAHMEED", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
     { id: "m20", name: "hameed1991", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },

@@ -1,6 +1,6 @@
 /**
  * نظام حاسبة التفاعل التراكمي المحمي للأدمن السبعة - تحالف HFo
- * نسخة الربط السحابي الفوري عبر Google Sheets API
+ * نسخة الربط السحابي الفوري الكامل عبر Google Sheets & Apps Script API
  * إعداد وإشراف وتطوير - 806 Abo S3D - HFo
  */
 
@@ -12,7 +12,7 @@ const CALCULATOR_WEIGHTS = {
     SEASON_WAR_VAL: 50           
 };
 
-// 👑 تم دمج رابط جوجل شيت الحي والخاص بك هنا برمجياً
+// 👑 الروابط السحابية الرسمية لتحالفك
 const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqi_eTk0Wd2W0aELh6dUD6p2cTEC7i8pylEEKxTU3kaVOcqmi6ptLYXaTouomM7-diWeuwWIxnomKy/pub?gid=24547307&single=true&output=csv";
 const GOOGLE_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzDAcDk2o7UvKLA35PvGouXBQBlYS8P69FVjMShdCoIWuv6GJHJYbtL-KCeNpD531bv/exec";
 
@@ -27,13 +27,11 @@ const ALLIANCE_ADMINS = {
     "Abu som3a": { pin: "1984", role: "admin" }
 };
 
-let currentLoggedInAdmin = null; 
-let currentAdminRole = "viewer"; 
-
 let members = [];
 let auditLogs = [];
 let seasonalArchive = []; 
-
+let currentLoggedInAdmin = null; 
+let currentAdminRole = "viewer"; 
 let currentEditMemberOldData = { duel: 0, tech: 0, desert: 0, valley: 0, season: 0 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -42,49 +40,71 @@ document.addEventListener('DOMContentLoaded', () => {
     startLiveClockAndAutomation();
 });
 
-// دالة تهيئة متطورة تقوم بجلب البيانات سحابياً كلياً لتوحيد الرؤية على كافة الأجهزة
 function initApp() {
     fetchCloudDataAndRender();
-    
     auditLogs = JSON.parse(localStorage.getItem('hfo_strict_logs')) || [];
     seasonalArchive = JSON.parse(localStorage.getItem('hfo_seasonal_archive')) || [];
     applyVisibilityRules();
 }
 
-// دالة سحب البيانات الحية مباشرة من الـ Google Sheet المشترك
+// دالة القراءة المرنة: تقرأ شيت وتتعامل مع الأعمدة بذكاء سواء كانت تحتوي على معرفات أو أسماء فقط
 function fetchCloudDataAndRender() {
-    if (GOOGLE_SHEET_CSV_URL.includes("ضع_رابط")) {
-        console.log("يرجى إعداد روابط الـ Google Sheets للبدء بالمزامنة السحابية.");
-        return;
-    }
-    
-    fetch(GOOGLE_SHEET_CSV_URL + "?cache-bypass=" + Date.now())
+    fetch(GOOGLE_SHEET_CSV_URL + "&t=" + Date.now())
     .then(response => response.text())
     .then(csvText => {
         const lines = csvText.split('\n');
         const cloudMembers = [];
-        for (let i = 1; i < lines.length; i++) {
+        
+        // نبدأ من الصف الأول لمعرفة العناوين وضمان عدم سقوط أي اسم
+        for (let i = 0; i < lines.length; i++) {
             const line = lines[i].trim();
             if (!line) continue;
+            
+            // تقسيم السطر مع مراعاة الفواصل
             const columns = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-            if (columns.length >= 7) {
+            if (columns.length === 0) continue;
+
+            let cell1 = columns[0] ? columns[0].replace(/^"|"$/g, '').trim() : "";
+            
+            // تخطي السطر الرئيسي للعناوين إذا وُجد
+            if (cell1.toLowerCase() === "id" || cell1 === "الاسم" || cell1.toLowerCase() === "name") continue;
+
+            // آلية فحص ذكية: إذا كان العمود الأول يحتوي على نص الاسم وليس معرّف رقمي m1
+            let memberId, memberName;
+            if (cell1.startsWith("m") && !isNaN(cell1.substring(1))) {
+                memberId = cell1;
+                memberName = columns[1] ? columns[1].replace(/^"|"$/g, '').trim() : "عضو غير معروف";
+            } else {
+                memberId = "m" + (i + 1);
+                memberName = cell1; 
+            }
+
+            // سحب بقية عدادات النقاط سحابياً في حال وجودها بالشيت
+            let dVal = columns[2] ? parseInt(columns[2].replace(/[^\d]/g, '')) || 0 : 0;
+            let tVal = columns[3] ? parseInt(columns[3].replace(/[^\d]/g, '')) || 0 : 0;
+            let deVal = columns[4] ? parseInt(columns[4].replace(/[^\d]/g, '')) || 0 : 0;
+            let vVal = columns[5] ? parseInt(columns[5].replace(/[^\d]/g, '')) || 0 : 0;
+            let sVal = columns[6] ? parseInt(columns[6].replace(/[^\d]/g, '')) || 0 : 0;
+
+            if (memberName) {
                 cloudMembers.push({
-                    id: columns[0].replace(/^"|"$/g, '').trim(),
-                    name: columns[1].replace(/^"|"$/g, '').trim(),
-                    duel: parseInt(columns[2]) || 0,
-                    tech: parseInt(columns[3]) || 0,
-                    desert: parseInt(columns[4]) || 0,
-                    valley: parseInt(columns[5]) || 0,
-                    season: parseInt(columns[6]) || 0
+                    id: memberId,
+                    name: memberName,
+                    duel: dVal,
+                    tech: tVal,
+                    desert: deVal,
+                    valley: vVal,
+                    season: sVal
                 });
             }
         }
+        
         if (cloudMembers.length > 0) {
             members = cloudMembers;
             calculateScoresAndRender();
         }
     })
-    .catch(err => console.error("خطأ أثناء سحب البيانات السحابية الحية:", err));
+    .catch(err => console.error("خطأ أثناء سحب البيانات السحابية:", err));
 }
 
 function saveToStorage() {
@@ -285,11 +305,6 @@ function handleFormSubmit(e) {
     
     const currentTimestamp = getFormattedDateTime(); 
 
-    if (!id) {
-        alert("إضافة الأعضاء الجدد تتم مباشرة داخل جدول جوجل شيت لضمان المزامنة الدقيقة.");
-        return;
-    }
-
     const payload = {
         action: "updatePoints",
         id: id,
@@ -299,17 +314,6 @@ function handleFormSubmit(e) {
         valley: inputValley,
         season: inputSeason
     };
-
-    if (GOOGLE_SCRIPT_WEB_APP_URL.includes("ضع_رابط")) {
-        // حماية مسبقة في حال لم يتم وضع رابط السكريبت بعد
-        const index = members.findIndex(m => m.id === id);
-        if (index !== -1) {
-            members[index].duel += inputDuel; members[index].tech += inputTech;
-            members[index].desert += inputDesert; members[index].valley += inputValley; members[index].season += inputSeason;
-        }
-        calculateScoresAndRender(); closeModal();
-        return;
-    }
 
     fetch(GOOGLE_SCRIPT_WEB_APP_URL, {
         method: "POST",
@@ -331,9 +335,9 @@ function handleFormSubmit(e) {
         calculateScoresAndRender();
         closeModal();
         
-        setTimeout(fetchCloudDataAndRender, 2000);
+        setTimeout(fetchCloudDataAndRender, 1500);
     }).catch(err => {
-        alert("فشل في مزامنة البيانات سحابياً، تحقق من اتصال الإنترنت.");
+        alert("حدث خطأ أثناء الاتصال السحابي، سيتم الحفظ محلياً.");
         console.error(err);
     });
 }
@@ -360,7 +364,7 @@ function closeModal() { const modal = document.getElementById('memberModal'); if
 window.editMember = function(id) { const member = members.find(m => m.id === id); if (member) openModal(member); };
 
 window.deleteMember = function(id) {
-    alert("الحذف الفعلي وحفظ الكشوفات الجذرية يتم من داخل ملف جوجل شيت لحماية أمن النظام.");
+    alert("الحذف الفعلي يتم من داخل شيت جوجل لحماية أمن النظام البنائي.");
 };
 
 function openAuditModal() {

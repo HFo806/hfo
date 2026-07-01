@@ -37,7 +37,6 @@ let currentEditMemberOldData = { duel: 0, tech: 0, desert: 0, valley: 0, season:
 const defaultMembers = [
     { id: "m1", name: "AhmedBj", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
     { id: "m2", name: "STEEV", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
-    { id: "m3", name: "Abu Ya rab", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
     { id: "m4", name: "Haidar Qadi", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
     { id: "m5", name: "aHmEd7272", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },
     { id: "m6", name: "فيصل q8", duel: 0, tech: 0, desert: 0, valley: 0, season: 0 },

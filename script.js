@@ -1,6 +1,6 @@
 /**
  * نظام حاسبة التفاعل التراكمي المحمي للأدمن السبعة - تحالف HFo
- * نسخة الربط السحابي الفوري الكامل عبر Google Sheets & Apps Script API
+ * نسخة الربط السحابي الفوري الكامل وبناء سجل التدقيق المشترك
  * إعداد وإشراف وتطوير - 806 Abo S3D - HFo
  */
 
@@ -12,7 +12,7 @@ const CALCULATOR_WEIGHTS = {
     SEASON_WAR_VAL: 50           
 };
 
-// 👑 تم دمج رابط جوجل شيت الجديد والفعال الخاص بك هنا برمجياً
+// 👑 روابط جوجل شيت الحية والخاصة بك
 const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqi_eTk0Wd2W0aELh6dUD6p2cTEC7i8pylEEKxTU3kaVOcqmi6ptLYXaTouomM7-diWeuwWIxnomKy/pub?gid=24547307&single=true&output=csv";
 const GOOGLE_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzDAcDk2o7UvKLA35PvGouXBQBlYS8P69FVjMShdCoIWuv6GJHJYbtL-KCeNpD531bv/exec";
 
@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initApp() {
     fetchCloudDataAndRender();
+    // جلب السجلات المحفوظة محلياً كدعم احتياطي
     auditLogs = JSON.parse(localStorage.getItem('hfo_strict_logs')) || [];
     seasonalArchive = JSON.parse(localStorage.getItem('hfo_seasonal_archive')) || [];
     applyVisibilityRules();
@@ -289,6 +290,12 @@ function calculateScoresAndRender(filterKeyword = '') {
 function handleFormSubmit(e) {
     e.preventDefault(); if (!currentLoggedInAdmin) return;
     
+    const saveBtn = document.getElementById('saveMemberBtn');
+    if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = "جاري الحفظ سحابياً الفوري...";
+    }
+    
     const id = document.getElementById('memberId').value; 
     const name = document.getElementById('memberName').value.trim();
     const inputDuel = parseInt(document.getElementById('allianceDuel').value) || 0; 
@@ -298,6 +305,7 @@ function handleFormSubmit(e) {
     const inputSeason = parseInt(document.getElementById('seasonWars').value) || 0;
     
     const currentTimestamp = getFormattedDateTime(); 
+    const detailsLog = `حقن نقاط للعضو [${name}] | مبارزة: +${inputDuel}، تبرع: +${inputTech}، صحراء: +${inputDesert}، وادي: +${inputValley}، موسم: +${inputSeason}`;
 
     const payload = {
         action: "updatePoints",
@@ -306,13 +314,17 @@ function handleFormSubmit(e) {
         tech: inputTech,
         desert: inputDesert,
         valley: inputValley,
-        season: inputSeason
+        season: inputSeason,
+        // 🔄 تم تضمين بيانات سجل التدقيق هنا ليتم حفظها سحابياً مع العملية في نفس الوقت
+        operator: currentLoggedInAdmin,
+        logDetails: detailsLog,
+        timestamp: currentTimestamp
     };
 
     fetch(GOOGLE_SCRIPT_WEB_APP_URL, {
         method: "POST",
-        mode: "no-cors", 
-        headers: { "Content-Type": "application/json" },
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain" },
         body: JSON.stringify(payload)
     }).then(() => {
         const index = members.findIndex(m => m.id === id);
@@ -324,15 +336,22 @@ function handleFormSubmit(e) {
             members[index].season += inputSeason;
         }
         
-        auditLogs.unshift({ operator: currentLoggedInAdmin, action: "حقن نقاط سحابية", details: `حقن نقاط للعضو [${name}] ومزامنتها مع شيت جوجل`, datetime: currentTimestamp });
+        // حفظ التقرير محلياً كنسخة احتياطية سريعة
+        const newLog = { operator: currentLoggedInAdmin, action: "حقن نقاط سحابية", details: detailsLog, datetime: currentTimestamp };
+        auditLogs.unshift(newLog);
         localStorage.setItem('hfo_strict_logs', JSON.stringify(auditLogs));
+        
         calculateScoresAndRender();
         closeModal();
         
-        setTimeout(fetchCloudDataAndRender, 1500);
+        setTimeout(fetchCloudDataAndRender, 1000);
     }).catch(err => {
-        alert("حدث خطأ أثناء الاتصال السحابي.");
-        console.error(err);
+        console.error("اتصال سحابي غير مستقر:", err);
+    }).finally(() => {
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.textContent = "تحديث واحتساب المجموع التراكمية";
+        }
     });
 }
 
@@ -361,15 +380,22 @@ window.deleteMember = function(id) {
     alert("الحذف الفعلي يتم من داخل شيت جوجل لحماية أمن النظام البنائي.");
 };
 
+// عرض سجل العمليات المحدث
 function openAuditModal() {
     if (currentAdminRole !== 'owner') return;
     const tbody = document.getElementById('auditLogTableBody'); if(!tbody) return;
     tbody.innerHTML = '';
-    auditLogs.forEach(log => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td style="color:var(--gold-primary); font-weight:bold;">${escapeHtml(log.operator)}</td><td><b>${log.action}</b></td><td style="color:#cbd5e1;">${log.details}</td><td style="color:var(--text-muted); font-size:0.8rem; font-weight:600;">${log.datetime}</td>`;
-        tbody.appendChild(tr);
-    });
+    
+    // أولاً نعرض العمليات الحالية المحفوظة
+    if(auditLogs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">لا توجد عمليات مسجلة حالياً. لضمان رؤية العمليات السحابية الجديدة، تأكد من قيام الأدمن بالتعديل عبر النسخة الجديدة.</td></tr>`;
+    } else {
+        auditLogs.forEach(log => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td style="color:var(--gold-primary); font-weight:bold;">${escapeHtml(log.operator)}</td><td><b>${log.action}</b></td><td style="color:#cbd5e1;">${log.details}</td><td style="color:var(--text-muted); font-size:0.8rem; font-weight:600;">${log.datetime}</td>`;
+            tbody.appendChild(tr);
+        });
+    }
     const modal = document.getElementById('auditModal'); if(modal) modal.style.display = 'flex';
 }
 

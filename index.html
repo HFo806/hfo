@@ -1,0 +1,2246 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#070a12" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="HFO 806" />
+  <title>HFO #806 | مركز قيادة التحالف الرسمي - Last War</title>
+
+  <!-- PWA & App Icons -->
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+  <link rel="shortcut icon" href="/icon-192.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Chakra+Petch:wght@600;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Cairo', 'sans-serif'],
+            hud: ['Chakra Petch', 'Cairo', 'sans-serif']
+          },
+          colors: {
+            cmd: {
+              bg: '#070a12',
+              card: '#0f1624',
+              panel: '#162033',
+              border: '#24324d',
+              cyan: '#06b6d4',
+              green: '#10b981',
+              amber: '#f59e0b',
+              red: '#ef4444'
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: #070a12;
+      color: #f1f5f9;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+      padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+    }
+    @media (min-width: 768px) { body { padding-bottom: 2.5rem; } }
+    @media screen and (max-width: 768px) { input, select, textarea { font-size: 16px !important; } }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #070a12; }
+    ::-webkit-scrollbar-thumb { background: #24324d; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .game-map-ltr { direction: ltr !important; text-align: left !important; }
+    .glass-panel {
+      background: rgba(15, 22, 36, 0.94);
+      backdrop-filter: blur(12px);
+      border: 1px solid #24324d;
+    }
+    .tab-active {
+      background: linear-gradient(135deg, rgba(6,182,212,0.22), rgba(6,182,212,0.05));
+      border-color: #06b6d4 !important;
+      color: #22d3ee !important;
+      box-shadow: 0 0 15px rgba(6, 182, 212, 0.18);
+    }
+    .subtab-active {
+      background-color: #06b6d4 !important;
+      color: #070a12 !important;
+      font-weight: 800;
+    }
+
+    .map-touch-viewport {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      touch-action: none;
+      user-select: none;
+      border-radius: 1rem;
+      background: #050811;
+      cursor: grab;
+      border: 2px solid #24324d;
+    }
+    .map-touch-viewport:active { cursor: grabbing; }
+    .map-touch-stage {
+      width: 980px;
+      height: 640px;
+      transform-origin: 0 0;
+      will-change: transform;
+    }
+
+    .desert-battlefield-canvas {
+      background-color: #24170d;
+      background-image:
+        radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.18) 0%, transparent 60%),
+        radial-gradient(circle at 10% 88%, rgba(59, 130, 246, 0.3) 0%, transparent 26%),
+        radial-gradient(circle at 90% 12%, rgba(239, 68, 68, 0.3) 0%, transparent 26%),
+        linear-gradient(rgba(245, 158, 11, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245, 158, 11, 0.06) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 100% 100%, 42px 42px, 42px 42px;
+      border: 3px solid #b45309;
+      box-shadow: inset 0 0 70px rgba(0, 0, 0, 0.9);
+    }
+
+    .canyon-battlefield-canvas {
+      background-color: #071019;
+      background-image:
+        radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.18) 0%, transparent 55%),
+        radial-gradient(circle at 10% 50%, rgba(59, 130, 246, 0.3) 0%, transparent 28%),
+        radial-gradient(circle at 90% 50%, rgba(239, 68, 68, 0.3) 0%, transparent 28%),
+        linear-gradient(rgba(6, 182, 212, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(6, 182, 212, 0.06) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+      border: 3px solid #0891b2;
+      box-shadow: inset 0 0 70px rgba(0, 0, 0, 0.9);
+    }
+
+    .map-building-node {
+      transform: translate(-50%, -50%);
+      transition: box-shadow 0.18s ease, border-color 0.18s ease, transform 0.15s ease;
+    }
+    .map-building-node:hover {
+      z-index: 40;
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.6);
+      transform: translate(-50%, -50%) scale(1.03);
+    }
+
+    .mobile-bottom-nav { padding-bottom: calc(0.4rem + env(safe-area-inset-bottom)); }
+  </style>
+</head>
+<body class="select-none md:select-auto">
+
+  <!-- ==================== نافذة تسجيل الدخول / تبديل الحساب ==================== -->
+  <div id="auth-gate-modal" class="fixed inset-0 z-50 hidden bg-[#050811]/95 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-cmd-card border-2 border-amber-500/50 rounded-3xl max-w-md w-full p-5 md:p-6 space-y-4 shadow-2xl my-auto">
+      <div class="text-center space-y-1.5">
+        <img src="/icon-192.png" onerror="this.src='https://img.icons8.com/color/192/shield.png'" class="w-16 h-16 rounded-2xl mx-auto shadow-lg border border-amber-400/40 object-cover" alt="HFO Logo" />
+        <h2 class="font-black text-xl text-white">مركز قيادة تحالف HFO [#806]</h2>
+        <p class="text-xs text-slate-400">سجل دخولك لتحديث ملفك وتشكيلاتك في جدول التحالف</p>
+        <div class="text-[11px] font-hud text-cyan-400 font-bold">806 Abo S3D - HFo</div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-1.5 bg-cmd-bg p-1 rounded-xl border border-cmd-border">
+        <button onclick="switchAuthMode('login')" id="auth-tab-login" class="py-2 rounded-lg text-xs font-black bg-amber-500 text-slate-950 transition">تسجيل دخول</button>
+        <button onclick="switchAuthMode('register')" id="auth-tab-register" class="py-2 rounded-lg text-xs font-bold text-slate-300 transition">تسجيل عضو جديد</button>
+      </div>
+
+      <div id="auth-form-login" class="space-y-3 text-xs">
+        <div>
+          <label class="text-slate-300 font-bold block mb-1">اسم اللاعب في اللعبة:</label>
+          <input type="text" id="login-name" placeholder="مثال: Abo S3D" class="w-full bg-cmd-bg border border-cmd-border rounded-xl p-3 text-white font-bold focus:border-amber-400 focus:outline-none" />
+        </div>
+        <div>
+          <label class="text-slate-300 font-bold block mb-1">الرمز السري (PIN):</label>
+          <input type="password" id="login-pin" placeholder="أدخل رمزك السري..." class="w-full bg-cmd-bg border border-cmd-border rounded-xl p-3 text-white font-bold focus:border-amber-400 focus:outline-none" />
+        </div>
+        <button onclick="handleMemberLogin()" class="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-black text-sm shadow-lg hover:opacity-95">
+          <i class="fa-solid fa-right-to-bracket ml-1"></i> دخول
+        </button>
+      </div>
+
+      <div id="auth-form-register" class="hidden space-y-2.5 text-xs">
+        <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-2.5 text-[11px] text-amber-300">
+          <i class="fa-solid fa-shield-halved ml-1"></i> اسم القائد <strong>Abo S3D</strong> محجوز للمالك (Owner R4).
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div class="col-span-2">
+            <label class="text-slate-300 font-bold block mb-1">اسمك في اللعبة:</label>
+            <input type="text" id="reg-name" placeholder="الاسم في Last War" class="w-full bg-cmd-bg border border-cmd-border rounded-xl p-2.5 text-white font-bold" />
+          </div>
+          <div class="col-span-2">
+            <label class="text-slate-300 font-bold block mb-1">رمز الدخول السري (PIN):</label>
+            <input type="password" id="reg-pin" placeholder="رمز سري تحفظه" class="w-full bg-cmd-bg border border-cmd-border rounded-xl p-2.5 text-white font-bold" />
+          </div>
+          <div>
+            <label class="text-slate-400 block mb-1">مستوى HQ</label>
+            <input type="number" id="reg-hq" value="30" min="1" max="35" class="w-full bg-cmd-bg border border-cmd-border rounded-xl p-2.5 text-cyan-400 font-black" />
+          </div>
+          <div>
+            <label class="text-slate-400 block mb-1">إجمالي القوة (M)</label>
+            <input type="number" id="reg-power" step="0.1" placeholder="مثال: 145.5" class="w-full bg-cmd-bg border border-cmd-border rounded-xl p-2.5 text-emerald-400 font-black" />
+          </div>
+          <div>
+            <label class="text-slate-400 block mb-1">قوة الفريق 1 (M)</label>
+            <input type="number" id="reg-sq1" step="0.1" placeholder="مثال: 32.4" class="w-full bg-cmd-bg border border-cmd-border rounded-xl p-2.5 text-white font-bold" />
+          </div>
+          <div>
+            <label class="text-slate-400 block mb-1">التشكيلة الأساسية</label>
+            <select id="reg-formation" class="w-full bg-cmd-bg border border-cmd-border rounded-xl p-2.5 text-amber-400 font-bold">
+              <option value="Tank">🛡️ Tank (دبابات)</option>
+              <option value="Aircraft">✈️ Aircraft (طائرات)</option>
+              <option value="Missile">🚀 Missile (صواريخ)</option>
+            </select>
+          </div>
+        </div>
+        <button onclick="handleMemberRegister()" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm shadow-lg">
+          <i class="fa-solid fa-user-check ml-1"></i> تسجيل حسابي
+        </button>
+      </div>
+
+      <div class="pt-2 border-t border-slate-800 flex items-center justify-between text-xs">
+        <button onclick="toggleModal('auth-gate-modal')" class="text-slate-400 hover:text-white font-bold">إغلاق النافذة</button>
+        <span class="text-[11px] text-emerald-400 font-bold"><i class="fa-solid fa-cloud ml-1"></i>سحابي مباشر</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 1. الهيدر العلوي ==================== -->
+  <header class="sticky top-0 z-40 glass-panel border-b border-cmd-border px-3 py-2 shadow-xl">
+    <div class="max-w-7xl mx-auto flex flex-col gap-2">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <img src="/icon-192.png" onerror="this.src='https://img.icons8.com/color/192/shield.png'" class="w-10 h-10 md:w-11 md:h-11 shrink-0 rounded-xl border border-amber-400/40 object-cover shadow-lg" alt="HFO" />
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <h1 class="font-black text-sm md:text-lg tracking-wide text-white truncate">تحالف HFO [Server #806]</h1>
+              <span id="cloud-sync-pill" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> متصل
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-400 flex items-center gap-1.5 truncate">
+              <span><i class="fa-regular fa-clock text-cyan-400 ml-1"></i>الرياض <span id="live-clock">--:--</span></span>
+              <span>•</span>
+              <span class="font-hud text-cyan-400 font-bold">806 Abo S3D - HFo</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button onclick="testSendAlertNow()" class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 border border-amber-400/40 text-amber-300 hover:bg-amber-500/30 transition text-xs font-black flex items-center gap-1.5 shadow" title="فحص الإرسال الفوري لتيليجرام وديسكورد">
+            <i class="fa-solid fa-paper-plane text-xs"></i>
+            <span class="hidden sm:inline">فحص التنبيهات</span>
+          </button>
+
+          <!-- بطاقة المالك -->
+          <div onclick="openAuthModal()" class="cursor-pointer bg-cmd-bg border border-cmd-border hover:border-amber-400 rounded-xl px-2.5 py-1 text-xs flex items-center gap-1.5 transition">
+            <span id="header-user-icon"><i class="fa-solid fa-crown text-amber-400"></i></span>
+            <span id="header-user-name" class="font-black text-white">Abo S3D</span>
+            <span id="current-role-badge" class="px-1.5 py-0.2 rounded bg-amber-500 text-slate-950 text-[10px] font-hud font-black">Owner R4</span>
+          </div>
+
+          <button onclick="toggleModal('notifications-modal')" class="relative p-2.5 rounded-xl bg-cmd-panel border border-cmd-border hover:border-cyan-500 transition" title="الإشعارات">
+            <i class="fa-solid fa-bell text-slate-200 text-sm"></i>
+            <span id="notif-badge" class="hidden absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-black items-center justify-center">0</span>
+          </button>
+
+          <button onclick="openAuthModal()" class="p-2.5 rounded-xl bg-cyan-500/15 border border-cyan-500/30 hover:bg-cyan-500/25 text-cyan-300 transition text-xs font-bold flex items-center gap-1" title="تبديل أو تسجيل عضو جديد">
+            <i class="fa-solid fa-user-plus text-sm"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between gap-2 pt-1 border-t border-slate-800/80 overflow-x-auto no-scrollbar">
+        <div class="flex items-center gap-1.5" id="accounts-chips-container"></div>
+        <button onclick="openAddSubAccountModal()" id="btn-add-subaccount" class="shrink-0 text-xs px-2.5 py-1 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/20 font-bold flex items-center gap-1">
+          <i class="fa-solid fa-plus"></i> إضافة حساب فرعي (Alt/Farm)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== المحتوى الرئيسي ==================== -->
+  <main class="max-w-7xl mx-auto px-2.5 md:px-4 pt-3 space-y-4">
+
+    <!-- البانر الذكي -->
+    <section class="bg-gradient-to-l from-slate-900 via-cmd-card to-slate-900 border border-cmd-border rounded-2xl p-3 shadow-lg">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-xs md:text-sm font-extrabold text-slate-300 flex items-center gap-1.5">
+          <i class="fa-solid fa-bolt text-amber-400"></i> ما الذي يحتاج منك إجراء الآن؟ (<span id="smart-banner-acc-name" class="text-cyan-400 font-black">Abo S3D</span>)
+        </h2>
+        <div class="flex items-center gap-2">
+          <button onclick="syncFromCloud(true)" class="text-[11px] text-cyan-400 hover:underline flex items-center gap-1" id="last-sync-indicator">
+            <i class="fa-solid fa-arrows-rotate"></i> مزامنة السحابة
+          </button>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2" id="smart-actions-grid"></div>
+    </section>
+
+    <!-- شريط التبويبات للكمبيوتر -->
+    <nav class="hidden md:grid grid-cols-6 gap-2 bg-cmd-card p-1.5 rounded-2xl border border-cmd-border">
+      <button onclick="switchMainTab('power')" id="tab-btn-power" class="main-tab-btn tab-active flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-transparent font-bold text-sm transition">
+        <i class="fa-solid fa-shield-halved"></i> <span>1. القوة</span>
+      </button>
+      <button onclick="switchMainTab('events')" id="tab-btn-events" class="main-tab-btn flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-transparent font-bold text-sm text-slate-300 hover:bg-slate-800/60 transition">
+        <i class="fa-solid fa-calendar-check"></i> <span>2. الفعاليات</span>
+      </button>
+      <button onclick="switchMainTab('train')" id="tab-btn-train" class="main-tab-btn flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-transparent font-bold text-sm text-slate-300 hover:bg-slate-800/60 transition">
+        <i class="fa-solid fa-train"></i> <span>3. القطار</span>
+      </button>
+      <button onclick="switchMainTab('calculators')" id="tab-btn-calculators" class="main-tab-btn flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-transparent font-bold text-sm text-slate-300 hover:bg-slate-800/60 transition">
+        <i class="fa-solid fa-calculator"></i> <span>4. الحاسبات</span>
+      </button>
+      <button onclick="switchMainTab('alliance')" id="tab-btn-alliance" class="main-tab-btn flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-transparent font-bold text-sm text-slate-300 hover:bg-slate-800/60 transition">
+        <i class="fa-solid fa-users-gear"></i> <span>5. التحالف والصلاحيات</span>
+      </button>
+      <button onclick="switchMainTab('profile')" id="tab-btn-profile" class="main-tab-btn flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-transparent font-bold text-sm text-slate-300 hover:bg-slate-800/60 transition">
+        <i class="fa-solid fa-user-astronaut"></i> <span>6. ملفي</span>
+      </button>
+    </nav>
+
+    <!-- 1. تبويب القوة -->
+    <section id="view-power" class="tab-view space-y-4">
+      <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2" id="power-summary-cards"></div>
+
+      <div class="bg-cmd-card border border-cmd-border rounded-2xl p-3 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="relative flex-1 min-w-[200px]">
+            <i class="fa-solid fa-magnifying-glass absolute right-3 top-3 text-slate-400 text-sm"></i>
+            <input type="text" id="roster-search" oninput="renderRoster()" placeholder="ابحث باسم اللاعب في HFO..." class="w-full bg-cmd-bg border border-cmd-border rounded-xl pr-9 pl-3 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none" />
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs text-slate-400">ترتيب:</span>
+            <select id="roster-sort" onchange="renderRoster()" class="bg-cmd-bg border border-cmd-border rounded-xl px-2.5 py-2 text-xs font-bold text-slate-200">
+              <option value="power_desc">الأعلى قوة</option>
+              <option value="hq_desc">الأعلى HQ</option>
+              <option value="squad1_desc">الأقوى فريق 1</option>
+              <option value="activity">الأكثر نشاطاً</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-1.5 flex-wrap w-full sm:w-auto">
+            <button onclick="switchMainTab('profile')" class="flex-1 sm:flex-initial justify-center px-3.5 py-2.5 rounded-xl bg-cyan-500 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow">
+              <i class="fa-solid fa-pen-to-square"></i> تحديث قوتي
+            </button>
+            <button onclick="openMemberModal()" class="role-protected-mod flex-1 sm:flex-initial justify-center px-3.5 py-2.5 rounded-xl bg-emerald-600 text-white font-black text-xs flex items-center gap-1.5 shadow">
+              <i class="fa-solid fa-user-plus"></i> إضافة عضو
+            </button>
+            <button onclick="exportRosterCSV()" class="px-2.5 py-2.5 rounded-xl bg-cmd-panel border border-cmd-border text-slate-200 text-xs font-bold">CSV</button>
+            <button onclick="exportRosterJSON()" class="px-2.5 py-2.5 rounded-xl bg-cmd-panel border border-cmd-border text-slate-200 text-xs font-bold">JSON</button>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <button onclick="setFormationFilter('ALL')" id="filter-form-ALL" class="form-filter-btn px-2.5 py-1.5 rounded-lg text-xs font-bold bg-cyan-500 text-slate-950">الكل</button>
+            <button onclick="setFormationFilter('Tank')" id="filter-form-Tank" class="form-filter-btn px-2.5 py-1.5 rounded-lg text-xs font-bold bg-cmd-bg border border-cmd-border text-slate-300">🛡️ Tank</button>
+            <button onclick="setFormationFilter('Aircraft')" id="filter-form-Aircraft" class="form-filter-btn px-2.5 py-1.5 rounded-lg text-xs font-bold bg-cmd-bg border border-cmd-border text-slate-300">✈️ Aircraft</button>
+            <button onclick="setFormationFilter('Missile')" id="filter-form-Missile" class="form-filter-btn px-2.5 py-1.5 rounded-lg text-xs font-bold bg-cmd-bg border border-cmd-border text-slate-300">🚀 Missile</button>
+
+            <select id="filter-hq" onchange="renderRoster()" class="bg-cmd-bg border border-cmd-border rounded-lg px-2 py-1 text-xs text-slate-300">
+              <option value="0">كل HQ</option>
+              <option value="30">HQ 30+</option>
+              <option value="27">HQ 27+</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div id="roster-empty-state" class="hidden bg-cmd-card border border-dashed border-cmd-border rounded-2xl p-6 text-center space-y-3">
+        <h3 class="font-black text-base text-white">لم يتم تسجيل أعضاء بعد</h3>
+        <button onclick="switchMainTab('profile')" class="px-5 py-2.5 rounded-xl bg-cyan-500 text-slate-950 font-black text-xs">تحديث ملفي الشخصي الآن</button>
+      </div>
+
+      <div class="grid grid-cols-1 gap-3 md:hidden" id="roster-mobile-cards"></div>
+
+      <div id="roster-desktop-wrapper" class="hidden md:block bg-cmd-card border border-cmd-border rounded-2xl overflow-hidden shadow-xl">
+        <div class="overflow-x-auto">
+          <table class="w-full text-right text-sm">
+            <thead class="bg-cmd-panel text-slate-300 text-xs border-b border-cmd-border">
+              <tr>
+                <th class="py-3 px-4">اسم اللاعب</th>
+                <th class="py-3 px-3">HQ</th>
+                <th class="py-3 px-3">إجمالي القوة</th>
+                <th class="py-3 px-3">الفريق 1</th>
+                <th class="py-3 px-3">الفريق 2</th>
+                <th class="py-3 px-3">الفريق 3</th>
+                <th class="py-3 px-3">التشكيلة</th>
+                <th class="py-3 px-3">النشاط</th>
+                <th class="py-3 px-3">آخر تحديث</th>
+                <th class="py-3 px-3 text-center">إجراء</th>
+              </tr>
+            </thead>
+            <tbody id="roster-desktop-tbody" class="divide-y divide-slate-800/70"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. تبويب الفعاليات -->
+    <section id="view-events" class="tab-view hidden space-y-4">
+      <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar bg-cmd-card p-1.5 rounded-2xl border border-cmd-border">
+        <button onclick="switchEventsSubTab('desert')" id="ev-sub-desert" class="ev-subtab-btn subtab-active px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 transition">🏜️ خطة عاصفة الصحراء</button>
+        <button onclick="switchEventsSubTab('canyon')" id="ev-sub-canyon" class="ev-subtab-btn px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 shrink-0 transition">⛰️ خطة عاصفة الوادي</button>
+        <button onclick="switchEventsSubTab('upcoming')" id="ev-sub-upcoming" class="ev-subtab-btn px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 shrink-0 transition">📅 الفعاليات</button>
+        <button onclick="switchEventsSubTab('polls')" id="ev-sub-polls" class="ev-subtab-btn px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 shrink-0 transition">📊 الاستفتاءات</button>
+        <button onclick="switchEventsSubTab('attendance')" id="ev-sub-attendance" class="ev-subtab-btn px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 shrink-0 transition">✅ الحضور</button>
+      </div>
+
+      <!-- خطة عاصفة الصحراء -->
+      <div id="ev-panel-desert" class="ev-subpanel space-y-3">
+        <div class="bg-cmd-card border border-cmd-border rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2.5">
+          <div class="flex flex-wrap items-center gap-2 flex-1">
+            <select id="ds-team-filter" onchange="renderDesertStorm()" class="bg-cmd-bg border border-cmd-border rounded-xl px-3 py-2 text-xs font-black text-amber-400">
+              <option value="Team A">Team A (الفريق الأساسي)</option>
+              <option value="Team B">Team B (الفريق الثاني)</option>
+            </select>
+            <input type="text" id="ds-battle-time-input" value="السبت 20:00 بتوقيت الرياض" oninput="renderDesertStorm()" class="flex-1 min-w-[170px] bg-cmd-bg border border-cmd-border rounded-xl px-3 py-2 text-xs text-white font-bold" />
+          </div>
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <button onclick="clearDesertStormAssignments()" class="role-protected-officer px-3 py-2.5 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs font-bold">تصفير</button>
+            <button onclick="exportOfficialBattlePNG('desert-storm-official-poster', 'HFO-806-Desert-Storm.png')" class="flex-1 sm:flex-initial justify-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg">
+              <i class="fa-solid fa-camera"></i> تصدير خطة عاصفة الصحراء PNG
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-cmd-card border border-cmd-border rounded-2xl p-3 role-protected-officer">
+          <h4 class="text-xs font-black text-cyan-400 mb-2">اضغط على أي مبنى في خطة عاصفة الصحراء أو اختره من القائمة لتثبيت اللاعب:</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-5 gap-2">
+            <select id="ds-assign-player" class="bg-cmd-bg border border-cmd-border rounded-xl px-2.5 py-2 text-xs text-white font-bold"></select>
+            <select id="ds-assign-team" class="bg-cmd-bg border border-cmd-border rounded-xl px-2.5 py-2 text-xs text-white font-bold">
+              <option value="Team A">Team A</option>
+              <option value="Team B">Team B</option>
+              <option value="Reserve">Reserve</option>
+            </select>
+            <select id="ds-assign-building" class="bg-cmd-bg border border-cmd-border rounded-xl px-2.5 py-2 text-xs text-amber-300 font-bold">
+              <option value="NUCLEAR_SILO">☢️ الصومعة النووية [10:00]</option>
+              <option value="MERC_1">🪖 مصنع المرتزقة 1 [10:00]</option>
+              <option value="MERC_2">🪖 مصنع المرتزقة 2 [10:00]</option>
+              <option value="OIL_1">🛢️ مصفاة النفط 1 [00:00]</option>
+              <option value="OIL_2">🛢️ مصفاة النفط 2 [00:00]</option>
+              <option value="INFO_CENTER">📡 مركز المعلومات [00:00]</option>
+              <option value="WEAPONS_ARSENAL">🚀 ترسانة الأسلحة [00:00]</option>
+              <option value="HOSPITAL_1">➕ المستشفى 1 [00:00]</option>
+              <option value="HOSPITAL_2">➕ المستشفى 2 [00:00]</option>
+              <option value="HOSPITAL_3">➕ المستشفى 3 [00:00]</option>
+              <option value="HOSPITAL_4">➕ المستشفى 4 [00:00]</option>
+            </select>
+            <select id="ds-assign-role" class="bg-cmd-bg border border-cmd-border rounded-xl px-2.5 py-2 text-xs text-white font-bold">
+              <option value="هجوم">⚔️ هجوم (ATK)</option>
+              <option value="دفاع">🛡️ دفاع (DEF)</option>
+              <option value="إسناد">⚡ إسناد (Roam)</option>
+            </select>
+            <button onclick="assignPlayerDesertStorm()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl py-2.5 px-3">+ تثبيت</button>
+          </div>
+        </div>
+
+        <div id="desert-storm-official-poster" class="bg-[#0b0f17] border-2 border-amber-500/60 rounded-2xl p-3 md:p-4 shadow-2xl space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2 bg-gradient-to-r from-[#1c140d] via-[#291d12] to-[#1c140d] border border-amber-500/40 rounded-xl px-3.5 py-2.5">
+            <div class="flex items-center gap-2.5">
+              <img src="/icon-192.png" onerror="this.src='https://img.icons8.com/color/192/shield.png'" class="w-9 h-9 md:w-10 md:h-10 rounded-lg object-cover shadow" alt="HFO" />
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="font-hud font-black text-sm md:text-base text-amber-400 tracking-wide">DESERT STORM BATTLEFIELD</h3>
+                  <span class="px-2 py-0.5 rounded bg-amber-500/20 border border-amber-400/40 text-amber-200 font-hud text-[11px] font-bold" id="ds-poster-team-badge">TEAM A</span>
+                </div>
+                <p class="text-[11px] md:text-xs text-slate-300 font-bold">خطة عاصفة الصحراء الرسمية • <span id="ds-poster-time">السبت 20:00</span></p>
+              </div>
+            </div>
+            <div class="text-left font-hud">
+              <span class="text-[11px] md:text-xs font-black text-cyan-400 block">SERVER #806 • [HFO]</span>
+              <span class="text-[10px] md:text-[11px] text-amber-300/90 font-bold">806 Abo S3D - HFo</span>
+            </div>
+          </div>
+
+          <div id="desert-map-viewport" class="map-touch-viewport">
+            <div class="export-hide absolute top-2.5 left-2.5 z-40 flex items-center gap-1 bg-slate-950/90 border border-slate-700 rounded-xl p-1 shadow-lg" dir="ltr">
+              <button type="button" onclick="zoomInteractiveMap('desert', 0.15)" class="w-8 h-8 rounded-lg bg-slate-800 text-amber-400 font-black text-sm flex items-center justify-center">+</button>
+              <button type="button" onclick="zoomInteractiveMap('desert', -0.15)" class="w-8 h-8 rounded-lg bg-slate-800 text-amber-400 font-black text-sm flex items-center justify-center">−</button>
+              <button type="button" onclick="fitInteractiveMap('desert')" class="px-2.5 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 font-bold text-[11px]">ملاءمة الشاشة</button>
+            </div>
+
+            <div id="desert-map-stage" class="map-touch-stage game-map-ltr desert-battlefield-canvas relative select-none">
+              <svg class="absolute inset-0 w-full h-full pointer-events-none opacity-40" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <line x1="12" y1="88" x2="32" y2="68" stroke="#f59e0b" stroke-width="0.7" stroke-dasharray="2,2" />
+                <line x1="32" y1="68" x2="50" y2="50" stroke="#f59e0b" stroke-width="0.9" />
+                <line x1="50" y1="50" x2="68" y2="32" stroke="#f59e0b" stroke-width="0.9" />
+                <line x1="68" y1="32" x2="88" y2="12" stroke="#ef4444" stroke-width="0.7" stroke-dasharray="2,2" />
+                <line x1="15" y1="50" x2="85" y2="50" stroke="#f59e0b" stroke-width="0.5" stroke-dasharray="1.5,1.5" />
+                <line x1="50" y1="14" x2="50" y2="86" stroke="#f59e0b" stroke-width="0.5" stroke-dasharray="1.5,1.5" />
+                <circle cx="50" cy="50" r="12" fill="none" stroke="#f59e0b" stroke-width="0.5" stroke-dasharray="2,2" />
+              </svg>
+
+              <div class="absolute left-[3%] bottom-[3%] bg-blue-950/95 border-2 border-blue-400 rounded-xl px-3 py-2 shadow-xl">
+                <div class="text-[11px] font-hud font-black text-blue-300">🟦 ALLY SPAWN [HFO]</div>
+                <div class="text-[9px] text-blue-200" dir="rtl">قاعدة الانطلاق</div>
+              </div>
+
+              <div class="absolute right-[3%] top-[3%] bg-red-950/95 border-2 border-red-400 rounded-xl px-3 py-2 shadow-xl">
+                <div class="text-[11px] font-hud font-black text-red-300">🟥 ENEMY SPAWN</div>
+                <div class="text-[9px] text-red-200" dir="rtl">قاعدة الخصم</div>
+              </div>
+
+              <div id="desert-official-nodes-layer" class="absolute inset-0"></div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between bg-[#131b2b] border border-slate-800 rounded-xl px-3.5 py-2 text-xs">
+            <span class="font-black text-amber-400">الاحتياط: <span id="ds-reserves-list" class="font-normal text-white"></span></span>
+            <span class="font-hud text-[11px] text-cyan-400 font-bold">806 Abo S3D - HFo</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- خطة عاصفة الوادي -->
+      <div id="ev-panel-canyon" class="ev-subpanel hidden space-y-3">
+        <div class="bg-cmd-card border border-cmd-border rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2.5">
+          <div class="flex items-center gap-2 flex-1">
+            <span class="text-xs font-bold text-slate-300 shrink-0">الموعد:</span>
+            <input type="text" id="cs-battle-time-input" value="الأحد 20:00 بتوقيت الرياض" oninput="renderCanyonStorm()" class="flex-1 bg-cmd-bg border border-cmd-border rounded-xl px-3 py-2 text-xs text-white font-bold" />
+          </div>
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <button onclick="clearCanyonStormAssignments()" class="role-protected-officer px-3 py-2.5 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs font-bold">تصفير</button>
+            <button onclick="exportOfficialBattlePNG('canyon-storm-official-poster', 'HFO-806-Canyon-Storm.png')" class="flex-1 sm:flex-initial justify-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg">
+              <i class="fa-solid fa-camera"></i> تصدير خطة عاصفة الوادي PNG
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-cmd-card border border-cmd-border rounded-2xl p-3 role-protected-officer">
+          <h4 class="text-xs font-black text-cyan-400 mb-2">تعيين عضو في خطة عاصفة الوادي:</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
+            <select id="cs-assign-player" class="bg-cmd-bg border border-cmd-border rounded-xl px-2.5 py-2 text-xs text-white font-bold"></select>
+            <select id="cs-assign-stage" class="bg-cmd-bg border border-cmd-border rounded-xl px-2.5 py-2 text-xs text-cyan-300 font-bold">
+              <option value="CITADEL_CORE">🏰 القلعة المركزية [Stage 3]</option>
+              <option value="VIRUS_LAB">🧬 مختبر الزعيم [Stage 2]</option>
+              <option value="CENTER_HUB">🌉 جسر البيانات [Stage 2]</option>
+              <option value="NORTH_TOWER">⚡ برج الطاقة الشمالي [Stage 2]</option>
+              <option value="SOUTH_TOWER">⚡ برج الطاقة الجنوبي [Stage 2]</option>
+              <option value="NORTH_OUTPOST">🛡️ الحصن الشمالي [Stage 1]</option>
+              <option value="SOUTH_OUTPOST">🛡️ الحصن الجنوبي [Stage 1]</option>
+            </select>
+            <select id="cs-assign-role" class="bg-cmd-bg border border-cmd-border rounded-xl px-2.5 py-2 text-xs text-white font-bold">
+              <option value="قائد حشد">🔥 قائد حشد (Rally)</option>
+              <option value="انضمام وتمركز">🛡️ تمركز (Garrison)</option>
+              <option value="نقل عينات">🧪 نقل عينات (Carrier)</option>
+            </select>
+            <button onclick="updateCanyonAssignment()" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs rounded-xl py-2.5 px-3">+ تثبيت</button>
+          </div>
+        </div>
+
+        <div id="canyon-storm-official-poster" class="bg-[#070d14] border-2 border-cyan-500/60 rounded-2xl p-3 md:p-4 shadow-2xl space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2 bg-gradient-to-r from-[#091926] via-[#0e293d] to-[#091926] border border-cyan-500/40 rounded-xl px-3.5 py-2.5">
+            <div class="flex items-center gap-2.5">
+              <img src="/icon-192.png" onerror="this.src='https://img.icons8.com/color/192/shield.png'" class="w-9 h-9 md:w-10 md:h-10 rounded-lg object-cover shadow" alt="HFO" />
+              <div>
+                <h3 class="font-hud font-black text-sm md:text-base text-cyan-400 tracking-wide">CANYON STORM BATTLEFIELD</h3>
+                <p class="text-[11px] md:text-xs text-slate-300 font-bold">خطة عاصفة الوادي • <span id="cs-poster-time">الأحد 20:00</span></p>
+              </div>
+            </div>
+            <div class="text-left font-hud">
+              <span class="text-[11px] md:text-xs font-black text-amber-400 block">SERVER #806 • [HFO]</span>
+              <span class="text-[10px] md:text-[11px] text-cyan-300 font-bold">806 Abo S3D - HFo</span>
+            </div>
+          </div>
+
+          <div id="canyon-map-viewport" class="map-touch-viewport">
+            <div class="export-hide absolute top-2.5 left-2.5 z-40 flex items-center gap-1 bg-slate-950/90 border border-slate-700 rounded-xl p-1 shadow-lg" dir="ltr">
+              <button type="button" onclick="zoomInteractiveMap('canyon', 0.15)" class="w-8 h-8 rounded-lg bg-slate-800 text-cyan-400 font-black text-sm flex items-center justify-center">+</button>
+              <button type="button" onclick="zoomInteractiveMap('canyon', -0.15)" class="w-8 h-8 rounded-lg bg-slate-800 text-cyan-400 font-black text-sm flex items-center justify-center">−</button>
+              <button type="button" onclick="fitInteractiveMap('canyon')" class="px-2.5 h-8 rounded-lg bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 font-bold text-[11px]">ملاءمة الشاشة</button>
+            </div>
+
+            <div id="canyon-map-stage" class="map-touch-stage game-map-ltr canyon-battlefield-canvas relative select-none">
+              <svg class="absolute inset-0 w-full h-full pointer-events-none opacity-45" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <path d="M 10 50 Q 25 18, 50 18 T 90 50" fill="none" stroke="#06b6d4" stroke-width="0.8" stroke-dasharray="2,1.5" />
+                <line x1="10" y1="50" x2="90" y2="50" stroke="#22d3ee" stroke-width="1.0" />
+                <path d="M 10 50 Q 25 82, 50 82 T 90 50" fill="none" stroke="#06b6d4" stroke-width="0.8" stroke-dasharray="2,1.5" />
+              </svg>
+              <div class="absolute left-[3%] top-[43%] bg-blue-950/95 border-2 border-blue-400 rounded-xl px-3 py-2">
+                <div class="text-[11px] font-hud font-black text-blue-300">🟦 HFO SPAWN</div>
+              </div>
+              <div class="absolute right-[3%] top-[43%] bg-red-950/95 border-2 border-red-400 rounded-xl px-3 py-2">
+                <div class="text-[11px] font-hud font-black text-red-300">🟥 ENEMY SPAWN</div>
+              </div>
+              <div id="canyon-official-nodes-layer" class="absolute inset-0"></div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between bg-[#0c1624] border border-slate-800 rounded-xl px-3.5 py-2 text-xs">
+            <span class="text-slate-300 font-bold">توزيع المسارات الثلاثة (الشمالي • الأوسط • الجنوبي)</span>
+            <span class="font-hud text-[11px] text-cyan-400 font-bold">806 Abo S3D - HFo</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upcoming Events -->
+      <div id="ev-panel-upcoming" class="ev-subpanel hidden space-y-4">
+        <div class="flex items-center justify-between">
+          <button onclick="toggleModal('create-event-modal')" class="role-protected-officer px-3.5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-black">+ فعالية جديدة</button>
+        </div>
+        <div id="events-timeline-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+      </div>
+
+      <!-- Polls -->
+      <div id="ev-panel-polls" class="ev-subpanel hidden space-y-4">
+        <div class="flex items-center justify-between">
+          <button onclick="toggleModal('create-poll-modal')" class="role-protected-officer px-3.5 py-2 rounded-xl bg-cyan-500 text-slate-950 font-black text-xs">تصويت جديد</button>
+        </div>
+        <div id="polls-container" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
+      </div>
+
+      <!-- Attendance -->
+      <div id="ev-panel-attendance" class="ev-subpanel hidden space-y-4">
+        <div class="bg-cmd-card border border-cmd-border rounded-2xl p-4">
+          <div class="overflow-x-auto">
+            <table class="w-full text-right text-xs md:text-sm">
+              <thead class="bg-cmd-panel text-slate-300 border-b border-cmd-border">
+                <tr>
+                  <th class="py-2.5 px-3">اللاعب</th>
+                  <th class="py-2.5 px-3">Desert</th>
+                  <th class="py-2.5 px-3">Canyon</th>
+                  <th class="py-2.5 px-3">القطار</th>
+                  <th class="py-2.5 px-3">التصويت</th>
+                  <th class="py-2.5 px-3">الالتزام</th>
+                </tr>
+              </thead>
+              <tbody id="attendance-table-body" class="divide-y divide-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. تبويب قطار التحالف (الأحد) -->
+    <section id="view-train" class="tab-view hidden space-y-4">
+      <div class="max-w-3xl mx-auto space-y-4">
+        <div class="bg-cmd-card border border-cmd-border rounded-2xl p-4 md:p-6 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+            <div>
+              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-400">جدول القطار الأسبوعي</span>
+              <h3 class="font-black text-lg text-white mt-1">قطار تحالف HFO الذهبي الأحد</h3>
+              <p class="text-xs text-slate-400">قائد القطار وراكب الـ VIP فقط</p>
+            </div>
+            <button onclick="generateTrainVipTable()" class="role-protected-officer px-4 py-2 rounded-xl bg-amber-500 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow">
+              <i class="fa-solid fa-rotate"></i> تعيين السائق والـ VIP عادلاً
+            </button>
+          </div>
+
+          <div id="train-export-card" class="bg-gradient-to-br from-[#111927] via-[#090d16] to-[#111927] border-2 border-amber-500/50 rounded-2xl p-5 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div class="flex items-center gap-3">
+                <img src="/icon-192.png" onerror="this.src='https://img.icons8.com/color/192/shield.png'" class="w-12 h-12 rounded-2xl object-cover shadow" alt="HFO" />
+                <div>
+                  <h3 class="font-black text-base md:text-lg text-white">قطار تحالف HFO الذهبي الأحد</h3>
+                  <p class="text-xs text-cyan-400 font-bold">Server #806 • Alliance Train VIP Schedule</p>
+                </div>
+              </div>
+              <div class="text-left font-hud">
+                <span class="text-xs font-black text-amber-400 block">SUNDAY VIP</span>
+                <span class="text-[11px] text-slate-400 font-bold">806 Abo S3D - HFo</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <div class="bg-cmd-bg border border-amber-500/40 rounded-xl p-4 space-y-1.5 shadow">
+                <span class="text-[11px] text-amber-400 font-bold block"><i class="fa-solid fa-train-subway ml-1"></i> قائد القطار (Conductor)</span>
+                <div class="flex items-center justify-between">
+                  <strong class="text-lg text-white font-black" id="train-conductor-name">Abo S3D</strong>
+                  <select id="train-conductor-select" onchange="manualChangeConductor(this.value)" class="export-hide role-protected-officer bg-cmd-card border border-amber-500/40 rounded px-2 py-1 text-xs text-amber-300 font-bold"></select>
+                </div>
+              </div>
+
+              <div class="bg-cmd-bg border border-cyan-500/40 rounded-xl p-4 space-y-1.5 shadow">
+                <span class="text-[11px] text-cyan-400 font-bold block"><i class="fa-solid fa-crown ml-1"></i> راكب الـ VIP (VIP Passenger)</span>
+                <div class="flex items-center justify-between">
+                  <strong class="text-lg text-white font-black" id="train-vip-name">— غير محدد —</strong>
+                  <select id="train-vip-select" onchange="manualChangeVip(this.value)" class="export-hide role-protected-officer bg-cmd-card border border-cyan-500/40 rounded px-2 py-1 text-xs text-cyan-300 font-bold"></select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-end pt-1">
+            <button onclick="exportOfficialBattlePNG('train-export-card', 'HFO-806-Train-Sunday.png')" class="px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg">
+              <i class="fa-solid fa-camera"></i> تصدير جدول القطار الأسبوعي PNG
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. تبويب الحاسبات -->
+    <section id="view-calculators" class="tab-view hidden space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- 1. حاسبة القوة -->
+        <div class="bg-cmd-card border border-cmd-border rounded-2xl p-4 space-y-3 text-xs">
+          <h3 class="font-black text-sm text-cyan-400"><i class="fa-solid fa-shield-halved ml-1"></i> 1. حاسبة قوة الفرق والمقارنة</h3>
+          <div class="grid grid-cols-3 gap-2">
+            <div><label class="text-[10px] text-slate-400 block">فريق 1 (M)</label><input type="number" id="calc-sq1" value="0" step="0.1" oninput="runCalculators()" class="w-full bg-cmd-bg border rounded p-2 text-white" /></div>
+            <div><label class="text-[10px] text-slate-400 block">فريق 2 (M)</label><input type="number" id="calc-sq2" value="0" step="0.1" oninput="runCalculators()" class="w-full bg-cmd-bg border rounded p-2 text-white" /></div>
+            <div><label class="text-[10px] text-slate-400 block">فريق 3 (M)</label><input type="number" id="calc-sq3" value="0" step="0.1" oninput="runCalculators()" class="w-full bg-cmd-bg border rounded p-2 text-white" /></div>
+          </div>
+          <div><label class="text-[10px] text-slate-400 block">قوة الخصم (M)</label><input type="number" id="calc-enemy-power" value="0" step="0.5" oninput="runCalculators()" class="w-full bg-cmd-bg border rounded p-2 text-white" /></div>
+          <div class="bg-cmd-bg p-3 rounded-xl space-y-1.5 border border-slate-800">
+            <div class="flex justify-between"><span>إجمالي الفرق:</span><strong id="res-sq-total" class="text-white">0 M</strong></div>
+            <div class="flex justify-between"><span>المتوسط:</span><strong id="res-sq-avg" class="text-cyan-400">0 M</strong></div>
+            <div class="flex justify-between"><span>أقوى فريق:</span><strong id="res-sq-max" class="text-emerald-400">0 M</strong></div>
+            <div class="flex justify-between"><span>الفارق مع الخصم:</span><strong id="res-sq-diff" class="text-slate-300">0 M</strong></div>
+          </div>
+        </div>
+
+        <!-- 2. حاسبة التقدم -->
+        <div class="bg-cmd-card border border-cmd-border rounded-2xl p-4 space-y-3 text-xs">
+          <h3 class="font-black text-sm text-emerald-400"><i class="fa-solid fa-bars-progress ml-1"></i> 2. حاسبة التقدم (Progress)</h3>
+          <div class="grid grid-cols-2 gap-2">
+            <div><label class="text-[10px] text-slate-400 block">الحالي</label><input type="number" id="calc-prog-curr" value="0" oninput="runCalculators()" class="w-full bg-cmd-bg border rounded p-2 text-white" /></div>
+            <div><label class="text-[10px] text-slate-400 block">الهدف</label><input type="number" id="calc-prog-targ" value="100" oninput="runCalculators()" class="w-full bg-cmd-bg border rounded p-2 text-white" /></div>
+          </div>
+          <div class="bg-cmd-bg p-3 rounded-xl space-y-2 border border-slate-800">
+            <div class="flex justify-between"><span>المتبقي:</span><strong id="res-prog-rem" class="text-amber-400">100</strong></div>
+            <div class="flex justify-between"><span>النسبة:</span><strong id="res-prog-pct" class="text-emerald-400">0%</strong></div>
+            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden"><div id="res-prog-bar" class="h-full bg-emerald-400" style="width: 0%"></div></div>
+          </div>
+        </div>
+
+        <!-- 3. حاسبة النسب والتوزيع -->
+        <div class="bg-cmd-card border border-cmd-border rounded-2xl p-4 space-y-3 text-xs">
+          <h3 class="font-black text-sm text-amber-400"><i class="fa-solid fa-chart-pie ml-1"></i> 3. حاسبة النسب والتوزيع</h3>
+          <div class="grid grid-cols-2 gap-2">
+            <div><label class="text-[10px] text-slate-400 block">الجزء</label><input type="number" id="calc-rat-part" value="0" oninput="runCalculators()" class="w-full bg-cmd-bg border rounded p-2 text-white" /></div>
+            <div><label class="text-[10px] text-slate-400 block">الكل</label><input type="number" id="calc-rat-whole" value="100" oninput="runCalculators()" class="w-full bg-cmd-bg border rounded p-2 text-white" /></div>
+          </div>
+          <div><label class="text-[10px] text-slate-400 block">وعاء الجوائز</label><input type="number" id="calc-rat-pool" value="1000" oninput="runCalculators()" class="w-full bg-cmd-bg border rounded p-2 text-white" /></div>
+          <div class="bg-cmd-bg p-3 rounded-xl space-y-1.5 border border-slate-800">
+            <div class="flex justify-between"><span>النسبة:</span><strong id="res-rat-pct" class="text-cyan-400">0.00%</strong></div>
+            <div class="flex justify-between"><span>الحصة المستحقة:</span><strong id="res-rat-share" class="text-amber-400">0</strong></div>
+          </div>
+        </div>
+
+        <!-- 4. حاسبة النشاط -->
+        <div class="bg-cmd-card border border-cmd-border rounded-2xl p-4 space-y-3 text-xs">
+          <h3 class="font-black text-sm text-cyan-400"><i class="fa-solid fa-fire-flame-curved ml-1"></i> 4. حاسبة النشاط (VS)</h3>
+          <div class="grid grid-cols-2 gap-2">
+            <div><label class="text-[10px] text-slate-400 block">نقاط VS يومية (M)</label><input type="number" id="calc-act-vs" value="7.2" step="0.5" oninput="runCalculators()" class="w-full bg-cmd-bg border rounded p-2 text-white" /></div>
+            <div><label class="text-[10px] text-slate-400 block">تبرعات تقنية</label><input type="number" id="calc-act-tech" value="10000" step="1000" oninput="runCalculators()" class="w-full bg-cmd-bg border rounded p-2 text-white" /></div>
+          </div>
+          <div class="bg-cmd-bg p-3 rounded-xl space-y-1.5 border border-slate-800">
+            <div class="flex justify-between"><span>تقييم اليوم:</span><strong id="res-act-day" class="text-white">-</strong></div>
+            <div class="flex justify-between"><span>حصيلة الأسبوع:</span><strong id="res-act-week" class="text-cyan-400">-</strong></div>
+          </div>
+        </div>
+
+        <!-- 5. حاسبة المشاركة -->
+        <div class="bg-cmd-card border border-cmd-border rounded-2xl p-4 space-y-3 text-xs">
+          <h3 class="font-black text-sm text-emerald-400"><i class="fa-solid fa-user-check ml-1"></i> 5. حاسبة المشاركة</h3>
+          <div class="grid grid-cols-4 gap-1">
+            <div><label class="text-[9px] text-slate-400 block">Desert (4)</label><input type="number" id="calc-part-ds" value="0" min="0" max="4" oninput="runCalculators()" class="w-full bg-cmd-bg border rounded p-1 text-center text-white" /></div>
+            <div><label class="text-[9px] text-slate-400 block">Canyon (4)</label><input type="number" id="calc-part-cs" value="0" min="0" max="4" oninput="runCalculators()" class="w-full bg-cmd-bg border rounded p-1 text-center text-white" /></div>
+            <div><label class="text-[9px] text-slate-400 block">قطار (7)</label><input type="number" id="calc-part-tr" value="0" min="0" max="7" oninput="runCalculators()" class="w-full bg-cmd-bg border rounded p-1 text-center text-white" /></div>
+            <div><label class="text-[9px] text-slate-400 block">تصويت (5)</label><input type="number" id="calc-part-pl" value="0" min="0" max="5" oninput="runCalculators()" class="w-full bg-cmd-bg border rounded p-1 text-center text-white" /></div>
+          </div>
+          <div class="bg-cmd-bg p-3 rounded-xl space-y-1.5 border border-slate-800">
+            <div class="flex justify-between"><span>مجموع الحضور:</span><strong id="res-part-count" class="text-white">0 / 20</strong></div>
+            <div class="flex justify-between"><span>نسبة الالتزام:</span><strong id="res-part-pct" class="text-emerald-400">0.0%</strong></div>
+          </div>
+        </div>
+
+        <!-- 6. ملخص تحالف HFO -->
+        <div class="bg-cmd-card border border-cmd-border rounded-2xl p-4 space-y-3 text-xs">
+          <h3 class="font-black text-sm text-amber-400"><i class="fa-solid fa-chart-column ml-1"></i> 6. ملخص قوة تحالف HFO</h3>
+          <div id="alliance-calc-box" class="bg-cmd-bg p-3 rounded-xl space-y-1.5 border border-slate-800"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. تبويب التحالف والصلاحيات -->
+    <section id="view-alliance" class="tab-view hidden space-y-4">
+      <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar bg-cmd-card p-1.5 rounded-2xl border border-cmd-border">
+        <button onclick="switchAllianceSubTab('permissions')" id="al-sub-permissions" class="al-subtab-btn subtab-active px-3.5 py-2 rounded-xl text-xs font-bold shrink-0">🔑 الصلاحيات والرتب والإشعارات</button>
+        <button onclick="switchAllianceSubTab('announcements')" id="al-sub-announcements" class="al-subtab-btn px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 shrink-0">📢 الإعلانات</button>
+        <button onclick="switchAllianceSubTab('recruitment')" id="al-sub-recruitment" class="al-subtab-btn px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 shrink-0">🪪 بطاقة التجنيد</button>
+        <button onclick="switchAllianceSubTab('stats')" id="al-sub-stats" class="al-subtab-btn px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 shrink-0">📈 سجل التدقيق والنشاط</button>
+      </div>
+
+      <div id="al-panel-permissions" class="al-subpanel bg-cmd-card border border-cmd-border rounded-2xl p-4 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+          <div>
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-400">لوحة المالك (Abo S3D - Owner R4)</span>
+            <h3 class="font-black text-base text-white mt-1">تحرير رتب الأعضاء (R1 إلى R5) وصلاحية إرسال التنبيهات</h3>
+            <p class="text-xs text-slate-400">يمكنك هنا تغيير رتبة أي عضو بدقة وتفعيل أو تعطيل حقه في إرسال تنبيهات ديسكورد وتيليجرام</p>
+          </div>
+        </div>
+        <div id="permissions-management-list" class="space-y-2"></div>
+      </div>
+
+      <div id="al-panel-announcements" class="al-subpanel hidden space-y-4">
+        <div class="bg-cmd-card border border-cmd-border rounded-2xl p-4 space-y-3 role-protected-leader">
+          <input type="text" id="ann-title" placeholder="عنوان الإعلان..." class="w-full bg-cmd-bg border rounded-xl p-2.5 text-xs text-white font-bold" />
+          <textarea id="ann-body" placeholder="نص الإعلان أو التعليمات..." class="w-full bg-cmd-bg border rounded-xl p-2.5 text-xs text-white" rows="2"></textarea>
+          <button onclick="publishAnnouncement()" class="px-4 py-2 rounded-xl bg-cyan-500 text-slate-950 font-black text-xs">نشر الإعلان لجميع القنوات (ديسكورد + تيليجرام)</button>
+        </div>
+        <div class="space-y-2.5" id="announcements-list"></div>
+      </div>
+
+      <div id="al-panel-recruitment" class="al-subpanel hidden grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="bg-cmd-card border border-cmd-border rounded-2xl p-4 space-y-3 text-xs">
+          <input type="text" id="rec-name" value="تحالف HFO" oninput="updateRecruitmentPreview()" class="w-full bg-cmd-bg border rounded p-2 text-white" />
+          <input type="text" id="rec-power" value="حسب تقييم القيادة" oninput="updateRecruitmentPreview()" class="w-full bg-cmd-bg border rounded p-2 text-white" />
+          <button onclick="exportOfficialBattlePNG('recruitment-card-preview', 'HFO-Recruit.png')" class="w-full py-2.5 bg-amber-500 text-slate-950 font-black rounded-xl">تصدير بطاقة التجنيد PNG</button>
+        </div>
+        <div id="recruitment-card-preview" class="bg-[#0c1322] border-2 border-amber-500/50 rounded-2xl p-6 flex flex-col justify-between shadow-2xl">
+          <h2 class="text-2xl font-black text-white" id="prev-rec-name">تحالف HFO</h2>
+          <p class="text-xs text-slate-300" id="prev-rec-desc">تحالف HFO الرسمي في سيرفر 806</p>
+          <span class="text-cyan-400 font-hud text-xs font-bold">806 Abo S3D - HFo</span>
+        </div>
+      </div>
+
+      <div id="al-panel-stats" class="al-subpanel hidden space-y-3">
+        <div id="audit-log-container" class="space-y-2 max-h-80 overflow-y-auto text-xs"></div>
+      </div>
+    </section>
+
+    <!-- 6. تبويب ملفي الشخصي -->
+    <section id="view-profile" class="tab-view hidden space-y-4">
+      <div class="bg-cmd-card border border-cmd-border rounded-2xl p-4 md:p-6 space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center text-2xl font-black text-slate-950 shadow-lg" id="prof-avatar">A</div>
+            <div>
+              <h2 class="text-xl font-black text-white" id="prof-header-name">Abo S3D</h2>
+              <p class="text-xs text-slate-400" id="prof-header-meta">Server #806 • تحالف HFO • المالك R4</p>
+            </div>
+          </div>
+          <button onclick="saveActiveProfile()" class="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-lg">
+            <i class="fa-solid fa-cloud-arrow-up ml-1"></i> حفظ بياناتي ومزامنتها في جدول القوة
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+          <div><label class="text-slate-400 block mb-1">الاسم</label><input type="text" id="prof-name" readonly class="w-full bg-cmd-bg/60 border rounded-xl p-2.5 text-slate-300 font-bold cursor-not-allowed" /></div>
+          <div><label class="text-slate-400 block mb-1">الرمز السري (PIN)</label><input type="password" id="prof-pin" class="w-full bg-cmd-bg border rounded-xl p-2.5 text-amber-300 font-bold" /></div>
+          <div><label class="text-slate-400 block mb-1">مستوى HQ</label><input type="number" id="prof-hq" class="w-full bg-cmd-bg border rounded-xl p-2.5 text-cyan-400 font-black" /></div>
+          <div><label class="text-slate-400 block mb-1">إجمالي القوة (M)</label><input type="number" id="prof-power" step="0.1" class="w-full bg-cmd-bg border rounded-xl p-2.5 text-emerald-400 font-black" /></div>
+          <div><label class="text-slate-400 block mb-1">فريق 1 (M)</label><input type="number" id="prof-sq1" step="0.1" class="w-full bg-cmd-bg border rounded-xl p-2.5 text-white" /></div>
+          <div><label class="text-slate-400 block mb-1">فريق 2 (M)</label><input type="number" id="prof-sq2" step="0.1" class="w-full bg-cmd-bg border rounded-xl p-2.5 text-white" /></div>
+          <div><label class="text-slate-400 block mb-1">فريق 3 (M)</label><input type="number" id="prof-sq3" step="0.1" class="w-full bg-cmd-bg border rounded-xl p-2.5 text-white" /></div>
+          <div>
+            <label class="text-slate-400 block mb-1">التشكيلة</label>
+            <select id="prof-formation" class="w-full bg-cmd-bg border rounded-xl p-2.5 text-amber-400 font-bold">
+              <option value="Tank">🛡️ Tank</option><option value="Aircraft">✈️ Aircraft</option><option value="Missile">🚀 Missile</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- شريط الجوال السفلي -->
+  <nav class="md:hidden fixed bottom-0 inset-x-0 z-40 glass-panel border-t border-cmd-border px-2 pt-1.5 mobile-bottom-nav grid grid-cols-6 gap-1">
+    <button onclick="switchMainTab('power')" id="mob-tab-power" class="mob-tab-btn tab-active flex flex-col items-center justify-center py-1.5 rounded-xl text-[11px] font-bold"><i class="fa-solid fa-shield-halved text-sm"></i><span>القوة</span></button>
+    <button onclick="switchMainTab('events')" id="mob-tab-events" class="mob-tab-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-[11px] font-bold text-slate-400"><i class="fa-solid fa-calendar-check text-sm"></i><span>الفعاليات</span></button>
+    <button onclick="switchMainTab('train')" id="mob-tab-train" class="mob-tab-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-[11px] font-bold text-slate-400"><i class="fa-solid fa-train text-sm"></i><span>القطار</span></button>
+    <button onclick="switchMainTab('calculators')" id="mob-tab-calculators" class="mob-tab-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-[11px] font-bold text-slate-400"><i class="fa-solid fa-calculator text-sm"></i><span>الحاسبات</span></button>
+    <button onclick="switchMainTab('alliance')" id="mob-tab-alliance" class="mob-tab-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-[11px] font-bold text-slate-400"><i class="fa-solid fa-users-gear text-sm"></i><span>التحالف</span></button>
+    <button onclick="switchMainTab('profile')" id="mob-tab-profile" class="mob-tab-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-[11px] font-bold text-slate-400"><i class="fa-solid fa-user-astronaut text-sm"></i><span>ملفي</span></button>
+  </nav>
+
+  <!-- Modals -->
+  <div id="notifications-modal" class="fixed inset-0 z-50 hidden bg-black/75 flex items-center justify-center p-4">
+    <div class="bg-cmd-card border border-cmd-border rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <h3 class="font-black text-base text-white"><i class="fa-solid fa-bell text-cyan-400 ml-1"></i> الإشعارات</h3>
+        <button onclick="markAllNotificationsRead()" class="text-xs text-cyan-400 font-bold">تحديد كمقروء</button>
+      </div>
+      <div id="notifications-list" class="space-y-2 max-h-80 overflow-y-auto"></div>
+      <button onclick="toggleModal('notifications-modal')" class="w-full py-2.5 rounded-xl bg-cmd-panel text-slate-200 text-xs font-bold">إغلاق</button>
+    </div>
+  </div>
+
+  <div id="add-account-modal" class="fixed inset-0 z-50 hidden bg-black/75 flex items-center justify-center p-4">
+    <div class="bg-cmd-card border border-cmd-border rounded-2xl max-w-md w-full p-4 space-y-3 text-xs">
+      <h3 class="font-black text-base text-white">إضافة حساب فرعي (Alt / Farm)</h3>
+      <input type="text" id="new-acc-name" placeholder="اسم الحساب الفرعي" class="w-full bg-cmd-bg border rounded-xl p-2.5 text-white font-bold" />
+      <select id="new-acc-tag" class="w-full bg-cmd-bg border rounded-xl p-2.5 text-white font-bold">
+        <option value="Alt">حساب فرعي (Alt)</option><option value="Farm">حساب مزرعة (Farm)</option>
+      </select>
+      <div class="grid grid-cols-2 gap-2">
+        <input type="number" id="new-acc-hq" placeholder="HQ" value="27" class="bg-cmd-bg border rounded-xl p-2.5 text-white font-bold" />
+        <input type="number" id="new-acc-power" placeholder="القوة (M)" value="0" step="0.1" class="bg-cmd-bg border rounded-xl p-2.5 text-white font-bold" />
+      </div>
+      <div class="flex gap-2">
+        <button onclick="addNewSubAccount()" class="flex-1 py-2 rounded-xl bg-cyan-500 text-slate-950 font-black">إضافة</button>
+        <button onclick="toggleModal('add-account-modal')" class="flex-1 py-2 rounded-xl bg-cmd-panel text-slate-300 font-bold">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- نافذة إضافة / تعديل عضو -->
+  <div id="member-modal" class="fixed inset-0 z-50 hidden bg-black/75 flex items-center justify-center p-4">
+    <div class="bg-cmd-card border border-cmd-border rounded-2xl max-w-lg w-full p-4 space-y-3 text-xs">
+      <h3 class="font-black text-base text-white" id="member-modal-title">بيانات العضو</h3>
+      <input type="hidden" id="edit-member-id" />
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+        <div class="col-span-2 sm:col-span-1">
+          <label class="text-slate-400 block mb-1">اسم اللاعب</label>
+          <input type="text" id="mem-name" placeholder="الاسم في اللعبة" class="w-full bg-cmd-bg border rounded p-2 text-white font-bold" />
+        </div>
+        <div>
+          <label class="text-slate-400 block mb-1">الرمز السري (PIN)</label>
+          <input type="password" id="mem-pin" value="1234" class="w-full bg-cmd-bg border rounded p-2 text-amber-300 font-bold" />
+        </div>
+        <div>
+          <label class="text-slate-400 block mb-1">HQ</label>
+          <input type="number" id="mem-hq" value="30" class="w-full bg-cmd-bg border rounded p-2 text-white font-bold" />
+        </div>
+        <div>
+          <label class="text-slate-400 block mb-1">إجمالي القوة (M)</label>
+          <input type="number" id="mem-power" step="0.1" value="0" class="w-full bg-cmd-bg border rounded p-2 text-emerald-400 font-bold" />
+        </div>
+        <div>
+          <label class="text-slate-400 block mb-1">الفريق 1 (M)</label>
+          <input type="number" id="mem-sq1" step="0.1" value="0" class="w-full bg-cmd-bg border rounded p-2 text-white" />
+        </div>
+        <div>
+          <label class="text-slate-400 block mb-1">الفريق 2 (M)</label>
+          <input type="number" id="mem-sq2" step="0.1" value="0" class="w-full bg-cmd-bg border rounded p-2 text-white" />
+        </div>
+        <div>
+          <label class="text-slate-400 block mb-1">الفريق 3 (M)</label>
+          <input type="number" id="mem-sq3" step="0.1" value="0" class="w-full bg-cmd-bg border rounded p-2 text-white" />
+        </div>
+        <div>
+          <label class="text-slate-400 block mb-1">التشكيلة</label>
+          <select id="mem-formation" class="w-full bg-cmd-bg border rounded p-2 text-amber-400 font-bold">
+            <option value="Tank">Tank (دبابات)</option>
+            <option value="Aircraft">Aircraft (طائرات)</option>
+            <option value="Missile">Missile (صواريخ)</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-slate-400 block mb-1">الرتبة</label>
+          <select id="mem-role" class="w-full bg-cmd-bg border rounded p-2 text-amber-400 font-bold">
+            <option value="R5">R5</option>
+            <option value="R4">R4</option>
+            <option value="R3" selected>R3</option>
+            <option value="R2">R2</option>
+            <option value="R1">R1</option>
+          </select>
+        </div>
+        <div class="col-span-2 sm:col-span-3">
+          <label class="text-slate-400 block mb-1">النشاط</label>
+          <select id="mem-activity" class="w-full bg-cmd-bg border rounded p-2 text-white font-bold">
+            <option value="نشط جدًا">نشط جدًا</option>
+            <option value="نشط">نشط</option>
+            <option value="متوسط">متوسط</option>
+            <option value="ضعيف">ضعيف</option>
+            <option value="غير نشط">غير نشط</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex gap-2 pt-2">
+        <button onclick="saveMemberFromModal()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs">حفظ ومزامنة فورية</button>
+        <button onclick="toggleModal('member-modal')" class="flex-1 py-2.5 bg-cmd-panel text-slate-300 font-bold rounded-xl text-xs">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="create-event-modal" class="fixed inset-0 z-50 hidden bg-black/75 flex items-center justify-center p-4">
+    <div class="bg-cmd-card border rounded-2xl max-w-md w-full p-4 space-y-3 text-xs">
+      <input type="text" id="ev-new-title" placeholder="اسم الفعالية" class="w-full bg-cmd-bg border rounded p-2 text-white" />
+      <button onclick="createNewEvent()" class="w-full py-2 bg-emerald-600 text-white font-black rounded">إنشاء</button>
+    </div>
+  </div>
+
+  <div id="create-poll-modal" class="fixed inset-0 z-50 hidden bg-black/75 flex items-center justify-center p-4">
+    <div class="bg-cmd-card border rounded-2xl max-w-md w-full p-4 space-y-3 text-xs">
+      <input type="text" id="poll-new-q" placeholder="سؤال التصويت" class="w-full bg-cmd-bg border rounded p-2 text-white" />
+      <button onclick="createNewPoll()" class="w-full py-2 bg-cyan-500 text-slate-950 font-black rounded">نشر</button>
+    </div>
+  </div>
+
+  <div id="toast-box" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 hidden px-4 py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs shadow-2xl flex items-center gap-2 whitespace-nowrap">
+    <i class="fa-solid fa-circle-check"></i> <span id="toast-msg">تم</span>
+  </div>
+
+  <!-- ==================== المحرك البرمجي المدمج ==================== -->
+  <script>
+    const DEFAULT_SUPABASE_URL = 'https://bwwbbbcfxhyiqeqrlfje.supabase.co';
+    const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3d2JiYmNmeGh5aXFlcXJsZmplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3MDgwMzcsImV4cCI6MjEwODI4NDAzN30.tnaZHaYkVI6KYBxmu6z0EwRu1HOkbWj-6HcqTlDbZ1g';
+    const OWNER_RESERVED_NAME = 'Abo S3D';
+
+    const STORAGE_KEY = 'LEGIONMATE_HFO_806_VERCEL_V1';
+    const SESSION_USER_KEY = 'HFO_806_LOGGED_USER';
+    let sbClient = null;
+
+    async function hashPin(pinString) {
+      if (!pinString) return '';
+      const clean = String(pinString).trim();
+      const msgBuffer = new TextEncoder().encode(clean);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    const OFFICIAL_DESERT_BUILDINGS = [
+      { code: 'OIL_1', nameAr: 'مصفاة النفط الشمالية', nameEn: 'North Oil Refinery', stage: 'Stage 1 (00:00)', x: 50, y: 12, icon: 'fa-oil-well', color: 'border-yellow-500/80 bg-stone-900/95' },
+      { code: 'HOSPITAL_1', nameAr: 'المستشفى 1 (NW)', nameEn: 'Hospital I', stage: 'Stage 1 (00:00)', x: 18, y: 16, icon: 'fa-kit-medical', color: 'border-emerald-400/80 bg-stone-900/95' },
+      { code: 'HOSPITAL_2', nameAr: 'المستشفى 2 (NE)', nameEn: 'Hospital II', stage: 'Stage 1 (00:00)', x: 82, y: 16, icon: 'fa-kit-medical', color: 'border-emerald-400/80 bg-stone-900/95' },
+      { code: 'MERC_1', nameAr: 'مصنع المرتزقة 1', nameEn: 'Mercenary Factory I', stage: 'Stage 2 (10:00)', x: 32, y: 32, icon: 'fa-skull-crossbones', color: 'border-orange-400 bg-stone-900/95' },
+      { code: 'MERC_2', nameAr: 'مصنع المرتزقة 2', nameEn: 'Mercenary Factory II', stage: 'Stage 2 (10:00)', x: 68, y: 32, icon: 'fa-skull-crossbones', color: 'border-orange-400 bg-stone-900/95' },
+      { code: 'INFO_CENTER', nameAr: 'مركز المعلومات', nameEn: 'Info Center', stage: 'Stage 1 (00:00)', x: 14, y: 50, icon: 'fa-satellite-dish', color: 'border-cyan-400/80 bg-stone-900/95' },
+      { code: 'NUCLEAR_SILO', nameAr: 'الصومعة النووية المركزية', nameEn: 'Nuclear Silo (Core)', stage: 'Stage 2 (10:00)', x: 50, y: 50, icon: 'fa-radiation', color: 'border-amber-400 bg-amber-950/95' },
+      { code: 'WEAPONS_ARSENAL', nameAr: 'ترسانة الأسلحة', nameEn: 'Weapons Arsenal', stage: 'Stage 1 (00:00)', x: 86, y: 50, icon: 'fa-person-rifle', color: 'border-rose-400/80 bg-stone-900/95' },
+      { code: 'HOSPITAL_3', nameAr: 'المستشفى 3 (SW)', nameEn: 'Hospital III', stage: 'Stage 1 (00:00)', x: 30, y: 78, icon: 'fa-kit-medical', color: 'border-emerald-400/80 bg-stone-900/95' },
+      { code: 'HOSPITAL_4', nameAr: 'المستشفى 4 (SE)', nameEn: 'Hospital IV', stage: 'Stage 1 (00:00)', x: 70, y: 78, icon: 'fa-kit-medical', color: 'border-emerald-400/80 bg-stone-900/95' },
+      { code: 'OIL_2', nameAr: 'مصفاة النفط الجنوبية', nameEn: 'South Oil Refinery', stage: 'Stage 1 (00:00)', x: 50, y: 86, icon: 'fa-oil-well', color: 'border-yellow-500/80 bg-stone-900/95' }
+    ];
+
+    const OFFICIAL_CANYON_BUILDINGS = [
+      { code: 'NORTH_OUTPOST', nameAr: 'الحصن الشمالي', nameEn: 'North Outpost', stage: 'Stage 1', x: 22, y: 18, color: 'border-emerald-400 bg-slate-900/95' },
+      { code: 'NORTH_TOWER', nameAr: 'برج الطاقة الشمالي', nameEn: 'North Power Tower', stage: 'Stage 2', x: 50, y: 18, color: 'border-sky-400 bg-slate-900/95' },
+      { code: 'VIRUS_LAB', nameAr: 'مختبر الزعيم والعينات', nameEn: 'Virus Boss Lab', stage: 'Stage 2', x: 78, y: 18, color: 'border-purple-400 bg-slate-900/95' },
+      { code: 'CITADEL_CORE', nameAr: 'القلعة المركزية للوادي', nameEn: 'Canyon Citadel', stage: 'Stage 3', x: 50, y: 50, color: 'border-amber-400 bg-slate-950/95' },
+      { code: 'CENTER_HUB', nameAr: 'جسر البيانات الأوسط', nameEn: 'Central Data Bridge', stage: 'Stage 2', x: 78, y: 50, color: 'border-cyan-400 bg-slate-900/95' },
+      { code: 'SOUTH_OUTPOST', nameAr: 'الحصن الجنوبي', nameEn: 'South Outpost', stage: 'Stage 1', x: 22, y: 82, color: 'border-emerald-400 bg-slate-900/95' },
+      { code: 'SOUTH_TOWER', nameAr: 'برج الطاقة الجنوبي', nameEn: 'South Power Tower', stage: 'Stage 2', x: 50, y: 82, color: 'border-sky-400 bg-slate-900/95' }
+    ];
+
+    const defaultState = {
+      currentRole: 'Owner',
+      loggedInUserName: 'Abo S3D',
+      activeAccountName: 'Abo S3D',
+      timezone: 'Asia/Riyadh',
+      formationFilter: 'ALL',
+      timelineFilter: 'ALL',
+      trainConductor: 'Abo S3D',
+      trainVip: '',
+      members: [],
+      events: [],
+      polls: [],
+      desertStorm: { assignments: [] },
+      canyonStorm: { assignments: [] },
+      announcements: [],
+      notifications: [],
+      auditLog: []
+    };
+
+    let state = loadState();
+
+    function ensureOwnerExists() {
+      if (!Array.isArray(state.members)) state.members = [];
+      let owner = state.members.find(m => m.name.toLowerCase() === OWNER_RESERVED_NAME.toLowerCase());
+      if (!owner) {
+        owner = {
+          id: 'm_owner_806',
+          name: OWNER_RESERVED_NAME,
+          pin: '806',
+          sysRole: 'Owner',
+          role: 'R4',
+          canNotify: true,
+          accountTag: 'Main',
+          hq: 30,
+          vip: 15,
+          power: 0,
+          sq1: 0,
+          sq2: 0,
+          sq3: 0,
+          formation: 'Tank',
+          drone: 1,
+          heroes: 'Kimberly, Stetmann, Murphy',
+          gear: 'Pure Tank',
+          activity: 'نشط جدًا',
+          updated: 'الآن'
+        };
+        state.members.unshift(owner);
+      } else {
+        owner.sysRole = 'Owner';
+        owner.role = 'R4';
+        owner.canNotify = true;
+      }
+    }
+
+    async function sendAllianceExternalAlert(title, detailsText, colorHex = 0xf59e0b) {
+      try {
+        const response = await fetch('/api/alert', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: title,
+            details: detailsText,
+            color: colorHex
+          })
+        });
+        const result = await response.json();
+        return result;
+      } catch (err) {
+        console.error('Secure dispatch failed:', err);
+      }
+    }
+
+    async function testSendAlertNow() {
+      showToast('جاري إرسال فحص التنبيهات عبر خادم Vercel...');
+      await sendAllianceExternalAlert(
+        'اختبار ربط التنبيهات المباشرة الآمن ✅',
+        'تم إرسال هذا التنبيه من خادم Vercel الخلفي المشفر بنجاح إلى ديسكورد وتيليجرام.',
+        0x10b981
+      );
+      setTimeout(() => showToast('تم إرسال أمر الفحص! تفقد القروب والروم الآن'), 1200);
+    }
+
+    function initSupabaseConnection() {
+      let attempts = 0;
+      const checkSdkInterval = setInterval(() => {
+        attempts++;
+        if (window.supabase) {
+          clearInterval(checkSdkInterval);
+          try {
+            sbClient = window.supabase.createClient(DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_ANON_KEY);
+            const pill = document.getElementById('cloud-sync-pill');
+            if (pill) pill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> متصل`;
+            syncFromCloud(false);
+            setInterval(() => syncFromCloud(false), 10000);
+
+            sbClient.channel('hfo-live-channel')
+              .on('postgres_changes', { event: '*', schema: 'public', table: 'hfo_members' }, () => syncFromCloud(false))
+              .on('postgres_changes', { event: '*', schema: 'public', table: 'hfo_alliance_state' }, () => syncFromCloud(false))
+              .subscribe();
+          } catch (err) {
+            console.error('Supabase Init Error:', err);
+          }
+        } else if (attempts > 30) {
+          clearInterval(checkSdkInterval);
+        }
+      }, 200);
+    }
+
+    async function syncFromCloud(showNotification = false) {
+      if (!sbClient) return;
+      try {
+        const { data: memRows, error: memErr } = await sbClient.from('hfo_members').select('*');
+        if (!memErr && Array.isArray(memRows) && memRows.length > 0) {
+          state.members = memRows.map(r => ({
+            id: r.id, name: r.name, pin: r.pin || '1234', sysRole: isOwnerName(r.name) ? 'Owner' : (r.sys_role || 'Member'), role: isOwnerName(r.name) ? 'R4' : (r.role || 'R3'),
+            parentOwner: r.parent_owner || null, accountTag: r.account_tag || 'Main',
+            hq: Number(r.hq || 30), vip: Number(r.vip || 12), power: Number(r.power || 0),
+            sq1: Number(r.sq1 || 0), sq2: Number(r.sq2 || 0), sq3: Number(r.sq3 || 0),
+            formation: r.formation || 'Tank', drone: Number(r.drone || 1), canNotify: r.can_notify ?? isOwnerName(r.name),
+            activity: r.activity || 'نشط جدًا', updated: r.updated || 'الآن'
+          }));
+        }
+        ensureOwnerExists();
+
+        const { data: stRow } = await sbClient.from('hfo_alliance_state').select('*').eq('id', 'HFO_806').maybeSingle();
+        if (stRow && stRow.payload) {
+          const p = stRow.payload;
+          state.events = p.events || [];
+          state.polls = p.polls || [];
+          state.desertStorm = p.desertStorm || { assignments: [] };
+          state.canyonStorm = p.canyonStorm || { assignments: [] };
+          state.trainConductor = p.trainConductor || 'Abo S3D';
+          state.trainVip = p.trainVip || '';
+          state.announcements = p.announcements || [];
+          state.notifications = p.notifications || [];
+          state.auditLog = p.auditLog || [];
+        }
+        refreshLoggedUserRole();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        renderAll();
+        if (showNotification) showToast('تمت مزامنة البيانات السحابية');
+      } catch (e) { console.error(e); }
+    }
+
+    async function pushMemberToCloud(memberObj) {
+      if (!sbClient) return;
+      try {
+        const payload = {
+          id: memberObj.id, name: memberObj.name, pin: memberObj.pin || '1234',
+          sys_role: memberObj.sysRole || 'Member', role: memberObj.role || 'R3',
+          parent_owner: memberObj.parentOwner || null, account_tag: memberObj.accountTag || 'Main',
+          hq: memberObj.hq, vip: memberObj.vip || 12, power: memberObj.power,
+          sq1: memberObj.sq1, sq2: memberObj.sq2, sq3: memberObj.sq3,
+          formation: memberObj.formation, drone: memberObj.drone || 1,
+          activity: memberObj.activity || 'نشط جدًا', updated: memberObj.updated || 'الآن', updated_at: new Date().toISOString()
+        };
+
+        const { error } = await sbClient.from('hfo_members').upsert({
+          ...payload,
+          can_notify: memberObj.canNotify ?? isOwnerName(memberObj.name)
+        });
+
+        if (error && error.message && error.message.includes('can_notify')) {
+          await sbClient.from('hfo_members').upsert(payload);
+        }
+      } catch (e) { console.error(e); }
+    }
+
+    async function pushAllianceStateToCloud() {
+      if (!sbClient) return;
+      try {
+        await sbClient.from('hfo_alliance_state').upsert({
+          id: 'HFO_806',
+          payload: {
+            events: state.events, polls: state.polls, desertStorm: state.desertStorm,
+            canyonStorm: state.canyonStorm, trainConductor: state.trainConductor, trainVip: state.trainVip,
+            announcements: state.announcements, notifications: state.notifications, auditLog: state.auditLog
+          },
+          updated_at: new Date().toISOString()
+        });
+      } catch (e) { console.error(e); }
+    }
+
+    function isOwnerName(name) { return (name || '').trim().toLowerCase() === OWNER_RESERVED_NAME.toLowerCase(); }
+
+    function switchAuthMode(mode) {
+      const loginForm = document.getElementById('auth-form-login');
+      const regForm = document.getElementById('auth-form-register');
+      const loginBtn = document.getElementById('auth-tab-login');
+      const regBtn = document.getElementById('auth-tab-register');
+      if (mode === 'login') {
+        loginForm.classList.remove('hidden'); regForm.classList.add('hidden');
+        loginBtn.className = 'py-2 rounded-lg text-xs font-black bg-amber-500 text-slate-950 transition';
+        regBtn.className = 'py-2 rounded-lg text-xs font-bold text-slate-300 transition';
+      } else {
+        loginForm.classList.add('hidden'); regForm.classList.remove('hidden');
+        regBtn.className = 'py-2 rounded-lg text-xs font-black bg-emerald-500 text-slate-950 transition';
+        loginBtn.className = 'py-2 rounded-lg text-xs font-bold text-slate-300 transition';
+      }
+    }
+
+    function openAuthModal() { toggleModal('auth-gate-modal'); }
+
+    async function handleMemberLogin() {
+      const name = document.getElementById('login-name').value.trim();
+      const rawPin = document.getElementById('login-pin').value.trim();
+      if (!name || !rawPin) return showToast('أدخل الاسم والرمز السري');
+
+      await syncFromCloud(false);
+      let found = state.members.find(m => m.name.toLowerCase() === name.toLowerCase());
+
+      if (!found && isOwnerName(name)) {
+        found = state.members[0];
+      }
+
+      if (!found) return showToast('الاسم غير مسجل — اضغط تسجيل عضو جديد');
+      
+      const hashedEnteredPin = await hashPin(rawPin);
+      const isPinMatch = (String(found.pin) === String(rawPin)) || (String(found.pin) === String(hashedEnteredPin));
+      
+      if (!isPinMatch) return showToast('الرمز السري غير صحيح');
+
+      if (isOwnerName(found.name)) { found.sysRole = 'Owner'; found.role = 'R4'; }
+      setLoggedUserSession(found.name);
+      document.getElementById('auth-gate-modal').classList.add('hidden');
+      renderAll();
+      showToast(`أهلاً بك يا ${found.name}`);
+    }
+
+    async function handleMemberRegister() {
+      const name = document.getElementById('reg-name').value.trim();
+      const rawPin = document.getElementById('reg-pin').value.trim();
+      const hq = Number(document.getElementById('reg-hq').value) || 30;
+      const power = Number(document.getElementById('reg-power').value) || 0;
+      const sq1 = Number(document.getElementById('reg-sq1').value) || 0;
+      const formation = document.getElementById('reg-formation').value;
+
+      if (!name || !rawPin) return showToast('أدخل الاسم والرمز السري');
+      await syncFromCloud(false);
+      if (state.members.some(m => m.name.toLowerCase() === name.toLowerCase())) return showToast('الاسم مسجل مسبقاً');
+
+      const assignedSysRole = isOwnerName(name) ? 'Owner' : 'Member';
+      const assignedRank = isOwnerName(name) ? 'R4' : 'R3';
+      const hashedPin = await hashPin(rawPin);
+
+      const newMember = {
+        id: 'm_' + Date.now(), name, pin: hashedPin, sysRole: assignedSysRole, role: assignedRank,
+        parentOwner: name, accountTag: 'Main', hq, vip: 14, power, sq1, sq2: 0, sq3: 0,
+        formation, drone: 1, canNotify: isOwnerName(name), activity: 'نشط جدًا', updated: 'الآن'
+      };
+
+      state.members.push(newMember);
+      await pushMemberToCloud(newMember);
+      setLoggedUserSession(newMember.name);
+      saveState(`سجل العضو (${newMember.name})`);
+      document.getElementById('auth-gate-modal').classList.add('hidden');
+      renderAll();
+      showToast('تم التسجيل بنجاح');
+      sendAllianceExternalAlert('عضو جديد انضم للتحالف', `انضم اللاعب **${name}** (HQ ${hq} - ${power}M) إلى مركز القيادة.`, 0x10b981);
+    }
+
+    function enterAsGuest() {
+      state.loggedInUserName = null; state.activeAccountName = null; state.currentRole = 'Guest';
+      localStorage.removeItem(SESSION_USER_KEY);
+      document.getElementById('auth-gate-modal').classList.add('hidden');
+      renderAll();
+      showToast('أنت تتصفح كزائر (مشاهدة فقط)');
+    }
+
+    function setLoggedUserSession(playerName) {
+      state.loggedInUserName = playerName; state.activeAccountName = playerName;
+      localStorage.setItem(SESSION_USER_KEY, playerName);
+      refreshLoggedUserRole();
+    }
+
+    function refreshLoggedUserRole() {
+      if (!state.loggedInUserName) {
+        state.loggedInUserName = 'Abo S3D';
+        state.activeAccountName = 'Abo S3D';
+        state.currentRole = 'Owner';
+        return;
+      }
+      if (isOwnerName(state.loggedInUserName)) {
+        state.currentRole = 'Owner';
+        return;
+      }
+      const userObj = state.members.find(m => m.name.toLowerCase() === state.loggedInUserName.toLowerCase());
+      if (userObj) {
+        state.currentRole = isOwnerName(userObj.name) ? 'Owner' : (userObj.sysRole || 'Member');
+      } else {
+        state.currentRole = 'Member';
+      }
+    }
+
+    function logoutCurrentUser() { openAuthModal(); }
+
+    function getActiveAccount() {
+      const targetName = state.activeAccountName || state.loggedInUserName || 'Abo S3D';
+      const found = state.members.find(m => m.name.toLowerCase() === targetName.toLowerCase());
+      if (found) return found;
+      return state.members[0] || { id: 'm_owner', name: 'Abo S3D', pin: '806', sysRole: 'Owner', role: 'R4', canNotify: true, accountTag: 'Main', hq: 30, power: 0, formation: 'Tank' };
+    }
+
+    function isOwner() { return state.currentRole === 'Owner' || isOwnerName(state.loggedInUserName); }
+    function canManagePermissions() { return isOwner(); }
+    function canManageAlliance() { return isOwner() || state.currentRole === 'Leader'; }
+    function canManageEvents() { return isOwner() || ['Leader', 'Officer'].includes(state.currentRole); }
+    function canEditAllMembers() { return isOwner() || ['Leader', 'Moderator'].includes(state.currentRole); }
+    function canEditSpecificMember(memberObj) {
+      if (canEditAllMembers()) return true;
+      if (!state.loggedInUserName || !memberObj) return false;
+      return memberObj.name.toLowerCase() === state.loggedInUserName.toLowerCase() || (memberObj.parentOwner && memberObj.parentOwner.toLowerCase() === state.loggedInUserName.toLowerCase());
+    }
+
+    function applyRolePermissions() {
+      const activeName = state.loggedInUserName || 'Abo S3D';
+      const isActOwner = isOwner();
+      
+      document.getElementById('header-user-name').textContent = activeName;
+      document.getElementById('header-user-icon').innerHTML = isActOwner ? '<i class="fa-solid fa-crown text-amber-400"></i>' : '<i class="fa-solid fa-user-shield text-cyan-400"></i>';
+      
+      const badge = document.getElementById('current-role-badge');
+      badge.textContent = isActOwner ? 'Owner R4' : state.currentRole;
+      badge.className = isActOwner ? 'px-1.5 py-0.2 rounded bg-amber-500 text-slate-950 text-[10px] font-hud font-black' : 'px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 text-[10px] font-hud font-bold';
+
+      document.querySelectorAll('.role-protected-owner').forEach(el => el.style.display = isActOwner ? '' : 'none');
+      document.querySelectorAll('.role-protected-leader').forEach(el => el.style.display = canManageAlliance() ? '' : 'none');
+      document.querySelectorAll('.role-protected-officer').forEach(el => el.style.display = canManageEvents() ? '' : 'none');
+      document.querySelectorAll('.role-protected-mod').forEach(el => el.style.display = canEditAllMembers() ? '' : 'none');
+    }
+
+    const mapControllers = {
+      desert: { scale: 1, x: 0, y: 0, baseW: 980, baseH: 640, viewportId: 'desert-map-viewport', stageId: 'desert-map-stage' },
+      canyon: { scale: 1, x: 0, y: 0, baseW: 980, baseH: 640, viewportId: 'canyon-map-viewport', stageId: 'canyon-map-stage' }
+    };
+
+    function applyMapTransform(key) {
+      const ctrl = mapControllers[key];
+      const viewport = document.getElementById(ctrl.viewportId);
+      const stage = document.getElementById(ctrl.stageId);
+      if (!viewport || !stage) return;
+      const vw = viewport.clientWidth || 360;
+      const scaledH = Math.max(300, Math.min(640, Math.round(ctrl.baseH * ctrl.scale)));
+      viewport.style.height = `${scaledH}px`;
+      ctrl.x = Math.max(Math.min(0, vw - ctrl.baseW * ctrl.scale) - 20, Math.min(20, ctrl.x));
+      ctrl.y = Math.max(Math.min(0, scaledH - ctrl.baseH * ctrl.scale) - 20, Math.min(20, ctrl.y));
+      stage.style.transform = `translate3d(${ctrl.x}px, ${ctrl.y}px, 0) scale(${ctrl.scale})`;
+    }
+
+    function fitInteractiveMap(key) {
+      const ctrl = mapControllers[key];
+      const viewport = document.getElementById(ctrl.viewportId);
+      if (!viewport) return;
+      ctrl.scale = Number(Math.min(1, Math.max(0.38, (viewport.clientWidth || window.innerWidth - 32) / ctrl.baseW)).toFixed(3));
+      ctrl.x = 0; ctrl.y = 0;
+      applyMapTransform(key);
+    }
+
+    function zoomInteractiveMap(key, delta) {
+      mapControllers[key].scale = Math.min(2.0, Math.max(0.38, Number((mapControllers[key].scale + delta).toFixed(2))));
+      applyMapTransform(key);
+    }
+
+    function initTouchMapEngine(key) {
+      const ctrl = mapControllers[key];
+      const viewport = document.getElementById(ctrl.viewportId);
+      if (!viewport) return;
+      let isDragging = false, startX = 0, startY = 0, initialPinchDist = null, initialScale = 1;
+
+      viewport.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) { isDragging = true; startX = e.touches[0].clientX - ctrl.x; startY = e.touches[0].clientY - ctrl.y; }
+        else if (e.touches.length === 2) { isDragging = false; initialPinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); initialScale = ctrl.scale; }
+      }, { passive: true });
+
+      viewport.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 1 && isDragging) { ctrl.x = e.touches[0].clientX - startX; ctrl.y = e.touches[0].clientY - startY; applyMapTransform(key); }
+        else if (e.touches.length === 2 && initialPinchDist) {
+          ctrl.scale = Math.min(2.0, Math.max(0.38, initialScale * (Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY) / initialPinchDist)));
+          applyMapTransform(key);
+        }
+      }, { passive: true });
+
+      viewport.addEventListener('touchend', () => { isDragging = false; initialPinchDist = null; });
+      viewport.addEventListener('mousedown', (e) => { isDragging = true; startX = e.clientX - ctrl.x; startY = e.clientY - ctrl.y; });
+      window.addEventListener('mousemove', (e) => { if (!isDragging) return; ctrl.x = e.clientX - startX; ctrl.y = e.clientY - startY; applyMapTransform(key); });
+      window.addEventListener('mouseup', () => { isDragging = false; });
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return JSON.parse(JSON.stringify(defaultState));
+        return Object.assign(JSON.parse(JSON.stringify(defaultState)), JSON.parse(raw));
+      } catch (e) { return JSON.parse(JSON.stringify(defaultState)); }
+    }
+
+    function saveState(auditMessage = null) {
+      if (auditMessage) {
+        state.auditLog.unshift({
+          who: `${state.loggedInUserName || 'Abo S3D'} (${state.currentRole})`,
+          what: auditMessage,
+          when: new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })
+        });
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      pushAllianceStateToCloud();
+    }
+
+    function showToast(msg) {
+      const box = document.getElementById('toast-box');
+      document.getElementById('toast-msg').textContent = msg;
+      box.classList.remove('hidden');
+      setTimeout(() => box.classList.add('hidden'), 2600);
+    }
+
+    function switchMainTab(tabName) {
+      document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`view-${tabName}`).classList.remove('hidden');
+      document.querySelectorAll('.main-tab-btn, .mob-tab-btn').forEach(btn => btn.classList.remove('tab-active'));
+      document.getElementById(`tab-btn-${tabName}`)?.classList.add('tab-active');
+      document.getElementById(`mob-tab-${tabName}`)?.classList.add('tab-active');
+      if (tabName === 'profile') populateProfileForm();
+      if (tabName === 'calculators') runCalculators();
+      if (tabName === 'events') { setTimeout(() => { fitInteractiveMap('desert'); fitInteractiveMap('canyon'); }, 60); }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function switchEventsSubTab(sub) {
+      document.querySelectorAll('.ev-subpanel').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`ev-panel-${sub}`).classList.remove('hidden');
+      document.querySelectorAll('.ev-subtab-btn').forEach(b => b.classList.remove('subtab-active'));
+      document.getElementById(`ev-sub-${sub}`).classList.add('subtab-active');
+      if (sub === 'desert') setTimeout(() => fitInteractiveMap('desert'), 50);
+      if (sub === 'canyon') setTimeout(() => fitInteractiveMap('canyon'), 50);
+    }
+
+    function switchAllianceSubTab(sub) {
+      document.querySelectorAll('.al-subpanel').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`al-panel-${sub}`).classList.remove('hidden');
+      document.querySelectorAll('.al-subtab-btn').forEach(b => b.classList.remove('subtab-active'));
+      document.getElementById(`al-sub-${sub}`).classList.add('subtab-active');
+    }
+
+    function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
+
+    function renderAccountsChips() {
+      const container = document.getElementById('accounts-chips-container');
+      const curUser = state.loggedInUserName || 'Abo S3D';
+      const myAccounts = state.members.filter(m => m.name.toLowerCase() === curUser.toLowerCase() || (m.parentOwner && m.parentOwner.toLowerCase() === curUser.toLowerCase()));
+      container.innerHTML = myAccounts.map(acc => {
+        const isActive = acc.name.toLowerCase() === (state.activeAccountName || curUser).toLowerCase();
+        return `<button onclick="switchActiveSubAccount('${acc.name}')" class="shrink-0 px-3 py-1 rounded-xl text-xs font-bold border transition ${isActive ? 'bg-amber-500 text-slate-950 border-amber-400 font-black' : 'bg-cmd-bg text-slate-300 border-cmd-border'}">${acc.name} (${acc.accountTag || 'Main'})</button>`;
+      }).join('');
+    }
+
+    function switchActiveSubAccount(accName) { state.activeAccountName = accName; renderAll(); populateProfileForm(); }
+    function openAddSubAccountModal() { toggleModal('add-account-modal'); }
+
+    async function addNewSubAccount() {
+      const name = document.getElementById('new-acc-name').value.trim();
+      const tag = document.getElementById('new-acc-tag').value;
+      const hq = parseInt(document.getElementById('new-acc-hq').value) || 27;
+      const power = parseFloat(document.getElementById('new-acc-power').value) || 0;
+      if (!name) return showToast('أدخل اسم الحساب');
+
+      const parent = state.loggedInUserName || 'Abo S3D';
+      const mainUser = state.members.find(m => m.name.toLowerCase() === parent.toLowerCase());
+      const subMember = {
+        id: 'm_sub_' + Date.now(), name, pin: mainUser ? mainUser.pin : '1234', sysRole: 'Member', role: 'R2',
+        parentOwner: parent, accountTag: tag, hq, vip: 11, power, sq1: 0, sq2: 0, sq3: 0,
+        formation: 'Tank', drone: 1, canNotify: false, activity: 'نشط', updated: 'الآن'
+      };
+      state.members.push(subMember);
+      await pushMemberToCloud(subMember);
+      state.activeAccountName = name;
+      saveState(`أضاف حساباً فرعياً (${name})`);
+      toggleModal('add-account-modal');
+      renderAll();
+    }
+
+    function renderSmartActionBanner() {
+      const acc = getActiveAccount();
+      document.getElementById('smart-banner-acc-name').textContent = acc.name;
+      document.getElementById('smart-actions-grid').innerHTML = `
+        <div onclick="switchMainTab('profile')" class="cursor-pointer p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-2 text-xs"><span>🟢</span><div><strong class="text-emerald-400 block">حسابك: ${acc.name} (${acc.power}M)</strong><span class="text-slate-300 text-[11px]">تحديث قوتك وتشكيلاتك</span></div></div>
+        <div onclick="switchMainTab('events');switchEventsSubTab('desert')" class="cursor-pointer p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center gap-2 text-xs"><span>🏜️</span><div><strong class="text-cyan-400 block">خطة عاصفة الصحراء</strong><span class="text-slate-300 text-[11px]">المباني الـ 11 الرسمية</span></div></div>
+        <div onclick="switchMainTab('events');switchEventsSubTab('polls')" class="cursor-pointer p-2.5 rounded-xl bg-red-500/15 border border-red-500/40 flex items-center gap-2 text-xs"><span>📊</span><div><strong class="text-red-400 block">الاستفتاءات والتصويت</strong><span class="text-slate-300 text-[11px]">جاهزية المعارك</span></div></div>
+        <div onclick="switchMainTab('train')" class="cursor-pointer p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-2 text-xs"><span>🚂</span><div><strong class="text-amber-400 block">قطار التحالف الأحد</strong><span class="text-slate-300 text-[11px]">السائق والـ VIP</span></div></div>
+      `;
+    }
+
+    function renderPowerSummaryCards() {
+      const members = state.members;
+      const count = members.length;
+      const totalPower = members.reduce((s, m) => s + Number(m.power || 0), 0);
+      document.getElementById('power-summary-cards').innerHTML = `
+        <div class="bg-cmd-card border rounded-2xl p-2.5 flex flex-col justify-between shadow"><span>قوة HFO</span><strong class="text-cyan-400 text-sm md:text-lg">${totalPower.toFixed(1)}M</strong></div>
+        <div class="bg-cmd-card border rounded-2xl p-2.5 flex flex-col justify-between shadow"><span>الأعضاء</span><strong class="text-white text-sm md:text-lg">${count}</strong></div>
+        <div class="bg-cmd-card border rounded-2xl p-2.5 flex flex-col justify-between shadow"><span>المتوسط</span><strong class="text-emerald-400 text-sm md:text-lg">${count ? (totalPower/count).toFixed(1) : 0}M</strong></div>
+        <div class="bg-cmd-card border rounded-2xl p-2.5 flex flex-col justify-between shadow"><span>السيرفر</span><strong class="text-amber-400 text-sm md:text-lg">#806</strong></div>
+      `;
+    }
+
+    function setFormationFilter(form) { state.formationFilter = form; renderRoster(); }
+    function resetRosterFilters() { document.getElementById('roster-search').value = ''; setFormationFilter('ALL'); }
+
+    function renderRoster() {
+      renderPowerSummaryCards();
+      const emptyBox = document.getElementById('roster-empty-state');
+      const desktopWrapper = document.getElementById('roster-desktop-wrapper');
+      
+      if (!Array.isArray(state.members) || state.members.length === 0) {
+        ensureOwnerExists();
+      }
+      emptyBox.classList.add('hidden');
+      desktopWrapper.classList.remove('hidden');
+
+      const q = (document.getElementById('roster-search')?.value || '').trim().toLowerCase();
+      let list = state.members.filter(m => !q || m.name.toLowerCase().includes(q));
+      
+      list.sort((a, b) => {
+        if (isOwnerName(a.name)) return -1;
+        if (isOwnerName(b.name)) return 1;
+        return Number(b.power || 0) - Number(a.power || 0);
+      });
+
+      document.getElementById('roster-desktop-tbody').innerHTML = list.map(m => {
+        const editable = canEditSpecificMember(m);
+        return `
+          <tr class="hover:bg-slate-800/50 transition">
+            <td class="py-3 px-4 font-black text-white flex items-center gap-2">
+              <span class="px-1.5 py-0.5 rounded bg-slate-800 text-amber-400 text-[10px] font-hud font-bold">${m.role}</span>
+              <span>${m.name}</span>
+              ${isOwnerName(m.name) ? '<span class="px-1.5 py-0.2 rounded bg-amber-500 text-slate-950 text-[9px] font-hud font-black">OWNER R4 👑</span>' : ''}
+              ${m.canNotify ? '<span class="text-cyan-400 text-xs" title="يمتلك صلاحية إرسال التنبيهات"><i class="fa-solid fa-bell"></i></span>' : ''}
+            </td>
+            <td class="py-3 px-3 text-cyan-400 font-black">HQ ${m.hq}</td>
+            <td class="py-3 px-3 text-emerald-400 font-black">${Number(m.power).toFixed(1)}M</td>
+            <td class="py-3 px-3 font-bold text-slate-200">${Number(m.sq1).toFixed(1)}M</td>
+            <td class="py-3 px-3 text-slate-300">${Number(m.sq2).toFixed(1)}M</td>
+            <td class="py-3 px-3 text-slate-300">${Number(m.sq3).toFixed(1)}M</td>
+            <td class="py-3 px-3">${m.formation}</td>
+            <td class="py-3 px-3">${m.activity}</td>
+            <td class="py-3 px-3 text-xs text-slate-400">${m.updated}</td>
+            <td class="py-3 px-3 text-center">
+              ${editable ? `
+                <div class="flex items-center justify-center gap-1">
+                  <button onclick="openMemberModal('${m.id}')" class="px-2 py-1 rounded-lg bg-cmd-panel border border-cmd-border hover:border-cyan-400 text-xs text-cyan-400 font-bold">تعديل</button>
+                  ${canEditAllMembers() && !isOwnerName(m.name) ? `<button onclick="deleteMember('${m.id}')" class="px-2 py-1 rounded-lg bg-red-500/10 border border-red-500/30 text-xs text-red-400 font-bold"><i class="fa-solid fa-trash"></i></button>` : ''}
+                </div>
+              ` : `<span class="text-[11px] text-slate-500">محمي</span>`}
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('roster-mobile-cards').innerHTML = list.map(m => {
+        const editable = canEditSpecificMember(m);
+        return `
+          <div class="bg-cmd-card border border-cmd-border rounded-2xl p-3.5 space-y-2.5 shadow">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-400 text-xs font-black font-hud">${m.role}</span>
+                <h4 class="font-black text-base text-white">${m.name}</h4>
+                <span class="text-xs font-black text-cyan-400">HQ ${m.hq}</span>
+                ${isOwnerName(m.name) ? '<span class="px-1 py-0.2 rounded bg-amber-500 text-slate-950 text-[9px] font-hud font-black">OWNER 👑</span>' : ''}
+              </div>
+              <span class="text-[11px] text-emerald-400 font-bold">${m.activity}</span>
+            </div>
+            <div class="grid grid-cols-4 gap-1.5 bg-cmd-bg p-2.5 rounded-xl text-center text-xs border border-slate-800">
+              <div><span class="text-[10px] text-slate-400 block">القوة</span><strong class="text-emerald-400 font-black">${Number(m.power).toFixed(1)}M</strong></div>
+              <div><span class="text-[10px] text-slate-400 block">فريق 1</span><strong class="text-white">${Number(m.sq1).toFixed(1)}M</strong></div>
+              <div><span class="text-[10px] text-slate-400 block">فريق 2</span><strong class="text-slate-300">${Number(m.sq2).toFixed(1)}M</strong></div>
+              <div><span class="text-[10px] text-slate-400 block">فريق 3</span><strong class="text-slate-300">${Number(m.sq3).toFixed(1)}M</strong></div>
+            </div>
+            <div class="flex items-center justify-between text-xs pt-1">
+              <span class="text-slate-300">${m.formation}</span>
+              ${editable ? `
+                <div class="flex gap-1.5">
+                  <button onclick="openMemberModal('${m.id}')" class="px-3 py-1 rounded-lg bg-cmd-panel border border-cmd-border text-cyan-400 font-bold">تعديل</button>
+                  ${canEditAllMembers() && !isOwnerName(m.name) ? `<button onclick="deleteMember('${m.id}')" class="px-2.5 py-1 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 font-bold">حذف</button>` : ''}
+                </div>
+              ` : `<span class="text-[11px] text-slate-500">خاص بالعضو</span>`}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openMemberModal(memberId = null) {
+      const titleEl = document.getElementById('member-modal-title');
+      if (memberId) {
+        const m = state.members.find(x => x.id === memberId);
+        if (!m) return;
+        if (!canEditSpecificMember(m)) return showToast('لا تملك صلاحية تعديل بيانات عضو آخر');
+        if (titleEl) titleEl.textContent = `تعديل بيانات اللاعب: ${m.name}`;
+        document.getElementById('edit-member-id').value = m.id;
+        document.getElementById('mem-name').value = m.name;
+        document.getElementById('mem-pin').value = '';
+        document.getElementById('mem-hq').value = m.hq || 30;
+        document.getElementById('mem-power').value = m.power || 0;
+        document.getElementById('mem-sq1').value = m.sq1 || 0;
+        document.getElementById('mem-sq2').value = m.sq2 || 0;
+        document.getElementById('mem-sq3').value = m.sq3 || 0;
+        document.getElementById('mem-formation').value = m.formation || 'Tank';
+        document.getElementById('mem-activity').value = m.activity || 'نشط جدًا';
+        document.getElementById('mem-role').value = m.role || 'R3';
+      } else {
+        if (!canEditAllMembers()) return showToast('إضافة الأعضاء متاحة للقادة فقط');
+        if (titleEl) titleEl.textContent = 'إضافة عضو جديد للتحالف';
+        document.getElementById('edit-member-id').value = '';
+        document.getElementById('mem-name').value = '';
+        document.getElementById('mem-pin').value = '1234';
+        document.getElementById('mem-hq').value = 30;
+        document.getElementById('mem-power').value = 0;
+        document.getElementById('mem-sq1').value = 0;
+        document.getElementById('mem-sq2').value = 0;
+        document.getElementById('mem-sq3').value = 0;
+        document.getElementById('mem-formation').value = 'Tank';
+        document.getElementById('mem-activity').value = 'نشط جدًا';
+        document.getElementById('mem-role').value = 'R3';
+      }
+      toggleModal('member-modal');
+    }
+
+    async function saveMemberFromModal() {
+      const id = document.getElementById('edit-member-id').value.trim();
+      const name = document.getElementById('mem-name').value.trim();
+      const pinVal = document.getElementById('mem-pin').value.trim();
+      if (!name) return showToast('يرجى إدخال اسم اللاعب');
+
+      let hashedPin = '';
+      if (pinVal) {
+        hashedPin = await hashPin(pinVal);
+      }
+
+      const data = {
+        name,
+        hq: Number(document.getElementById('mem-hq').value) || 30,
+        power: Number(document.getElementById('mem-power').value) || 0,
+        sq1: Number(document.getElementById('mem-sq1').value) || 0,
+        sq2: Number(document.getElementById('mem-sq2').value) || 0,
+        sq3: Number(document.getElementById('mem-sq3').value) || 0,
+        formation: document.getElementById('mem-formation').value || 'Tank',
+        activity: document.getElementById('mem-activity').value || 'نشط جدًا',
+        role: document.getElementById('mem-role').value || 'R3',
+        updated: 'الآن'
+      };
+
+      if (hashedPin) {
+        data.pin = hashedPin;
+      }
+
+      let targetMember = null;
+      if (id) {
+        const idx = state.members.findIndex(x => x.id === id);
+        if (idx > -1) {
+          state.members[idx] = Object.assign(state.members[idx], data);
+          targetMember = state.members[idx];
+        }
+      } else {
+        if (state.members.some(m => m.name.toLowerCase() === name.toLowerCase())) {
+          return showToast('هذا الاسم مسجل مسبقاً في التحالف');
+        }
+        targetMember = Object.assign({
+          id: 'm_' + Date.now(),
+          pin: hashedPin || await hashPin('1234'),
+          sysRole: isOwnerName(name) ? 'Owner' : 'Member',
+          parentOwner: name,
+          accountTag: 'Main',
+          vip: 12,
+          drone: 1,
+          canNotify: isOwnerName(name)
+        }, data);
+        state.members.push(targetMember);
+      }
+
+      if (targetMember) {
+        await pushMemberToCloud(targetMember);
+      }
+      saveState(id ? `عدّل بيانات ${name}` : `أضاف اللاعب ${name}`);
+      toggleModal('member-modal');
+      renderAll();
+      showToast(`تم حفظ ومزامنة بيانات ${name} بنجاح`);
+    }
+
+    async function deleteMember(id) {
+      if (!canEditAllMembers()) return;
+      const m = state.members.find(x => x.id === id);
+      if (m && isOwnerName(m.name)) return showToast('لا يمكن حذف حساب المالك (Owner)');
+      state.members = state.members.filter(x => x.id !== id);
+      if (sbClient) await sbClient.from('hfo_members').delete().eq('id', id);
+      saveState(`حذف العضو ${m ? m.name : ''}`);
+      renderAll();
+      showToast('تم حذف العضو ومزامنته');
+    }
+
+    function getAvailablePlayerNames() { return state.members.map(m => m.name); }
+
+    function renderDesertStorm() {
+      const selectedTeam = document.getElementById('ds-team-filter')?.value || 'Team A';
+      const allPlayers = getAvailablePlayerNames();
+      const playerSelect = document.getElementById('ds-assign-player');
+      if (playerSelect) playerSelect.innerHTML = allPlayers.map(n => `<option value="${n}">${n}</option>`).join('');
+
+      document.getElementById('desert-official-nodes-layer').innerHTML = OFFICIAL_DESERT_BUILDINGS.map(b => {
+        const assigned = state.desertStorm.assignments.filter(a => a.building === b.code && a.team === selectedTeam);
+        const isCore = b.code === 'NUCLEAR_SILO';
+        return `
+          <div onclick="selectBuildingForQuickAssign('desert', '${b.code}')" style="left:${b.x}%; top:${b.y}%;" class="map-building-node cursor-pointer absolute ${isCore ? 'w-48' : 'w-36'} rounded-xl border-2 ${b.color} p-2 shadow-2xl">
+            <div class="flex items-center justify-between text-[10px] text-amber-300 font-bold border-b border-white/10 pb-0.5">
+              <span><i class="fa-solid ${b.icon} mr-1"></i>${b.nameEn}</span>
+              <span class="text-[9px] text-amber-200">${b.stage.split(' ')[1]}</span>
+            </div>
+            <div class="text-[11px] font-black text-white mt-0.5 text-right" dir="rtl">${b.nameAr}</div>
+            <div class="mt-1 space-y-1 max-h-16 overflow-y-auto" dir="rtl">
+              ${assigned.length ? assigned.map(a => `<div class="bg-black/80 border border-amber-500/40 rounded px-1.5 py-0.5 text-[10px] text-amber-300 flex justify-between font-bold"><span>${a.player}</span><span class="text-cyan-300">${a.role}</span></div>`).join('') : '<div class="text-[9px] text-slate-400 text-center">— اضغط للتثبيت —</div>'}
+            </div>
+          </div>
+        `;
+      }).join('');
+      const reserves = state.desertStorm.assignments.filter(a => a.team === 'Reserve' || a.building === 'RESERVE');
+      document.getElementById('ds-reserves-list').textContent = reserves.map(r => r.player).join('، ') || 'لا يوجد';
+    }
+
+    function selectBuildingForQuickAssign(mapType, code) {
+      if (!canManageEvents()) return;
+      if (mapType === 'desert') document.getElementById('ds-assign-building').value = code;
+      showToast(`تم تحديد المبنى: ${code}`);
+    }
+
+    async function assignPlayerDesertStorm() {
+      if (!canManageEvents()) return showToast('متاح للمشرفين فقط');
+      const player = document.getElementById('ds-assign-player').value;
+      const team = document.getElementById('ds-assign-team').value;
+      const building = document.getElementById('ds-assign-building').value;
+      const role = document.getElementById('ds-assign-role').value;
+      if (!player) return;
+
+      state.desertStorm.assignments = state.desertStorm.assignments.filter(a => !(a.player === player && a.team === team));
+      state.desertStorm.assignments.push({ player, team, building, role });
+      saveState(`عيّن ${player} في ${building} (${team})`);
+      renderDesertStorm();
+      showToast('تم التثبيت');
+
+      sendAllianceExternalAlert('تحديث خطة عاصفة الصحراء', `تم تعيين اللاعب **${player}** في مبنى **${building}** ضمن (${team}).`, 0xf59e0b);
+    }
+
+    function clearDesertStormAssignments() {
+      if (!canManageEvents()) return;
+      state.desertStorm.assignments = [];
+      saveState('تصفير خطة عاصفة الصحراء');
+      renderDesertStorm();
+    }
+
+    function renderCanyonStorm() {
+      const allPlayers = getAvailablePlayerNames();
+      document.getElementById('cs-assign-player').innerHTML = allPlayers.map(n => `<option value="${n}">${n}</option>`).join('');
+      document.getElementById('canyon-official-nodes-layer').innerHTML = OFFICIAL_CANYON_BUILDINGS.map(b => {
+        const assigned = state.canyonStorm.assignments.filter(a => a.stage === b.code);
+        const isCore = b.code === 'CITADEL_CORE';
+        return `
+          <div style="left:${b.x}%; top:${b.y}%;" class="map-building-node absolute ${isCore ? 'w-48' : 'w-36'} rounded-xl border-2 ${b.color} p-2 shadow-2xl">
+            <div class="text-[10px] text-cyan-300 font-bold border-b border-white/10 pb-0.5">${b.nameEn}</div>
+            <div class="text-[11px] font-black text-white mt-0.5 text-right" dir="rtl">${b.nameAr}</div>
+            <div class="mt-1 space-y-1 max-h-16 overflow-y-auto" dir="rtl">
+              ${assigned.length ? assigned.map(a => `<div class="bg-black/80 rounded px-1 text-[10px] text-cyan-300">${a.player}</div>`).join('') : '<div class="text-[9px] text-slate-400 text-center">— شاغر —</div>'}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateCanyonAssignment() {
+      if (!canManageEvents()) return;
+      const player = document.getElementById('cs-assign-player').value;
+      const stage = document.getElementById('cs-assign-stage').value;
+      const role = document.getElementById('cs-assign-role').value;
+      if (!player) return;
+      state.canyonStorm.assignments = state.canyonStorm.assignments.filter(a => a.player !== player);
+      state.canyonStorm.assignments.push({ player, stage, role });
+      saveState(`عيّن ${player} في ${stage}`);
+      renderCanyonStorm();
+      showToast('تم التثبيت');
+    }
+
+    function clearCanyonStormAssignments() {
+      if (!canManageEvents()) return;
+      state.canyonStorm.assignments = [];
+      saveState('تصفير خطة عاصفة الوادي');
+      renderCanyonStorm();
+    }
+
+    function renderEventsTimeline() {
+      const container = document.getElementById('events-timeline-cards');
+      container.innerHTML = state.events.length ? state.events.map(ev => `
+        <div class="bg-cmd-card border rounded-2xl p-4 space-y-2 text-xs">
+          <h4 class="font-black text-base text-white">${ev.title}</h4>
+          <p class="text-slate-400">المسجلون: <strong class="text-emerald-400">${ev.participants.length}</strong></p>
+          <button onclick="registerForEvent('${ev.id}')" class="py-2 px-3 bg-emerald-600 text-white font-black rounded-xl">تسجيل مشاركة</button>
+        </div>
+      `).join('') : '<div class="text-xs text-slate-400">لا توجد فعاليات حالياً</div>';
+    }
+
+    async function registerForEvent(evId) {
+      const ev = state.events.find(e => e.id === evId);
+      const acc = getActiveAccount();
+      if (!ev.participants.includes(acc.name)) ev.participants.push(acc.name);
+      saveState(`سجل ${acc.name} في ${ev.title}`);
+      renderAll();
+    }
+
+    function createNewEvent() {
+      if (!canManageEvents()) return;
+      const title = document.getElementById('ev-new-title').value.trim();
+      if (!title) return;
+      state.events.unshift({ id: 'ev_' + Date.now(), title, day: 'اليوم', time: '20:00', maxSeats: 20, minPower: 0, participants: [], reserves: [], declined: [] });
+      saveState(`أنشأ فعالية ${title}`);
+      toggleModal('create-event-modal');
+      renderEventsTimeline();
+    }
+
+    function renderPolls() {
+      const container = document.getElementById('polls-container');
+      container.innerHTML = state.polls.length ? state.polls.map(p => `
+        <div class="bg-cmd-card border rounded-2xl p-4 space-y-3 text-xs">
+          <h4 class="font-black text-base text-white">${p.question}</h4>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="castPollVote('${p.id}', 'yes')" class="py-2 bg-emerald-500/20 text-emerald-400 font-bold rounded-xl">نعم (${p.yes.length})</button>
+            <button onclick="castPollVote('${p.id}', 'no')" class="py-2 bg-red-500/20 text-red-400 font-bold rounded-xl">لا (${p.no.length})</button>
+          </div>
+          <button onclick="remindNonVoters('${p.id}')" class="role-protected-officer py-1.5 px-3 bg-amber-500 text-slate-950 font-black rounded-lg">ذكّر غير المصوتين</button>
+        </div>
+      `).join('') : '<div class="text-xs text-slate-400">لا توجد استفتاءات</div>';
+    }
+
+    function castPollVote(pollId, opt) {
+      const poll = state.polls.find(p => p.id === pollId);
+      const acc = getActiveAccount();
+      poll.yes = poll.yes.filter(n => n !== acc.name);
+      poll.no = poll.no.filter(n => n !== acc.name);
+      poll[opt].push(acc.name);
+      saveState('صوّت في الاستفتاء');
+      renderAll();
+    }
+
+    function remindNonVoters(pollId) {
+      const poll = state.polls.find(p => p.id === pollId);
+      const allNames = getAvailablePlayerNames();
+      const voted = [...poll.yes, ...poll.no];
+      const nonVoters = allNames.filter(n => !voted.includes(n));
+      showToast(`تم التذكير لـ ${nonVoters.length} عضو`);
+
+      sendAllianceExternalAlert(
+        `🔔 تذكير بالتصويت: ${poll.question}`,
+        `⚠️ الأعضاء الذين لم يصوتوا بعد (${nonVoters.length}):\n${nonVoters.join('، ') || 'الجميع صوّت'}`,
+        0xef4444
+      );
+    }
+
+    function createNewPoll() {
+      if (!canManageEvents()) return;
+      const q = document.getElementById('poll-new-q').value.trim();
+      if (!q) return;
+      state.polls.unshift({ id: 'p_' + Date.now(), question: q, closeTime: 'السبت 18:00', yes: [], reserve: [], no: [] });
+      saveState(`أنشأ تصويت: ${q}`);
+      toggleModal('create-poll-modal');
+      renderPolls();
+      sendAllianceExternalAlert('📊 استفتاء جديد', `سؤال جديد: **${q}**\nيرجى من جميع الأعضاء الدخول والتصويت في مركز القيادة.`, 0x06b6d4);
+    }
+
+    function renderAttendanceTable() {
+      document.getElementById('attendance-table-body').innerHTML = state.members.map(m => `
+        <tr><td class="py-2 px-3 text-white font-bold">${m.name}</td><td colspan="5" class="text-slate-400">مسجل في التحالف</td></tr>
+      `).join('');
+    }
+
+    function renderTrainTab() {
+      const conductor = state.trainConductor || 'Abo S3D';
+      const vip = state.trainVip || '— غير محدد —';
+      document.getElementById('train-conductor-name').textContent = conductor;
+      document.getElementById('train-vip-name').textContent = vip;
+
+      const playerPool = getAvailablePlayerNames();
+      const condSelect = document.getElementById('train-conductor-select');
+      const vipSelect = document.getElementById('train-vip-select');
+
+      if (condSelect) {
+        condSelect.innerHTML = (playerPool.length ? playerPool : ['Abo S3D']).map(n => `<option value="${n}" ${n === conductor ? 'selected' : ''}>تغيير: ${n}</option>`).join('');
+      }
+      if (vipSelect) {
+        vipSelect.innerHTML = `<option value="">-- اختر راكب VIP --</option>` + (playerPool.length ? playerPool : []).map(n => `<option value="${n}" ${n === vip ? 'selected' : ''}>تعيين: ${n}</option>`).join('');
+      }
+    }
+
+    function generateTrainVipTable() {
+      if (!canManageEvents()) return;
+      const active = state.members.map(m => m.name);
+      if (active.length === 0) return showToast('أضف أعضاء أولاً في التحالف');
+      state.trainConductor = active[0] || 'Abo S3D';
+      state.trainVip = active[1] || active[0] || '';
+      saveState('ولد جدول قطار التحالف الأحد');
+      renderTrainTab();
+      showToast('تم تعيين السائق والـ VIP عادلاً');
+      sendAllianceExternalAlert('🚂 قطار تحالف HFO الذهبي الأحد', `👨‍✈️ قائد القطار: **${state.trainConductor}**\n👑 راكب الـ VIP: **${state.trainVip || '—'}**`, 0x10b981);
+    }
+
+    function manualChangeConductor(n) {
+      if (!canManageEvents()) return;
+      state.trainConductor = n;
+      saveState(`عيّن ${n} سائقاً للقطار`);
+      renderTrainTab();
+    }
+
+    function manualChangeVip(n) {
+      if (!canManageEvents()) return;
+      state.trainVip = n;
+      saveState(`عيّن ${n} راكب VIP للقطار`);
+      renderTrainTab();
+    }
+
+    function runCalculators() {
+      const sq1 = parseFloat(document.getElementById('calc-sq1')?.value) || 0;
+      const sq2 = parseFloat(document.getElementById('calc-sq2')?.value) || 0;
+      const sq3 = parseFloat(document.getElementById('calc-sq3')?.value) || 0;
+      const enemy = parseFloat(document.getElementById('calc-enemy-power')?.value) || 0;
+      const totalSq = sq1 + sq2 + sq3;
+      const avgSq = totalSq / 3;
+      const diff = totalSq - enemy;
+
+      document.getElementById('res-sq-total').textContent = `${totalSq.toFixed(2)} M`;
+      document.getElementById('res-sq-avg').textContent = `${avgSq.toFixed(2)} M`;
+      document.getElementById('res-sq-max').textContent = `${Math.max(sq1, sq2, sq3).toFixed(2)} M`;
+      const diffEl = document.getElementById('res-sq-diff');
+      if (diffEl) {
+        diffEl.textContent = `${diff >= 0 ? '+' : ''}${diff.toFixed(2)} M`;
+        diffEl.className = diff >= 0 ? 'text-emerald-400 font-black' : 'text-red-400 font-black';
+      }
+
+      const curr = parseFloat(document.getElementById('calc-prog-curr')?.value) || 0;
+      const targ = parseFloat(document.getElementById('calc-prog-targ')?.value) || 1;
+      document.getElementById('res-prog-rem').textContent = Math.max(0, targ - curr);
+      document.getElementById('res-prog-pct').textContent = `${Math.min(100, (curr/targ)*100).toFixed(1)}%`;
+      document.getElementById('res-prog-bar').style.width = `${Math.min(100, (curr/targ)*100)}%`;
+
+      const part = parseFloat(document.getElementById('calc-rat-part')?.value) || 0;
+      const whole = parseFloat(document.getElementById('calc-rat-whole')?.value) || 1;
+      const pool = parseFloat(document.getElementById('calc-rat-pool')?.value) || 0;
+      const ratPctEl = document.getElementById('res-rat-pct');
+      const ratShareEl = document.getElementById('res-rat-share');
+      if (ratPctEl) ratPctEl.textContent = `${((part / whole) * 100).toFixed(2)}%`;
+      if (ratShareEl) ratShareEl.textContent = Math.round((part / whole) * pool).toLocaleString();
+
+      const vsDay = parseFloat(document.getElementById('calc-act-vs')?.value) || 0;
+      const techDay = parseFloat(document.getElementById('calc-act-tech')?.value) || 0;
+      const actDayEl = document.getElementById('res-act-day');
+      const actWeekEl = document.getElementById('res-act-week');
+      if (actDayEl) actDayEl.textContent = vsDay >= 7.2 ? 'ممتاز' : 'عادي';
+      if (actWeekEl) actWeekEl.textContent = `${(vsDay * 6).toFixed(1)}M نقطة`;
+
+      const pDs = parseInt(document.getElementById('calc-part-ds')?.value) || 0;
+      const pCs = parseInt(document.getElementById('calc-part-cs')?.value) || 0;
+      const pTr = parseInt(document.getElementById('calc-part-tr')?.value) || 0;
+      const pPl = parseInt(document.getElementById('calc-part-pl')?.value) || 0;
+      const pSum = pDs + pCs + pTr + pPl;
+      const pCountEl = document.getElementById('res-part-count');
+      const pPctEl = document.getElementById('res-part-pct');
+      if (pCountEl) pCountEl.textContent = `${pSum} / 20`;
+      if (pPctEl) pPctEl.textContent = `${((pSum / 20) * 100).toFixed(1)}%`;
+
+      const sorted = [...state.members].sort((a, b) => b.power - a.power);
+      const totalAll = sorted.reduce((s, m) => s + Number(m.power || 0), 0);
+      document.getElementById('alliance-calc-box').innerHTML = `
+        <div class="flex justify-between"><span>قوة HFO:</span><strong class="text-cyan-400">${totalAll.toFixed(1)}M</strong></div>
+        <div class="flex justify-between"><span>الأعضاء:</span><strong class="text-white">${state.members.length}</strong></div>
+      `;
+    }
+
+    function renderAllianceTab() {
+      const permBox = document.getElementById('permissions-management-list');
+      if (!canManagePermissions()) {
+        permBox.innerHTML = `<div class="text-center text-xs text-slate-400 py-3">إدارة الصلاحيات مخصصة لمالك التحالف (Owner R4: Abo S3D) فقط.</div>`;
+      } else {
+        permBox.innerHTML = state.members.map(m => {
+          const isMainOwner = isOwnerName(m.name);
+          return `
+            <div class="bg-cmd-bg border border-cmd-border rounded-xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-hud font-bold">${m.role}</span>
+                <div>
+                  <strong class="text-white text-sm">${m.name}</strong>
+                  <span class="text-slate-400 text-[11px] mr-2">HQ ${m.hq} • ${Number(m.power).toFixed(1)}M</span>
+                </div>
+                ${isMainOwner ? '<span class="px-2 py-0.5 rounded bg-amber-500 text-slate-950 font-hud font-black text-[10px]">OWNER R4 👑</span>' : ''}
+              </div>
+
+              <div class="flex items-center gap-2 flex-wrap">
+                <div class="flex items-center gap-1">
+                  <span class="text-slate-400 text-[11px]">الرتبة:</span>
+                  <select onchange="updateMemberRankByOwner('${m.id}', this.value)" class="bg-cmd-card border border-amber-500/40 rounded-lg px-2 py-1 text-xs font-bold text-amber-300 font-hud">
+                    ${['R5', 'R4', 'R3', 'R2', 'R1'].map(r => `<option value="${r}" ${m.role === r ? 'selected' : ''}>${r}</option>`).join('')}
+                  </select>
+                </div>
+
+                ${isMainOwner ? '' : `
+                  <div class="flex items-center gap-1">
+                    <span class="text-slate-400 text-[11px]">الصلاحية:</span>
+                    <select onchange="updateMemberPermissionByOwner('${m.id}', this.value)" class="bg-cmd-card border border-cyan-500/40 rounded-lg px-2 py-1 text-xs font-bold text-cyan-300">
+                      <option value="Leader" ${m.sysRole==='Leader'?'selected':''}>Leader (نائب)</option>
+                      <option value="Officer" ${m.sysRole==='Officer'?'selected':''}>Officer (مشرف)</option>
+                      <option value="Moderator" ${m.sysRole==='Moderator'?'selected':''}>Moderator</option>
+                      <option value="Member" ${m.sysRole==='Member'?'selected':''}>Member (عضو)</option>
+                      <option value="Guest" ${m.sysRole==='Guest'?'selected':''}>Guest</option>
+                    </select>
+                  </div>
+                `}
+
+                ${isMainOwner ? '' : `
+                  <button onclick="toggleMemberNotificationByOwner('${m.id}')" class="px-2.5 py-1 rounded-lg border text-xs font-bold flex items-center gap-1 transition ${m.canNotify ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-slate-800 text-slate-400 border-slate-700'}" title="التحكم بصلاحية إرسال التنبيهات لتيليجرام وديسكورد">
+                    <i class="fa-solid ${m.canNotify ? 'fa-bell' : 'fa-bell-slash'}"></i>
+                    <span>${m.canNotify ? 'إشعار: مسموح' : 'إشعار: معطل'}</span>
+                  </button>
+                `}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('announcements-list').innerHTML = state.announcements.length ? state.announcements.map(a => `
+        <div class="bg-cmd-card border rounded-2xl p-4 space-y-1 text-xs">
+          <h4 class="font-black text-sm text-white">${a.title}</h4>
+          <p class="text-slate-300">${a.body}</p>
+        </div>
+      `).join('') : '<div class="text-xs text-slate-400">لا توجد إعلانات</div>';
+
+      document.getElementById('audit-log-container').innerHTML = state.auditLog.map(l => `
+        <div class="bg-cmd-bg p-2 rounded border flex justify-between"><span>${l.who}: ${l.what}</span><span class="text-slate-500">${l.when}</span></div>
+      `).join('');
+    }
+
+    async function updateMemberRankByOwner(memberId, newRank) {
+      if (!isOwner()) return showToast('تعديل الرتب متاح للمالك فقط');
+      const m = state.members.find(x => x.id === memberId);
+      if (!m) return;
+      m.role = newRank;
+      await pushMemberToCloud(m);
+      saveState(`عدّل رتبة ${m.name} إلى (${newRank})`);
+      renderAll();
+      showToast(`تم تعيين رتبة ${m.name} إلى ${newRank}`);
+    }
+
+    async function updateMemberPermissionByOwner(memberId, newSysRole) {
+      if (!isOwner()) return showToast('تعديل الصلاحيات متاح للمالك فقط');
+      const m = state.members.find(x => x.id === memberId);
+      if (!m) return;
+      m.sysRole = newSysRole;
+      await pushMemberToCloud(m);
+      saveState(`منح ${m.name} صلاحية ${newSysRole}`);
+      renderAll();
+      showToast(`تم تحديث صلاحية ${m.name} إلى ${newSysRole}`);
+    }
+
+    async function toggleMemberNotificationByOwner(memberId) {
+      if (!isOwner()) return showToast('التحكم بصلاحيات التنبيه للمالك فقط');
+      const m = state.members.find(x => x.id === memberId);
+      if (!m) return;
+      m.canNotify = !m.canNotify;
+      await pushMemberToCloud(m);
+      saveState(`${m.canNotify ? 'منح' : 'سحب'} صلاحية الإشعارات للعضو ${m.name}`);
+      renderAll();
+      showToast(`صلاحية إرسال التنبيهات لـ ${m.name}: ${m.canNotify ? 'مفعلة' : 'معطلة'}`);
+    }
+
+    function publishAnnouncement() {
+      const acc = getActiveAccount();
+      if (!isOwner() && !acc.canNotify && !canManageAlliance()) {
+        return showToast('ليس لديك صلاحية إرسال التنبيهات والإعلانات');
+      }
+      const title = document.getElementById('ann-title').value.trim();
+      const body = document.getElementById('ann-body').value.trim();
+      if (!title || !body) return showToast('يرجى كتابة عنوان ونص الإعلان');
+
+      state.announcements.unshift({ id: 'a_' + Date.now(), title, body, category: 'إعلان', pinned: true, author: acc.name, time: 'الآن' });
+      document.getElementById('ann-title').value = ''; document.getElementById('ann-body').value = '';
+      saveState(`نشر إعلان: ${title}`);
+      renderAllianceTab();
+      showToast('تم النشر وإرسال التنبيهات لتيليجرام وديسكورد');
+      sendAllianceExternalAlert(`📢 إعلان قيادي: ${title}`, body, 0x06b6d4);
+    }
+
+    function updateRecruitmentPreview() {
+      const recName = document.getElementById('rec-name');
+      if (recName) document.getElementById('prev-rec-name').textContent = recName.value;
+    }
+
+    function populateProfileForm() {
+      const acc = getActiveAccount();
+      document.getElementById('prof-avatar').textContent = acc.name.charAt(0).toUpperCase();
+      document.getElementById('prof-header-name').textContent = `${acc.name} (${acc.role || 'R4'})`;
+      document.getElementById('prof-header-meta').textContent = `Server #806 • تحالف HFO • ${isOwnerName(acc.name) ? 'المالك R4' : acc.sysRole}`;
+      document.getElementById('prof-name').value = acc.name;
+      document.getElementById('prof-pin').value = '';
+      document.getElementById('prof-hq').value = acc.hq || 30;
+      document.getElementById('prof-power').value = acc.power || 0;
+      document.getElementById('prof-sq1').value = acc.sq1 || 0;
+      document.getElementById('prof-sq2').value = acc.sq2 || 0;
+      document.getElementById('prof-sq3').value = acc.sq3 || 0;
+      document.getElementById('prof-formation').value = acc.formation || 'Tank';
+    }
+
+    async function saveActiveProfile() {
+      const acc = getActiveAccount();
+      acc.hq = Number(document.getElementById('prof-hq').value) || 30;
+      acc.power = Number(document.getElementById('prof-power').value) || 0;
+      acc.sq1 = Number(document.getElementById('prof-sq1').value) || 0;
+      acc.sq2 = Number(document.getElementById('prof-sq2').value) || 0;
+      acc.sq3 = Number(document.getElementById('prof-sq3').value) || 0;
+      acc.formation = document.getElementById('prof-formation').value;
+      
+      const newPin = document.getElementById('prof-pin').value.trim();
+      if (newPin) {
+        acc.pin = await hashPin(newPin);
+      }
+      acc.updated = 'الآن';
+
+      let foundIndex = state.members.findIndex(m => m.name.toLowerCase() === acc.name.toLowerCase());
+      if (foundIndex === -1) {
+        state.members.unshift(acc);
+      } else {
+        state.members[foundIndex] = acc;
+      }
+
+      await pushMemberToCloud(acc);
+      saveState(`حدّث ${acc.name} ملفه وقوته (${acc.power}M)`);
+      renderAll();
+      showToast('تم حفظ ومزامنة بياناتك في جدول القوة');
+    }
+
+    function renderNotifications() { document.getElementById('notif-badge').style.display = 'none'; }
+    function markAllNotificationsRead() {}
+
+    function exportOfficialBattlePNG(elementId, filename) {
+      const el = document.getElementById(elementId);
+      if (!el || typeof html2canvas === 'undefined') return;
+      const hiddenControls = el.querySelectorAll('.export-hide');
+      hiddenControls.forEach(c => c.style.display = 'none');
+      const viewports = el.querySelectorAll('.map-touch-viewport');
+      const stages = el.querySelectorAll('.map-touch-stage');
+      const prevViewportStyles = []; const prevStageTransforms = [];
+      viewports.forEach((vp, i) => { prevViewportStyles[i] = { width: vp.style.width, height: vp.style.height }; vp.style.width = '980px'; vp.style.height = '640px'; });
+      stages.forEach((st, i) => { prevStageTransforms[i] = st.style.transform; st.style.transform = 'none'; });
+      const prevElWidth = el.style.width; if (viewports.length > 0) el.style.width = '1020px';
+
+      showToast('جاري تصدير الصورة بدقة HD...');
+      html2canvas(el, { backgroundColor: '#070a12', scale: 2, windowWidth: 1280, scrollX: 0, scrollY: -window.scrollY, useCORS: true }).then(canvas => {
+        hiddenControls.forEach(c => c.style.display = '');
+        el.style.width = prevElWidth;
+        viewports.forEach((vp, i) => { vp.style.width = prevViewportStyles[i].width; vp.style.height = prevViewportStyles[i].height; });
+        stages.forEach((st, i) => { st.style.transform = prevStageTransforms[i]; });
+        const link = document.createElement('a');
+        link.download = filename; link.href = canvas.toDataURL('image/png'); link.click();
+        showToast('تم تحميل الصورة');
+      });
+    }
+
+    function exportRosterCSV() {
+      const headers = ['Name,Role,HQ,TotalPower,Squad1,Squad2,Squad3,Formation,Activity'];
+      const rows = state.members.map(m => `"${m.name}",${m.role},${m.hq},${m.power},${m.sq1},${m.sq2},${m.sq3},${m.formation},"${m.activity}"`);
+      downloadTextFile(headers.concat(rows).join('\n'), 'HFO-806-Roster.csv', 'text/csv;charset=utf-8;');
+    }
+
+    function exportAttendanceCSV() {}
+    function exportRosterJSON() {
+      downloadTextFile(JSON.stringify(state.members, null, 2), 'HFO-806-Roster.json', 'application/json');
+    }
+
+    function downloadTextFile(content, fileName, mime) {
+      const blob = new Blob(['\uFEFF' + content], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function updateClock() {
+      try {
+        document.getElementById('live-clock').textContent = new Date().toLocaleTimeString('ar-SA', { timeZone: state.timezone || 'Asia/Riyadh', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      } catch (e) {}
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      ensureOwnerExists();
+      initSupabaseConnection();
+      const savedSessionUser = localStorage.getItem(SESSION_USER_KEY);
+      if (savedSessionUser) {
+        setLoggedUserSession(savedSessionUser);
+      } else {
+        setLoggedUserSession('Abo S3D');
+      }
+      renderAll();
+      initTouchMapEngine('desert');
+      initTouchMapEngine('canyon');
+      fitInteractiveMap('desert');
+      fitInteractiveMap('canyon');
+      updateClock();
+      setInterval(updateClock, 1000);
+
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration skipped:', err));
+      }
+    });
+
+    window.addEventListener('resize', () => { fitInteractiveMap('desert'); fitInteractiveMap('canyon'); });
+  </script>
+</body>
+</html>

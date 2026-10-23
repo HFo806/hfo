@@ -4,21 +4,28 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#070a12" />
+  
+  <!-- إعدادات تطبيق الهاتف والآيفون PWA -->
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="HFO 806" />
+
+  <!-- مسارات الأيقونات مع كسر كاش سفاري المحدث -->
+  <link rel="manifest" href="/manifest.json?v=2" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=2" />
+  <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png?v=2" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=2" />
+  <link rel="shortcut icon" href="/icon-192.png?v=2" />
+
   <title>HFO #806 | مركز قيادة التحالف الرسمي - Last War</title>
 
-  <!-- PWA & App Icons -->
-  <link rel="manifest" href="/manifest.json" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
-  <link rel="shortcut icon" href="/icon-192.png" />
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Chakra+Petch:wght@600;700&display=swap" rel="stylesheet">
 
+  <!-- Tailwind CSS & المكتبات المساندة -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -62,6 +69,11 @@
     @media (min-width: 768px) { body { padding-bottom: 2.5rem; } }
     @media screen and (max-width: 768px) { input, select, textarea { font-size: 16px !important; } }
 
+    /* معالجة نزول الهيدر أسفل الجزيرة التفاعلية والنوتش في الآيفون */
+    .ios-safe-header {
+      padding-top: calc(0.65rem + env(safe-area-inset-top)) !important;
+    }
+
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: #070a12; }
     ::-webkit-scrollbar-thumb { background: #24324d; border-radius: 9999px; }
@@ -72,7 +84,8 @@
     .game-map-ltr { direction: ltr !important; text-align: left !important; }
     .glass-panel {
       background: rgba(15, 22, 36, 0.94);
-      backdrop-filter: blur(12px);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       border: 1px solid #24324d;
     }
     .tab-active {
@@ -222,12 +235,12 @@
     </div>
   </div>
 
-  <!-- ==================== 1. الهيدر العلوي ==================== -->
-  <header class="sticky top-0 z-40 glass-panel border-b border-cmd-border px-3 py-2 shadow-xl">
+  <!-- ==================== 1. الهيدر العلوي (مع معالجة أمان شاشة الآيفون) ==================== -->
+  <header class="sticky top-0 z-40 glass-panel border-b border-cmd-border px-3 pb-2 shadow-xl ios-safe-header">
     <div class="max-w-7xl mx-auto flex flex-col gap-2">
       <div class="flex items-center justify-between gap-2">
         <div class="flex items-center gap-2.5 min-w-0">
-          <img src="/icon-192.png" onerror="this.src='https://img.icons8.com/color/192/shield.png'" class="w-10 h-10 md:w-11 md:h-11 shrink-0 rounded-xl border border-amber-400/40 object-cover shadow-lg" alt="HFO" />
+          <img src="/icon-192.png?v=2" onerror="this.src='https://img.icons8.com/color/192/shield.png'" class="w-10 h-10 md:w-11 md:h-11 shrink-0 rounded-xl border border-amber-400/40 object-cover shadow-lg" alt="HFO" />
           <div class="min-w-0">
             <div class="flex items-center gap-1.5 flex-wrap">
               <h1 class="font-black text-sm md:text-lg tracking-wide text-white truncate">تحالف HFO [Server #806]</h1>
@@ -316,7 +329,7 @@
       </button>
     </nav>
 
-    <!-- 1. تبويب القوة -->
+    <!-- 1. تبويب القوة (محدث بالكامل مع ثبات المالك Abo S3D في السطر الأول) -->
     <section id="view-power" class="tab-view space-y-4">
       <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2" id="power-summary-cards"></div>
 
@@ -395,7 +408,7 @@
       </div>
     </section>
 
-    <!-- 2. تبويب الفعاليات -->
+    <!-- 2. تبويب الفعاليات (عاصفة الصحراء، عاصفة الوادي، الفعاليات، الاستفتاءات) -->
     <section id="view-events" class="tab-view hidden space-y-4">
       <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar bg-cmd-card p-1.5 rounded-2xl border border-cmd-border">
         <button onclick="switchEventsSubTab('desert')" id="ev-sub-desert" class="ev-subtab-btn subtab-active px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 transition">🏜️ خطة عاصفة الصحراء</button>
@@ -457,7 +470,7 @@
         <div id="desert-storm-official-poster" class="bg-[#0b0f17] border-2 border-amber-500/60 rounded-2xl p-3 md:p-4 shadow-2xl space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2 bg-gradient-to-r from-[#1c140d] via-[#291d12] to-[#1c140d] border border-amber-500/40 rounded-xl px-3.5 py-2.5">
             <div class="flex items-center gap-2.5">
-              <img src="/icon-192.png" onerror="this.src='https://img.icons8.com/color/192/shield.png'" class="w-9 h-9 md:w-10 md:h-10 rounded-lg object-cover shadow" alt="HFO" />
+              <img src="/icon-192.png?v=2" onerror="this.src='https://img.icons8.com/color/192/shield.png'" class="w-9 h-9 md:w-10 md:h-10 rounded-lg object-cover shadow" alt="HFO" />
               <div>
                 <div class="flex items-center gap-2">
                   <h3 class="font-hud font-black text-sm md:text-base text-amber-400 tracking-wide">DESERT STORM BATTLEFIELD</h3>
@@ -550,7 +563,7 @@
         <div id="canyon-storm-official-poster" class="bg-[#070d14] border-2 border-cyan-500/60 rounded-2xl p-3 md:p-4 shadow-2xl space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2 bg-gradient-to-r from-[#091926] via-[#0e293d] to-[#091926] border border-cyan-500/40 rounded-xl px-3.5 py-2.5">
             <div class="flex items-center gap-2.5">
-              <img src="/icon-192.png" onerror="this.src='https://img.icons8.com/color/192/shield.png'" class="w-9 h-9 md:w-10 md:h-10 rounded-lg object-cover shadow" alt="HFO" />
+              <img src="/icon-192.png?v=2" onerror="this.src='https://img.icons8.com/color/192/shield.png'" class="w-9 h-9 md:w-10 md:h-10 rounded-lg object-cover shadow" alt="HFO" />
               <div>
                 <h3 class="font-hud font-black text-sm md:text-base text-cyan-400 tracking-wide">CANYON STORM BATTLEFIELD</h3>
                 <p class="text-[11px] md:text-xs text-slate-300 font-bold">خطة عاصفة الوادي • <span id="cs-poster-time">الأحد 20:00</span></p>
@@ -647,7 +660,7 @@
           <div id="train-export-card" class="bg-gradient-to-br from-[#111927] via-[#090d16] to-[#111927] border-2 border-amber-500/50 rounded-2xl p-5 shadow-2xl space-y-4">
             <div class="flex items-center justify-between border-b border-slate-800 pb-3">
               <div class="flex items-center gap-3">
-                <img src="/icon-192.png" onerror="this.src='https://img.icons8.com/color/192/shield.png'" class="w-12 h-12 rounded-2xl object-cover shadow" alt="HFO" />
+                <img src="/icon-192.png?v=2" onerror="this.src='https://img.icons8.com/color/192/shield.png'" class="w-12 h-12 rounded-2xl object-cover shadow" alt="HFO" />
                 <div>
                   <h3 class="font-black text-base md:text-lg text-white">قطار تحالف HFO الذهبي الأحد</h3>
                   <p class="text-xs text-cyan-400 font-bold">Server #806 • Alliance Train VIP Schedule</p>
@@ -771,7 +784,7 @@
       </div>
     </section>
 
-    <!-- 5. تبويب التحالف والصلاحيات -->
+    <!-- 5. تبويب التحالف وإدارة الرتب والإشعارات -->
     <section id="view-alliance" class="tab-view hidden space-y-4">
       <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar bg-cmd-card p-1.5 rounded-2xl border border-cmd-border">
         <button onclick="switchAllianceSubTab('permissions')" id="al-sub-permissions" class="al-subtab-btn subtab-active px-3.5 py-2 rounded-xl text-xs font-bold shrink-0">🔑 الصلاحيات والرتب والإشعارات</button>
@@ -978,7 +991,7 @@
     </div>
   </div>
 
-  <div id="toast-box" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 hidden px-4 py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs shadow-2xl flex items-center gap-2 whitespace-nowrap">
+  <div id="toast-box" class="fixed top-24 left-1/2 -translate-x-1/2 z-50 hidden px-4 py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs shadow-2xl flex items-center gap-2 whitespace-nowrap">
     <i class="fa-solid fa-circle-check"></i> <span id="toast-msg">تم</span>
   </div>
 

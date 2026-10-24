@@ -425,7 +425,7 @@
               <option value="Team A">Team A (الفريق الأساسي)</option>
               <option value="Team B">Team B (الفريق الثاني)</option>
             </select>
-            <input type="text" id="ds-battle-time-input" value="السبت 20:00 بتوقيت الرياض" oninput="renderDesertStorm()" class="flex-1 min-w-[170px] bg-cmd-bg border border-cmd-border rounded-xl px-3 py-2 text-xs text-white font-bold" />
+            <span id="ds-battle-time-input" class="flex-1 min-w-[170px] bg-cmd-bg border border-cmd-border rounded-xl px-3 py-2 text-xs text-white font-bold">الجمعة 23:00 بتوقيت الرياض</span>
           </div>
           <div class="flex items-center gap-2 w-full sm:w-auto">
             <button onclick="clearDesertStormAssignments()" data-permission="manage_desert_storm" class="role-protected-officer px-3 py-2.5 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs font-bold">تصفير</button>
@@ -475,7 +475,7 @@
                   <h3 class="font-hud font-black text-sm md:text-base text-amber-400 tracking-wide">DESERT STORM BATTLEFIELD</h3>
                   <span class="px-2 py-0.5 rounded bg-amber-500/20 border border-amber-400/40 text-amber-200 font-hud text-[11px] font-bold" id="ds-poster-team-badge">TEAM A</span>
                 </div>
-                <p class="text-[11px] md:text-xs text-slate-300 font-bold">خطة عاصفة الصحراء الرسمية • <span id="ds-poster-time">السبت 20:00</span></p>
+                <p class="text-[11px] md:text-xs text-slate-300 font-bold">خطة عاصفة الصحراء الرسمية • <span id="ds-poster-time">الجمعة 23:00 بتوقيت الرياض</span></p>
               </div>
             </div>
             <div class="text-left font-hud">
@@ -518,6 +518,7 @@
             <span class="font-hud text-[11px] text-cyan-400 font-bold">806 Abo S3D - HFo</span>
           </div>
         </div>
+        <div id="weekly-desert-registration" class="bg-cmd-card border border-amber-500/30 rounded-2xl p-3 space-y-3"></div>
       </div>
 
       <!-- عاصفة الوادي -->
@@ -525,7 +526,7 @@
         <div class="bg-cmd-card border border-cmd-border rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2.5">
           <div class="flex items-center gap-2 flex-1">
             <span class="text-xs font-bold text-slate-300 shrink-0">الموعد:</span>
-            <input type="text" id="cs-battle-time-input" value="الأحد 20:00 بتوقيت الرياض" oninput="renderCanyonStorm()" class="flex-1 bg-cmd-bg border border-cmd-border rounded-xl px-3 py-2 text-xs text-white font-bold" />
+            <span id="cs-battle-time-input" class="flex-1 bg-cmd-bg border border-cmd-border rounded-xl px-3 py-2 text-xs text-white font-bold">الخميس 17:00 بتوقيت الرياض</span>
           </div>
           <div class="flex items-center gap-2 w-full sm:w-auto">
             <button data-permission="manage_canyon_storm" onclick="clearCanyonStormAssignments()" class="role-protected-officer px-3 py-2.5 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs font-bold">تصفير</button>
@@ -556,7 +557,7 @@
               <img src="/icon-192.png?v=3" onerror="this.src='https://img.icons8.com/color/192/shield.png'" class="w-9 h-9 md:w-10 md:h-10 rounded-lg object-cover shadow" alt="HFO" />
               <div>
                 <h3 class="font-hud font-black text-sm md:text-base text-cyan-400 tracking-wide">CANYON STORM BATTLEFIELD</h3>
-                <p class="text-[11px] md:text-xs text-slate-300 font-bold">خطة عاصفة الوادي الكاملة • <span id="cs-poster-time">الأحد 20:00</span></p>
+                <p class="text-[11px] md:text-xs text-slate-300 font-bold">خطة عاصفة الوادي الكاملة • <span id="cs-poster-time">الخميس 17:00 بتوقيت الرياض</span></p>
               </div>
             </div>
             <div class="text-left font-hud">
@@ -592,6 +593,7 @@
             <span class="font-hud text-[11px] text-cyan-400 font-bold">806 Abo S3D - HFo</span>
           </div>
         </div>
+        <div id="weekly-canyon-registration" class="bg-cmd-card border border-cyan-500/30 rounded-2xl p-3 space-y-3"></div>
       </div>
 
       <!-- 5. إدارة الفعاليات -->
@@ -618,6 +620,10 @@
 
       <!-- الحضور والالتزام -->
       <div id="ev-panel-attendance" class="ev-subpanel hidden space-y-4">
+        <div class="bg-cmd-card border border-cmd-border rounded-2xl p-4 space-y-3">
+          <div><h3 class="font-black text-white text-sm">الحضور الأسبوعي لعواصف التحالف</h3><p class="text-[11px] text-slate-400 mt-1">تُفتح خيارات «حضر / لم يحضر» بعد مرور نصف ساعة على موعد انتهاء الحدث. جميع الأوقات بتوقيت الرياض.</p></div>
+          <div id="weekly-attendance-records" class="space-y-3"></div>
+        </div>
         <div class="bg-cmd-card border border-cmd-border rounded-2xl p-4">
           <div class="overflow-x-auto">
             <table class="w-full text-right text-xs md:text-sm">
@@ -928,9 +934,13 @@
         <label class="text-slate-400 block mb-1">عنوان الفعالية</label>
         <input type="text" id="ev-edit-title" placeholder="مثال: حرب العاصمة أو تدريب الحشود" class="w-full bg-cmd-bg border rounded-xl p-2.5 text-white font-bold" />
       </div>
+      <div>
+        <label class="text-slate-400 block mb-1">تاريخ الفعالية</label>
+        <input type="date" id="ev-edit-date" class="w-full bg-cmd-bg border rounded-xl p-2.5 text-white" />
+      </div>
       <div class="grid grid-cols-2 gap-2">
         <div>
-          <label class="text-slate-400 block mb-1">اليوم</label>
+          <label class="text-slate-400 block mb-1">اليوم / وصف الموعد</label>
           <input type="text" id="ev-edit-day" placeholder="مثال: السبت" class="w-full bg-cmd-bg border rounded-xl p-2.5 text-white" />
         </div>
         <div>
@@ -1284,6 +1294,7 @@
       polls: [],
       desertStorm: { assignments: [] },
       canyonStorm: { assignments: [] },
+      weeklyEventInstances: [],
       announcements: [],
       notifications: [],
       auditLog: [],
@@ -1445,6 +1456,7 @@
           state.polls = p.polls || [];
           state.desertStorm = p.desertStorm || { assignments: [] };
           state.canyonStorm = p.canyonStorm || { assignments: [] };
+          state.weeklyEventInstances = Array.isArray(p.weeklyEventInstances) ? p.weeklyEventInstances : (state.weeklyEventInstances || []);
           state.trainConductor = p.trainConductor || 'Abo S3D';
           state.trainVip = p.trainVip || '';
           state.announcements = p.announcements || [];
@@ -1518,6 +1530,7 @@
             polls: state.polls,
             desertStorm: state.desertStorm,
             canyonStorm: state.canyonStorm,
+            weeklyEventInstances: state.weeklyEventInstances || [],
             trainConductor: state.trainConductor,
             trainVip: state.trainVip,
             announcements: state.announcements,
@@ -1833,6 +1846,7 @@
       document.getElementById(`ev-sub-${sub}`).classList.add('subtab-active');
       if (sub === 'desert') setTimeout(() => fitInteractiveMap('desert'), 50);
       if (sub === 'canyon') setTimeout(() => fitInteractiveMap('canyon'), 50);
+      if (sub === 'attendance') renderWeeklyAttendancePanel();
     }
 
     function switchAllianceSubTab(sub) {
@@ -2125,7 +2139,189 @@
 
     function getAvailablePlayerNames() { return state.members.map(m => m.name); }
 
+    // أحداث أسبوعية متكررة: الوادي الخميس 17:00، والصحراء الجمعة 23:00 بتوقيت الرياض.
+    function riyadhNowParts() {
+      const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Riyadh', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date());
+      const out = {}; parts.forEach(p => { if (p.type !== 'literal') out[p.type] = p.value; });
+      return { year: Number(out.year), month: Number(out.month), day: Number(out.day), hour: Number(out.hour), minute: Number(out.minute) };
+    }
+    function dateKeyFromParts(p) { return `${p.year}-${String(p.month).padStart(2,'0')}-${String(p.day).padStart(2,'0')}`; }
+    function datePartsFromKey(key) { const [year,month,day] = String(key).split('-').map(Number); return {year,month,day}; }
+    function formatWeeklyDate(key) {
+      const p = datePartsFromKey(key); const d = new Date(Date.UTC(p.year,p.month-1,p.day,12));
+      return new Intl.DateTimeFormat('ar-SA', { timeZone:'Asia/Riyadh', weekday:'long', year:'numeric', month:'long', day:'numeric' }).format(d);
+    }
+    function getWeeklyEventConfig(type) {
+      return type === 'canyon'
+        ? { type:'canyon', title:'عاصفة الوادي', weekday:4, time:'17:00', hour:17, minute:0 }
+        : { type:'desert', title:'عاصفة الصحراء', weekday:5, time:'23:00', hour:23, minute:0 };
+    }
+    function ensureWeeklyEventInstances() {
+      if (!Array.isArray(state.weeklyEventInstances)) state.weeklyEventInstances = [];
+      const now = riyadhNowParts();
+      const todayKey = dateKeyFromParts(now);
+      const todayUtc = new Date(Date.UTC(now.year, now.month-1, now.day, 12));
+      let addedAny = false;
+      for (const type of ['canyon','desert']) {
+        const cfg = getWeeklyEventConfig(type);
+        let offset = (cfg.weekday - todayUtc.getUTCDay() + 7) % 7;
+        if (offset === 0 && (now.hour > cfg.hour || (now.hour === cfg.hour && now.minute >= cfg.minute))) offset = 7;
+        for (let week=0; week<8; week++) {
+          const d = new Date(todayUtc.getTime()); d.setUTCDate(d.getUTCDate() + offset + week*7);
+          const date = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+          const id = `weekly_${type}_${date}`;
+          if (!state.weeklyEventInstances.some(x => x.id === id)) { state.weeklyEventInstances.push({ id, type, title:cfg.title, date, time:cfg.time, participants:[], teams:{}, attendance:{}, createdAt:new Date().toISOString() }); addedAny = true; }
+        }
+      }
+      state.weeklyEventInstances.sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time));
+      if (addedAny) { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); pushAllianceStateToCloud(); }
+    }
+    function weeklyEventStarted(ev) {
+      const now = riyadhNowParts();
+      const todayKey = dateKeyFromParts(now);
+      const nowMinutes = now.hour * 60 + now.minute;
+      const eventMinutes = Number((ev.time || '00:00').split(':')[0])*60 + Number((ev.time || '00:00').split(':')[1] || 0);
+      return ev.date < todayKey || (ev.date === todayKey && nowMinutes >= eventMinutes);
+    }
+    function weeklyEventEnded(ev) {
+      const now = riyadhNowParts(); const p = datePartsFromKey(ev.date);
+      const eventMinutes = Number((ev.time || '00:00').split(':')[0])*60 + Number((ev.time || '00:00').split(':')[1] || 0);
+      const nowMinutes = now.hour*60 + now.minute;
+      const todayKey = dateKeyFromParts(now);
+      return ev.date < todayKey || (ev.date === todayKey && nowMinutes >= eventMinutes + 30);
+    }
+    function nextWeeklyInstance(type) {
+      ensureWeeklyEventInstances();
+      return state.weeklyEventInstances.find(e => e.type === type && !weeklyEventStarted(e)) || state.weeklyEventInstances.find(e => e.type === type && !weeklyEventEnded(e)) || state.weeklyEventInstances.find(e => e.type === type);
+    }
+    function persistWeeklyEventChanges() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      pushAllianceStateToCloud();
+    }
+    function toggleWeeklyRegistration(type) {
+      if (!hasPermission('register_events')) return showToast('لا تملك صلاحية التسجيل في الفعاليات');
+      ensureWeeklyEventInstances();
+      const ev = nextWeeklyInstance(type); if (!ev) return showToast('تعذر تحميل موعد الحدث');
+      if (weeklyEventStarted(ev)) return showToast('أُغلق التسجيل لأن موعد الحدث بدأ بالفعل');
+      const name = state.loggedInUserName || 'Abo S3D';
+      if (!Array.isArray(ev.participants)) ev.participants = [];
+      if (ev.participants.includes(name)) {
+        ev.participants = ev.participants.filter(n => n !== name);
+        delete ev.teams[name]; delete ev.attendance[name];
+        logAuditAction('إلغاء تسجيل حدث أسبوعي', ev.title, `${name} - ${ev.date}`);
+        showToast('تم إلغاء رغبتك في المشاركة');
+      } else {
+        ev.participants.push(name);
+        logAuditAction('تسجيل حدث أسبوعي', ev.title, `${name} - ${ev.date}`);
+        showToast('تم تسجيل رغبتك في المشاركة، وستحدد الإدارة الفريق لاحقًا');
+      }
+      persistWeeklyEventChanges(); renderWeeklyEventPanels(); renderWeeklyAttendancePanel();
+    }
+    function setWeeklyTeam(eventId, player, team) {
+      const ev = state.weeklyEventInstances.find(e => e.id === eventId); if (!ev) return;
+      const allowed = ev.type === 'desert' ? hasPermission('manage_desert_storm') : hasPermission('manage_canyon_storm');
+      if (!allowed) return showToast('لا تملك صلاحية توزيع المشاركين');
+      if (!ev.teams) ev.teams = {};
+      if (!team) delete ev.teams[player]; else ev.teams[player] = team;
+      logAuditAction('توزيع مشارك في حدث أسبوعي', ev.title, `${player} → ${team || 'غير موزع'} - ${ev.date}`);
+      persistWeeklyEventChanges(); renderWeeklyEventPanels(); renderWeeklyAttendancePanel();
+    }
+    function setWeeklyAttendance(eventId, player, status) {
+      const ev = state.weeklyEventInstances.find(e => e.id === eventId); if (!ev) return;
+      const allowed = ev.type === 'desert' ? hasPermission('manage_desert_storm') : hasPermission('manage_canyon_storm');
+      if (!allowed) return showToast('لا تملك صلاحية تسجيل الحضور لهذا الحدث');
+      if (!weeklyEventEnded(ev)) return showToast('خيارات الحضور ستظهر بعد انتهاء الحدث');
+      if (!ev.attendance) ev.attendance = {};
+      ev.attendance[player] = status;
+      logAuditAction('تسجيل حضور حدث أسبوعي', ev.title, `${player}: ${status === 'present' ? 'حضر' : 'لم يحضر'} - ${ev.date}`);
+      persistWeeklyEventChanges(); renderWeeklyAttendancePanel();
+    }
+    function renderWeeklyEventPanels() {
+      ensureWeeklyEventInstances();
+      for (const type of ['desert','canyon']) {
+        const container = document.getElementById(type === 'desert' ? 'weekly-desert-registration' : 'weekly-canyon-registration');
+        if (!container) continue;
+        const ev = nextWeeklyInstance(type); if (!ev) { container.innerHTML=''; continue; }
+        const registered = (ev.participants || []).includes(state.loggedInUserName);
+        const canManage = type === 'desert' ? hasPermission('manage_desert_storm') : hasPermission('manage_canyon_storm');
+        const members = (ev.participants || []).map(name => state.members.find(m => m.name === name) || {name, sq1:0, power:0}).sort((a,b)=>Number(b.sq1||0)-Number(a.sq1||0));
+        const teamsCount = { 'Team A':0, 'Team B':0 };
+        Object.values(ev.teams || {}).forEach(t => { if (teamsCount[t] !== undefined) teamsCount[t]++; });
+        container.innerHTML = `
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div><h4 class="font-black text-white text-sm">${ev.title} — التسجيل الأسبوعي</h4><p class="text-xs text-slate-300 mt-1">${formatWeeklyDate(ev.date)} • الساعة ${ev.time} بتوقيت الرياض</p><p class="text-[10px] text-slate-500 mt-1">موعد أسبوعي ثابت • التاريخ يتحدث تلقائيًا</p></div>
+            <button onclick="toggleWeeklyRegistration('${type}')" class="px-4 py-2 rounded-xl text-xs font-black ${registered ? 'bg-red-500/15 border border-red-500/30 text-red-300' : 'bg-emerald-600 text-white'}">${registered ? 'إلغاء رغبتي بالمشاركة' : 'أرغب بالمشاركة'}</button>
+          </div>
+          <div class="flex flex-wrap gap-2 text-[11px]"><span class="bg-slate-800 rounded-lg px-2 py-1 text-white">الراغبون: ${(ev.participants||[]).length}</span><span class="bg-blue-500/10 border border-blue-500/20 rounded-lg px-2 py-1 text-blue-300">الفريق A: ${teamsCount['Team A']}</span><span class="bg-violet-500/10 border border-violet-500/20 rounded-lg px-2 py-1 text-violet-300">الفريق B: ${teamsCount['Team B']}</span></div>
+          <div class="overflow-x-auto"><table class="w-full text-right text-xs"><thead><tr class="text-slate-400 border-b border-slate-700"><th class="py-2 px-2">العضو</th><th class="py-2 px-2">قوة الفيلق الأول</th><th class="py-2 px-2">الفريق</th></tr></thead><tbody>
+          ${members.length ? members.map(m => `<tr class="border-b border-slate-800"><td class="py-2 px-2 text-white font-bold">${m.name}</td><td class="py-2 px-2 text-amber-300">${Number(m.sq1||0).toFixed(1)}M</td><td class="py-2 px-2">${canManage ? `<select onchange="setWeeklyTeam('${ev.id}','${m.name.replace(/'/g,"\\'")}',this.value)" class="bg-cmd-bg border border-slate-700 rounded-lg p-1.5 text-white"><option value="" ${!ev.teams?.[m.name]?'selected':''}>غير موزع</option><option value="Team A" ${ev.teams?.[m.name]==='Team A'?'selected':''}>الفريق A</option><option value="Team B" ${ev.teams?.[m.name]==='Team B'?'selected':''}>الفريق B</option></select>` : `<span class="${ev.teams?.[m.name] ? 'text-emerald-300' : 'text-slate-500'}">${ev.teams?.[m.name] === 'Team A' ? 'الفريق A' : ev.teams?.[m.name] === 'Team B' ? 'الفريق B' : 'بانتظار التوزيع'}</span>`}</td></tr>`).join('') : '<tr><td colspan="3" class="py-4 text-center text-slate-500">لا يوجد أعضاء سجلوا رغبتهم حتى الآن</td></tr>'}
+          </tbody></table></div>
+          ${canManage && members.length ? `<div class="flex flex-wrap gap-2"><button onclick="sortWeeklyTeamsByPower('${ev.id}')" class="px-3 py-2 rounded-lg bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-[11px] font-bold">اقتراح توزيع متوازن حسب القوة</button><span class="text-[10px] text-slate-500 self-center">يُقترح توزيع متوازن؛ ويمكن تعديل كل عضو يدويًا.</span></div>` : ''}`;
+      }
+    }
+    function sortWeeklyTeamsByPower(eventId) {
+      const ev = state.weeklyEventInstances.find(e => e.id === eventId); if (!ev) return;
+      const typePermission = ev.type === 'desert' ? 'manage_desert_storm' : 'manage_canyon_storm';
+      if (!hasPermission(typePermission)) return showToast('لا تملك صلاحية توزيع المشاركين');
+      const ranked = (ev.participants || []).map(name => ({ name, power:Number((state.members.find(m=>m.name===name)||{}).sq1||0) })).sort((a,b)=>b.power-a.power);
+      let aPower=0,bPower=0; ev.teams = ev.teams || {};
+      ranked.forEach(m => { if (aPower <= bPower) { ev.teams[m.name]='Team A'; aPower+=m.power; } else { ev.teams[m.name]='Team B'; bPower+=m.power; } });
+      logAuditAction('اقتراح توزيع متوازن', ev.title, `A: ${aPower.toFixed(1)}M / B: ${bPower.toFixed(1)}M - ${ev.date}`);
+      persistWeeklyEventChanges(); renderWeeklyEventPanels(); renderWeeklyAttendancePanel();
+      showToast(`تم اقتراح توزيع متوازن: A ${aPower.toFixed(1)}M / B ${bPower.toFixed(1)}M`);
+    }
+    function generalEventStarted(ev) {
+      if (!ev.date) return false;
+      const now = riyadhNowParts(); const todayKey = dateKeyFromParts(now);
+      const time = String(ev.time || '20:00').split(':'); const eventMinutes = Number(time[0]||0)*60 + Number(time[1]||0);
+      return ev.date < todayKey || (ev.date === todayKey && now.hour*60+now.minute >= eventMinutes);
+    }
+    function generalEventEnded(ev) {
+      if (!ev.date) return false;
+      const now = riyadhNowParts(); const todayKey = dateKeyFromParts(now);
+      const time = String(ev.time || '20:00').split(':'); const eventMinutes = Number(time[0]||0)*60 + Number(time[1]||0);
+      return ev.date < todayKey || (ev.date === todayKey && now.hour*60+now.minute >= eventMinutes+30);
+    }
+    function setGeneralEventAttendance(eventId, player, status) {
+      if (!hasPermission('manage_events')) return showToast('لا تملك صلاحية تسجيل حضور الفعاليات');
+      const ev = state.events.find(e => e.id === eventId); if (!ev) return;
+      if (!generalEventEnded(ev)) return showToast('خيارات الحضور ستظهر بعد موعد الفعالية');
+      if (!ev.attendance || typeof ev.attendance !== 'object') ev.attendance = {};
+      ev.attendance[player] = status;
+      logAuditAction('تسجيل حضور فعالية', ev.title, `${player}: ${status === 'present' ? 'حضر' : 'لم يحضر'} - ${ev.date}`);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); pushAllianceStateToCloud();
+      renderWeeklyAttendancePanel(); renderEventsTimeline();
+    }
+    function renderWeeklyAttendancePanel() {
+      ensureWeeklyEventInstances();
+      const container = document.getElementById('weekly-attendance-records'); if (!container) return;
+      const relevant = state.weeklyEventInstances.slice().sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time)).filter(ev => (ev.participants||[]).length || weeklyEventEnded(ev)).slice(0,16);
+      const canSeeAny = hasPermission('manage_desert_storm') || hasPermission('manage_canyon_storm');
+      if (!relevant.length) container.innerHTML='<div class="text-xs text-slate-500 text-center py-4">لا توجد سجلات لعواصف الأسبوع حتى الآن.</div>';
+      else container.innerHTML = relevant.map(ev => {
+        const ended = weeklyEventEnded(ev);
+        const canManage = ev.type === 'desert' ? hasPermission('manage_desert_storm') : hasPermission('manage_canyon_storm');
+        const names = (ev.participants||[]).slice().sort((a,b)=>a.localeCompare(b));
+        const presentCount = names.filter(n=>ev.attendance?.[n]==='present').length;
+        const absentCount = names.filter(n=>ev.attendance?.[n]==='absent').length;
+        return `<div class="rounded-xl border ${ev.type==='desert'?'border-amber-500/25':'border-cyan-500/25'} bg-cmd-bg p-3 space-y-3"><div class="flex flex-wrap justify-between gap-2"><div><h4 class="font-black text-white">${ev.title}</h4><p class="text-[11px] text-slate-300 mt-1">${formatWeeklyDate(ev.date)} • ${ev.time} بتوقيت الرياض</p></div><div class="flex gap-1.5 text-[10px] self-start"><span class="bg-slate-800 rounded px-2 py-1 text-white">المسجلون ${names.length}</span>${ended?`<span class="bg-emerald-500/10 text-emerald-300 rounded px-2 py-1">حضر ${presentCount}</span><span class="bg-red-500/10 text-red-300 rounded px-2 py-1">لم يحضر ${absentCount}</span>`:'<span class="bg-amber-500/10 text-amber-300 rounded px-2 py-1">لم ينتهِ بعد</span>'}</div></div>
+        ${names.length ? `<div class="overflow-x-auto"><table class="w-full text-right text-xs"><thead><tr class="text-slate-400 border-b border-slate-700"><th class="py-2 px-2">الاسم</th><th class="py-2 px-2">قوة الفيلق الأول</th><th class="py-2 px-2">الفريق</th><th class="py-2 px-2">الحضور</th></tr></thead><tbody>${names.map(name=>{const m=state.members.find(x=>x.name===name)||{};const status=ev.attendance?.[name]||'';return `<tr class="border-b border-slate-800"><td class="py-2 px-2 text-white font-bold">${name}</td><td class="py-2 px-2 text-amber-300">${Number(m.sq1||0).toFixed(1)}M</td><td class="py-2 px-2 text-slate-300">${ev.teams?.[name]==='Team A'?'A':ev.teams?.[name]==='Team B'?'B':'—'}</td><td class="py-2 px-2">${ended && canManage ? `<div class="flex gap-1"><button onclick="setWeeklyAttendance('${ev.id}','${name.replace(/'/g,"\\'") }','present')" class="px-2 py-1 rounded ${status==='present'?'bg-emerald-600 text-white':'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20'}">حضر</button><button onclick="setWeeklyAttendance('${ev.id}','${name.replace(/'/g,"\\'") }','absent')" class="px-2 py-1 rounded ${status==='absent'?'bg-red-600 text-white':'bg-red-500/10 text-red-300 border border-red-500/20'}">لم يحضر</button></div>` : `<span class="${status==='present'?'text-emerald-300':status==='absent'?'text-red-300':'text-slate-500'}">${status==='present'?'حضر':status==='absent'?'لم يحضر':ended?'بانتظار تسجيل الحضور':'—'}</span>`}</td></tr>`}).join('')}</tbody></table></div>` : '<p class="text-xs text-slate-500">لا يوجد مسجلون في هذا الموعد.</p>'}
+        ${ended && canManage && names.some(n=>!ev.attendance?.[n]) ? '<p class="text-[10px] text-amber-300">يرجى تحديد حالة كل مسجل: حضر أو لم يحضر.</p>' : ''}</div>`;
+      }).join('');
+      const datedGeneralEvents = (state.events || []).filter(ev => ev.date).slice().sort((a,b)=>(b.date+(b.time||'' )).localeCompare(a.date+(a.time||'')));
+      if (datedGeneralEvents.length) {
+        container.innerHTML += `<div class="pt-2"><h3 class="font-black text-white text-sm mb-2">حضور الفعاليات الأخرى</h3><div class="space-y-3">${datedGeneralEvents.map(ev => {
+          const ended = generalEventEnded(ev); const names = (ev.participants || []).slice(); const present = names.filter(n=>ev.attendance?.[n]==='present').length; const absent = names.filter(n=>ev.attendance?.[n]==='absent').length;
+          return `<div class="rounded-xl border border-slate-700 bg-cmd-bg p-3 space-y-2"><div class="flex flex-wrap justify-between gap-2"><div><h4 class="font-black text-white">${ev.title}</h4><p class="text-[11px] text-slate-300 mt-1">${formatWeeklyDate(ev.date)} • ${ev.time} بتوقيت الرياض</p></div><span class="text-[10px] text-slate-300">المسجلون ${names.length} ${ended?`• حضر ${present} • لم يحضر ${absent}`:'• لم ينتهِ الموعد بعد'}</span></div>${names.length ? `<div class="overflow-x-auto"><table class="w-full text-right text-xs"><thead><tr class="text-slate-400 border-b border-slate-700"><th class="py-2 px-2">الاسم</th><th class="py-2 px-2">الحضور</th></tr></thead><tbody>${names.map(name=>{const status=ev.attendance?.[name]||'';return `<tr class="border-b border-slate-800"><td class="py-2 px-2 text-white font-bold">${name}</td><td class="py-2 px-2">${ended && hasPermission('manage_events') ? `<div class="flex gap-1"><button onclick="setGeneralEventAttendance('${ev.id}','${name.replace(/'/g,"\\'") }','present')" class="px-2 py-1 rounded ${status==='present'?'bg-emerald-600 text-white':'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20'}">حضر</button><button onclick="setGeneralEventAttendance('${ev.id}','${name.replace(/'/g,"\\'") }','absent')" class="px-2 py-1 rounded ${status==='absent'?'bg-red-600 text-white':'bg-red-500/10 text-red-300 border border-red-500/20'}">لم يحضر</button></div>`:`<span class="${status==='present'?'text-emerald-300':status==='absent'?'text-red-300':'text-slate-500'}">${status==='present'?'حضر':status==='absent'?'لم يحضر':ended?'بانتظار تسجيل الحضور':'—'}</span>`}</td></tr>`}).join('')}</tbody></table></div>`:'<p class="text-xs text-slate-500">لا يوجد مسجلون.</p>'}</div>`;
+        }).join('')}</div></div>`;
+      }
+    }
+
     function renderDesertStorm() {
+      const scheduleEvent = nextWeeklyInstance('desert');
+      const scheduleLabel = scheduleEvent ? `${formatWeeklyDate(scheduleEvent.date)} • 23:00 بتوقيت الرياض` : 'الجمعة 23:00 بتوقيت الرياض';
+      const scheduleNode = document.getElementById('ds-battle-time-input'); if (scheduleNode) scheduleNode.textContent = scheduleLabel;
+      const posterTimeNode = document.getElementById('ds-poster-time'); if (posterTimeNode) posterTimeNode.textContent = scheduleLabel;
       const selectedTeam = document.getElementById('ds-team-filter')?.value || 'Team A';
       const allPlayers = getAvailablePlayerNames();
       const playerSelect = document.getElementById('ds-assign-player');
@@ -2183,6 +2379,10 @@
     }
 
     function renderCanyonStorm() {
+      const scheduleEvent = nextWeeklyInstance('canyon');
+      const scheduleLabel = scheduleEvent ? `${formatWeeklyDate(scheduleEvent.date)} • 17:00 بتوقيت الرياض` : 'الخميس 17:00 بتوقيت الرياض';
+      const scheduleNode = document.getElementById('cs-battle-time-input'); if (scheduleNode) scheduleNode.textContent = scheduleLabel;
+      const posterTimeNode = document.getElementById('cs-poster-time'); if (posterTimeNode) posterTimeNode.textContent = scheduleLabel;
       const allPlayers = getAvailablePlayerNames();
       const playerSelect = document.getElementById('cs-assign-player');
       if (playerSelect) playerSelect.innerHTML = allPlayers.map(n => `<option value="${n}">${n}</option>`).join('');
@@ -2245,7 +2445,7 @@
           <div class="bg-cmd-card border border-cmd-border rounded-2xl p-4 space-y-3 text-xs shadow-lg flex flex-col justify-between">
             <div class="space-y-2">
               <div class="flex items-center justify-between">
-                <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px] font-bold">${ev.day} ${ev.time}</span>
+                <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px] font-bold">${ev.date ? formatWeeklyDate(ev.date) : ev.day} • ${ev.time} بتوقيت الرياض</span>
                 <span class="text-slate-400 text-[11px]">المقاعد: <strong class="text-white">${ev.participants.length}/${ev.maxSeats || 30}</strong></span>
               </div>
               <h4 class="font-black text-base text-white">${ev.title}</h4>
@@ -2289,7 +2489,8 @@
       document.getElementById('event-modal-title').textContent = 'إنشاء فعالية جديدة';
       document.getElementById('ev-edit-id').value = '';
       document.getElementById('ev-edit-title').value = '';
-      document.getElementById('ev-edit-day').value = 'السبت';
+      document.getElementById('ev-edit-day').value = 'موعد محدد';
+      document.getElementById('ev-edit-date').value = dateKeyFromParts(riyadhNowParts());
       document.getElementById('ev-edit-time').value = '20:00';
       document.getElementById('ev-edit-seats').value = 30;
       document.getElementById('ev-edit-minpower').value = 0;
@@ -2306,7 +2507,8 @@
       document.getElementById('event-modal-title').textContent = 'تعديل الفعالية';
       document.getElementById('ev-edit-id').value = ev.id;
       document.getElementById('ev-edit-title').value = ev.title;
-      document.getElementById('ev-edit-day').value = ev.day || 'السبت';
+      document.getElementById('ev-edit-day').value = ev.day || 'موعد محدد';
+      document.getElementById('ev-edit-date').value = ev.date || '';
       document.getElementById('ev-edit-time').value = ev.time || '20:00';
       document.getElementById('ev-edit-seats').value = ev.maxSeats || 30;
       document.getElementById('ev-edit-minpower').value = ev.minPower || 0;
@@ -2351,18 +2553,21 @@
       if (!hasPermission('manage_events')) return showToast('لا تملك صلاحية إدارة الفعاليات');
       const id = document.getElementById('ev-edit-id').value;
       const title = document.getElementById('ev-edit-title').value.trim();
-      const day = document.getElementById('ev-edit-day').value.trim() || 'السبت';
+      const day = document.getElementById('ev-edit-day').value.trim() || 'موعد محدد';
+      const date = document.getElementById('ev-edit-date').value;
       const time = document.getElementById('ev-edit-time').value.trim() || '20:00';
       const maxSeats = Number(document.getElementById('ev-edit-seats').value) || 30;
       const minPower = Number(document.getElementById('ev-edit-minpower').value) || 0;
 
       if (!title) return showToast('يرجى إدخال عنوان الفعالية');
+      if (!date) return showToast('يرجى تحديد تاريخ الفعالية');
 
       if (id) {
         const ev = state.events.find(e => e.id === id);
         if (ev) {
           ev.title = title;
           ev.day = day;
+          ev.date = date;
           ev.time = time;
           ev.maxSeats = maxSeats;
           ev.minPower = minPower;
@@ -2374,6 +2579,7 @@
           id: 'ev_' + Date.now(),
           title,
           day,
+          date,
           time,
           maxSeats,
           minPower,
@@ -2395,6 +2601,7 @@
       const ev = state.events.find(e => e.id === evId);
       if (!ev) return;
       const user = state.loggedInUserName || 'Abo S3D';
+      if (ev.date && generalEventStarted(ev)) return showToast('بدأ موعد الفعالية ولا يمكن التسجيل الآن');
       if (ev.participants.includes(user)) {
         ev.participants = ev.participants.filter(p => p !== user);
         showToast('تم إلغاء تسجيلك في الفعالية');
@@ -3022,6 +3229,8 @@
       renderRoster();
       renderDesertStorm();
       renderCanyonStorm();
+      renderWeeklyEventPanels();
+      renderWeeklyAttendancePanel();
       renderEventsTimeline();
       renderPolls();
       renderTrainTab();

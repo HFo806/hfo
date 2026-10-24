@@ -2294,9 +2294,69 @@
           </tbody></table></div></div>
           <div class="pt-2 border-t border-slate-700"><div class="flex items-center justify-between gap-2 mb-2"><h5 class="text-xs font-black text-amber-300">قائمة الاحتياط</h5><span class="text-[10px] text-slate-500">لا يُضاف الاحتياط إلى أي فريق إلا باختيار الإدارة</span></div>
           ${reserves.length ? `<div class="overflow-x-auto"><table class="w-full text-right text-xs"><thead><tr class="text-slate-400 border-b border-slate-700"><th class="py-2 px-2">العضو</th><th class="py-2 px-2">قوة الفيلق الأول</th><th class="py-2 px-2">إضافة إلى الفريق</th></tr></thead><tbody>${reserves.map(m=>`<tr class="border-b border-slate-800"><td class="py-2 px-2 text-white font-bold">${m.name}</td><td class="py-2 px-2 text-amber-300">${Number(m.sq1||0).toFixed(1)}M</td><td class="py-2 px-2">${canManage?`<div class="flex gap-1.5 items-center"><select id="reserve-team-${ev.id}-${encodeURIComponent(m.name)}" class="bg-cmd-bg border border-slate-700 rounded-lg p-1.5 text-white"><option value="Team A">الفريق A</option><option value="Team B">الفريق B</option></select><button onclick="promoteWeeklyReserve('${ev.id}','${m.name.replace(/'/g,"\'")}',document.getElementById('reserve-team-${ev.id}-${encodeURIComponent(m.name)}').value)" class="px-2 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-black">إضافة</button></div>`:'<span class="text-amber-300">احتياط</span>'}</td></tr>`).join('')}</tbody></table></div>`:'<p class="text-xs text-slate-500">لا يوجد أعضاء في قائمة الاحتياط.</p>'}</div>
-          ${canManage && members.length ? `<div class="flex flex-wrap gap-2"><button onclick="sortWeeklyTeamsByPower('${ev.id}')" class="px-3 py-2 rounded-lg bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-[11px] font-bold">اقتراح توزيع متوازن حسب القوة</button><span class="text-[10px] text-slate-500 self-center">يشمل الأساسيين فقط؛ الاحتياط يبقى مستقلًا حتى تختاره الإدارة.</span></div>` : ''}`;
+          ${canManage && members.length ? `<div class="flex flex-wrap gap-2"><button onclick="sortWeeklyTeamsByPower('${ev.id}')" class="px-3 py-2 rounded-lg bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-[11px] font-bold">اقتراح توزيع متوازن حسب القوة</button><span class="text-[10px] text-slate-500 self-center">يشمل الأساسيين فقط؛ الاحتياط يبقى مستقلًا حتى تختاره الإدارة.</span></div>` : ''}
+          ${(hasPermission('export_battle_plans') || hasPermission('send_notifications')) ? `<div class="pt-3 mt-2 border-t border-slate-700 space-y-2"><h5 class="text-xs font-black text-white">تصدير ونشر القوائم</h5><p class="text-[10px] text-slate-400">كل قائمة مستقلة: الفريق A، الفريق B، أو الاحتياط. النشر يرسل تفاصيل القائمة إلى قنوات Telegram وDiscord المرتبطة بالخادم.</p><div class="flex flex-wrap gap-2">${hasPermission('export_battle_plans') ? `<button onclick="exportWeeklyRosterPNG('${ev.id}','Team A')" class="px-3 py-2 rounded-lg bg-blue-500/15 border border-blue-500/30 text-blue-200 text-[11px] font-bold">🖼️ صورة الفريق A</button><button onclick="exportWeeklyRosterPNG('${ev.id}','Team B')" class="px-3 py-2 rounded-lg bg-violet-500/15 border border-violet-500/30 text-violet-200 text-[11px] font-bold">🖼️ صورة الفريق B</button><button onclick="exportWeeklyRosterPNG('${ev.id}','Reserve')" class="px-3 py-2 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-200 text-[11px] font-bold">🖼️ صورة الاحتياط</button>` : ''}${hasPermission('send_notifications') ? `<button onclick="publishWeeklyRoster('${ev.id}','Team A')" class="px-3 py-2 rounded-lg bg-sky-600 text-white text-[11px] font-bold">نشر الفريق A</button><button onclick="publishWeeklyRoster('${ev.id}','Team B')" class="px-3 py-2 rounded-lg bg-indigo-600 text-white text-[11px] font-bold">نشر الفريق B</button><button onclick="publishWeeklyRoster('${ev.id}','Reserve')" class="px-3 py-2 rounded-lg bg-amber-600 text-slate-950 text-[11px] font-bold">نشر الاحتياط</button>` : ''}</div></div>` : ''}`;
       }
     }
+
+    function getWeeklyRosterData(eventId, rosterType) {
+      const ev = (state.weeklyEventInstances || []).find(e => e.id === eventId);
+      if (!ev) return null;
+      const names = (ev.participants || []).filter(name => {
+        const type = ev.participantTypes?.[name] || 'main';
+        if (rosterType === 'Reserve') return type === 'reserve';
+        return type !== 'reserve' && ev.teams?.[name] === rosterType;
+      }).map(name => {
+        const member = (state.members || []).find(m => m.name === name) || {};
+        return { name, power: Number(member.sq1 || 0) };
+      }).sort((a,b) => b.power - a.power || a.name.localeCompare(b.name));
+      return { ev, rosterType, rows: names, totalPower: names.reduce((sum,m)=>sum+m.power,0) };
+    }
+
+    async function exportWeeklyRosterPNG(eventId, rosterType) {
+      if (!hasPermission('export_battle_plans')) return showToast('لا تملك صلاحية تصدير الخطط');
+      if (typeof html2canvas === 'undefined') return showToast('تعذر تحميل أداة تصدير الصور؛ حدّث الصفحة وحاول مجددًا');
+      const data = getWeeklyRosterData(eventId, rosterType);
+      if (!data) return showToast('تعذر العثور على الحدث');
+      const label = rosterType === 'Reserve' ? 'قائمة الاحتياط' : rosterType === 'Team A' ? 'الفريق A' : 'الفريق B';
+      const card = document.createElement('div');
+      card.dir = 'rtl';
+      card.style.cssText = 'position:fixed;left:-12000px;top:0;width:1000px;padding:38px;background:#0b1220;color:#f8fafc;font-family:Tahoma,Arial,sans-serif;box-sizing:border-box;border:4px solid '+(rosterType==='Reserve'?'#f59e0b':rosterType==='Team A'?'#38bdf8':'#a78bfa')+';';
+      const header = document.createElement('div');
+      header.style.cssText='display:flex;justify-content:space-between;align-items:center;gap:20px;padding:22px 24px;margin-bottom:22px;background:#172033;border-radius:16px;border:1px solid #334155;';
+      const headingWrap=document.createElement('div');
+      const heading=document.createElement('div'); heading.textContent='HFO • SERVER 806'; heading.style.cssText='font-size:20px;font-weight:900;color:#fbbf24;margin-bottom:10px;';
+      const title=document.createElement('div'); title.textContent=data.ev.title+' — '+label; title.style.cssText='font-size:30px;font-weight:900;';
+      const date=document.createElement('div'); date.textContent=formatWeeklyDate(data.ev.date)+' • '+data.ev.time+' بتوقيت الرياض'; date.style.cssText='font-size:17px;color:#cbd5e1;margin-top:9px;';
+      headingWrap.append(heading,title,date);
+      const meta=document.createElement('div'); meta.style.cssText='text-align:left;font-size:18px;line-height:1.9;color:#cbd5e1;';
+      const count=document.createElement('div'); count.textContent='عدد الأعضاء: '+data.rows.length;
+      const power=document.createElement('div'); power.textContent='إجمالي قوة الفيلق الأول: '+data.totalPower.toFixed(1)+'M';
+      meta.append(count,power); header.append(headingWrap,meta); card.append(header);
+      const table=document.createElement('table'); table.style.cssText='width:100%;border-collapse:collapse;font-size:22px;';
+      const thead=document.createElement('thead'); const hr=document.createElement('tr');
+      ['#','اسم العضو','قوة الفيلق الأول'].forEach((txt,i)=>{const th=document.createElement('th');th.textContent=txt;th.style.cssText='padding:16px;text-align:right;background:#1e293b;color:#fbbf24;border-bottom:2px solid #475569;';hr.append(th);}); thead.append(hr);table.append(thead);
+      const tbody=document.createElement('tbody');
+      if (!data.rows.length) { const tr=document.createElement('tr');const td=document.createElement('td');td.colSpan=3;td.textContent='لا يوجد أعضاء في هذه القائمة';td.style.cssText='padding:28px;text-align:center;color:#94a3b8;';tr.append(td);tbody.append(tr); }
+      data.rows.forEach((m,i)=>{const tr=document.createElement('tr');tr.style.background=i%2?'#111b2c':'#0f172a';[String(i+1),m.name,m.power.toFixed(1)+'M'].forEach((txt,j)=>{const td=document.createElement('td');td.textContent=txt;td.style.cssText='padding:16px;border-bottom:1px solid #334155;'+(j===2?'color:#fbbf24;font-weight:900;':'');tr.append(td);});tbody.append(tr);});table.append(tbody);card.append(table);
+      const footer=document.createElement('div');footer.textContent='806 Abo S3D - HFo • HFO';footer.style.cssText='text-align:center;margin-top:22px;color:#94a3b8;font-size:15px;font-weight:bold;';card.append(footer);document.body.append(card);
+      try { showToast('جاري تجهيز صورة القائمة...'); const canvas=await html2canvas(card,{backgroundColor:'#0b1220',scale:2,useCORS:true});const link=document.createElement('a');const slug=rosterType==='Reserve'?'Reserve':rosterType.replace(' ','-');link.download='HFO-806-'+(data.ev.type==='desert'?'Desert':'Canyon')+'-'+slug+'-'+data.ev.date+'.png';link.href=canvas.toDataURL('image/png');link.click();logAuditAction('تصدير قائمة حدث كصورة',data.ev.title,`${label} - ${data.ev.date} - ${data.rows.length} أعضاء`);showToast('تم تصدير صورة '+label+' بنجاح'); } catch(err) { console.error(err);showToast('تعذر تصدير الصورة؛ حاول مرة أخرى'); } finally { card.remove(); }
+    }
+
+    async function publishWeeklyRoster(eventId, rosterType) {
+      if (!hasPermission('send_notifications')) return showToast('لا تملك صلاحية نشر القوائم على Telegram وDiscord');
+      const data = getWeeklyRosterData(eventId, rosterType); if (!data) return showToast('تعذر العثور على الحدث');
+      const label = rosterType === 'Reserve' ? 'قائمة الاحتياط' : rosterType === 'Team A' ? 'الفريق A' : 'الفريق B';
+      const lines = data.rows.length ? data.rows.map((m,i)=>`${i+1}. ${m.name} — قوة الفيلق الأول ${m.power.toFixed(1)}M`) : ['لا يوجد أعضاء مسجلون في هذه القائمة حاليًا.'];
+      const details = `📌 ${data.ev.title} — ${label}\n📅 ${formatWeeklyDate(data.ev.date)} | ${data.ev.time} بتوقيت الرياض\n👥 العدد: ${data.rows.length} | إجمالي قوة الفيلق الأول: ${data.totalPower.toFixed(1)}M\n\n${lines.join('\n')}\n\nHFO • Server 806`;
+      showToast('جاري إرسال القائمة إلى Telegram وDiscord...');
+      const result = await sendAllianceExternalAlert(`${data.ev.title} — ${label}`, details, rosterType==='Reserve'?0xf59e0b:rosterType==='Team A'?0x38bdf8:0xa78bfa);
+      if (!result) return showToast('لم يصل تأكيد من خادم التنبيهات؛ تحقق من إعدادات /api/alert');
+      if (result.success === false || result.ok === false || result.error) return showToast('تعذر نشر القائمة: '+(result.message || result.error || 'خطأ من الخادم'));
+      logAuditAction('نشر قائمة حدث على Telegram وDiscord',data.ev.title,`${label} - ${data.ev.date} - ${data.rows.length} أعضاء`);
+      showToast('تم إرسال طلب نشر '+label+' إلى خادم Telegram وDiscord');
+    }
+
     function sortWeeklyTeamsByPower(eventId) {
       const ev = state.weeklyEventInstances.find(e => e.id === eventId); if (!ev) return;
       const typePermission = ev.type === 'desert' ? 'manage_desert_storm' : 'manage_canyon_storm';

@@ -2170,7 +2170,7 @@
           const d = new Date(todayUtc.getTime()); d.setUTCDate(d.getUTCDate() + offset + week*7);
           const date = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
           const id = `weekly_${type}_${date}`;
-          if (!state.weeklyEventInstances.some(x => x.id === id)) { state.weeklyEventInstances.push({ id, type, title:cfg.title, date, time:cfg.time, participants:[], teams:{}, attendance:{}, createdAt:new Date().toISOString() }); addedAny = true; }
+          if (!state.weeklyEventInstances.some(x => x.id === id)) { state.weeklyEventInstances.push({ id, type, title:cfg.title, date, time:cfg.time, participants:[], participantTypes:{}, teams:{}, attendance:{}, createdAt:new Date().toISOString() }); addedAny = true; }
         }
       }
       state.weeklyEventInstances.sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time));
@@ -2198,24 +2198,36 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       pushAllianceStateToCloud();
     }
-    function toggleWeeklyRegistration(type) {
+    function registerWeeklyParticipation(type, preference) {
       if (!hasPermission('register_events')) return showToast('لا تملك صلاحية التسجيل في الفعاليات');
+      if (!['main','reserve'].includes(preference)) return showToast('اختر أساسي أو احتياط');
       ensureWeeklyEventInstances();
       const ev = nextWeeklyInstance(type); if (!ev) return showToast('تعذر تحميل موعد الحدث');
       if (weeklyEventStarted(ev)) return showToast('أُغلق التسجيل لأن موعد الحدث بدأ بالفعل');
       const name = state.loggedInUserName || 'Abo S3D';
       if (!Array.isArray(ev.participants)) ev.participants = [];
-      if (ev.participants.includes(name)) {
-        ev.participants = ev.participants.filter(n => n !== name);
-        delete ev.teams[name]; delete ev.attendance[name];
-        logAuditAction('إلغاء تسجيل حدث أسبوعي', ev.title, `${name} - ${ev.date}`);
-        showToast('تم إلغاء رغبتك في المشاركة');
-      } else {
-        ev.participants.push(name);
-        logAuditAction('تسجيل حدث أسبوعي', ev.title, `${name} - ${ev.date}`);
-        showToast('تم تسجيل رغبتك في المشاركة، وستحدد الإدارة الفريق لاحقًا');
-      }
+      if (!ev.participantTypes || typeof ev.participantTypes !== 'object') ev.participantTypes = {};
+      if (!ev.participants.includes(name)) ev.participants.push(name);
+      ev.participantTypes[name] = preference;
+      if (preference === 'reserve') delete ev.teams?.[name];
+      logAuditAction('تسجيل/تحديث رغبة حدث أسبوعي', ev.title, `${name} - ${preference === 'reserve' ? 'احتياط' : 'أساسي'} - ${ev.date}`);
       persistWeeklyEventChanges(); renderWeeklyEventPanels(); renderWeeklyAttendancePanel();
+      showToast(preference === 'reserve' ? 'تم تسجيلك ضمن قائمة الاحتياط' : 'تم تسجيلك ضمن الأساسيين، وستحدد الإدارة الفريق');
+    }
+    function cancelWeeklyRegistration(type) {
+      if (!hasPermission('register_events')) return showToast('لا تملك صلاحية إلغاء التسجيل');
+      ensureWeeklyEventInstances();
+      const ev = nextWeeklyInstance(type); if (!ev) return showToast('تعذر تحميل موعد الحدث');
+      if (weeklyEventStarted(ev)) return showToast('أُغلق إلغاء التسجيل لأن موعد الحدث بدأ بالفعل');
+      const name = state.loggedInUserName || 'Abo S3D';
+      if (!(ev.participants || []).includes(name)) return;
+      ev.participants = ev.participants.filter(n => n !== name);
+      if (ev.participantTypes) delete ev.participantTypes[name];
+      if (ev.teams) delete ev.teams[name];
+      if (ev.attendance) delete ev.attendance[name];
+      logAuditAction('إلغاء تسجيل حدث أسبوعي', ev.title, `${name} - ${ev.date}`);
+      persistWeeklyEventChanges(); renderWeeklyEventPanels(); renderWeeklyAttendancePanel();
+      showToast('تم إلغاء تسجيلك في الحدث');
     }
     function setWeeklyTeam(eventId, player, team) {
       const ev = state.weeklyEventInstances.find(e => e.id === eventId); if (!ev) return;
@@ -2225,6 +2237,21 @@
       if (!team) delete ev.teams[player]; else ev.teams[player] = team;
       logAuditAction('توزيع مشارك في حدث أسبوعي', ev.title, `${player} → ${team || 'غير موزع'} - ${ev.date}`);
       persistWeeklyEventChanges(); renderWeeklyEventPanels(); renderWeeklyAttendancePanel();
+    }
+    function promoteWeeklyReserve(eventId, player, team) {
+      const ev = state.weeklyEventInstances.find(e => e.id === eventId); if (!ev) return;
+      const allowed = ev.type === 'desert' ? hasPermission('manage_desert_storm') : hasPermission('manage_canyon_storm');
+      if (!allowed) return showToast('لا تملك صلاحية إدارة الاحتياط');
+      if (!['Team A','Team B'].includes(team)) return showToast('اختر الفريق A أو B');
+      if (!(ev.participants || []).includes(player)) return showToast('العضو غير موجود ضمن المسجلين');
+      if (!ev.participantTypes || typeof ev.participantTypes !== 'object') ev.participantTypes = {};
+      if (ev.participantTypes[player] !== 'reserve') return showToast('هذا العضو ليس ضمن قائمة الاحتياط');
+      ev.teams = ev.teams || {};
+      ev.teams[player] = team;
+      ev.participantTypes[player] = 'main';
+      logAuditAction('ترقية احتياط إلى أساسي', ev.title, `${player} → ${team === 'Team A' ? 'الفريق A' : 'الفريق B'} - ${ev.date}`);
+      persistWeeklyEventChanges(); renderWeeklyEventPanels(); renderWeeklyAttendancePanel();
+      showToast(`تمت إضافة ${player} إلى ${team === 'Team A' ? 'الفريق A' : 'الفريق B'}`);
     }
     function setWeeklyAttendance(eventId, player, status) {
       const ev = state.weeklyEventInstances.find(e => e.id === eventId); if (!ev) return;
@@ -2242,28 +2269,39 @@
         const container = document.getElementById(type === 'desert' ? 'weekly-desert-registration' : 'weekly-canyon-registration');
         if (!container) continue;
         const ev = nextWeeklyInstance(type); if (!ev) { container.innerHTML=''; continue; }
-        const registered = (ev.participants || []).includes(state.loggedInUserName);
+        if (!ev.participantTypes || typeof ev.participantTypes !== 'object') ev.participantTypes = {};
+        (ev.participants || []).forEach(name => { if (!ev.participantTypes[name]) ev.participantTypes[name] = 'main'; });
+        const name = state.loggedInUserName || 'Abo S3D';
+        const registered = (ev.participants || []).includes(name);
+        const myPreference = ev.participantTypes[name] || 'main';
         const canManage = type === 'desert' ? hasPermission('manage_desert_storm') : hasPermission('manage_canyon_storm');
-        const members = (ev.participants || []).map(name => state.members.find(m => m.name === name) || {name, sq1:0, power:0}).sort((a,b)=>Number(b.sq1||0)-Number(a.sq1||0));
+        const members = (ev.participants || []).filter(n => (ev.participantTypes[n] || 'main') !== 'reserve').map(n => state.members.find(m => m.name === n) || {name:n,sq1:0,power:0}).sort((a,b)=>Number(b.sq1||0)-Number(a.sq1||0));
+        const reserves = (ev.participants || []).filter(n => ev.participantTypes[n] === 'reserve').map(n => state.members.find(m => m.name === n) || {name:n,sq1:0,power:0}).sort((a,b)=>Number(b.sq1||0)-Number(a.sq1||0));
         const teamsCount = { 'Team A':0, 'Team B':0 };
-        Object.values(ev.teams || {}).forEach(t => { if (teamsCount[t] !== undefined) teamsCount[t]++; });
+        members.forEach(m => { const t=ev.teams?.[m.name]; if (teamsCount[t] !== undefined) teamsCount[t]++; });
         container.innerHTML = `
           <div class="flex flex-wrap items-start justify-between gap-3">
-            <div><h4 class="font-black text-white text-sm">${ev.title} — التسجيل الأسبوعي</h4><p class="text-xs text-slate-300 mt-1">${formatWeeklyDate(ev.date)} • الساعة ${ev.time} بتوقيت الرياض</p><p class="text-[10px] text-slate-500 mt-1">موعد أسبوعي ثابت • التاريخ يتحدث تلقائيًا</p></div>
-            <button onclick="toggleWeeklyRegistration('${type}')" class="px-4 py-2 rounded-xl text-xs font-black ${registered ? 'bg-red-500/15 border border-red-500/30 text-red-300' : 'bg-emerald-600 text-white'}">${registered ? 'إلغاء رغبتي بالمشاركة' : 'أرغب بالمشاركة'}</button>
+            <div><h4 class="font-black text-white text-sm">${ev.title} — التسجيل الأسبوعي</h4><p class="text-xs text-slate-300 mt-1">${formatWeeklyDate(ev.date)} • الساعة ${ev.time} بتوقيت الرياض</p><p class="text-[10px] text-slate-500 mt-1">اختر نوع تسجيلك؛ التوزيع على A وB من اختصاص الإدارة.</p></div>
+            <div class="flex flex-wrap gap-2">
+              <button ${registered && myPreference==='main'?'disabled':''} onclick="registerWeeklyParticipation('${type}','main')" class="px-3 py-2 rounded-xl text-xs font-black ${registered && myPreference==='main'?'bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 opacity-80':'bg-emerald-600 text-white'}">${registered && myPreference==='main'?'✓ مسجل أساسي':'تسجيل أساسي'}</button>
+              <button ${registered && myPreference==='reserve'?'disabled':''} onclick="registerWeeklyParticipation('${type}','reserve')" class="px-3 py-2 rounded-xl text-xs font-black ${registered && myPreference==='reserve'?'bg-amber-500/20 border border-amber-500/40 text-amber-300 opacity-80':'bg-amber-500/15 border border-amber-500/30 text-amber-300'}">${registered && myPreference==='reserve'?'✓ مسجل احتياط':'تسجيل احتياط'}</button>
+              ${registered && !weeklyEventStarted(ev)?`<button onclick="cancelWeeklyRegistration('${type}')" class="px-3 py-2 rounded-xl text-xs font-bold bg-red-500/10 border border-red-500/25 text-red-300">إلغاء التسجيل</button>`:''}
+            </div>
           </div>
-          <div class="flex flex-wrap gap-2 text-[11px]"><span class="bg-slate-800 rounded-lg px-2 py-1 text-white">الراغبون: ${(ev.participants||[]).length}</span><span class="bg-blue-500/10 border border-blue-500/20 rounded-lg px-2 py-1 text-blue-300">الفريق A: ${teamsCount['Team A']}</span><span class="bg-violet-500/10 border border-violet-500/20 rounded-lg px-2 py-1 text-violet-300">الفريق B: ${teamsCount['Team B']}</span></div>
-          <div class="overflow-x-auto"><table class="w-full text-right text-xs"><thead><tr class="text-slate-400 border-b border-slate-700"><th class="py-2 px-2">العضو</th><th class="py-2 px-2">قوة الفيلق الأول</th><th class="py-2 px-2">الفريق</th></tr></thead><tbody>
-          ${members.length ? members.map(m => `<tr class="border-b border-slate-800"><td class="py-2 px-2 text-white font-bold">${m.name}</td><td class="py-2 px-2 text-amber-300">${Number(m.sq1||0).toFixed(1)}M</td><td class="py-2 px-2">${canManage ? `<select onchange="setWeeklyTeam('${ev.id}','${m.name.replace(/'/g,"\\'")}',this.value)" class="bg-cmd-bg border border-slate-700 rounded-lg p-1.5 text-white"><option value="" ${!ev.teams?.[m.name]?'selected':''}>غير موزع</option><option value="Team A" ${ev.teams?.[m.name]==='Team A'?'selected':''}>الفريق A</option><option value="Team B" ${ev.teams?.[m.name]==='Team B'?'selected':''}>الفريق B</option></select>` : `<span class="${ev.teams?.[m.name] ? 'text-emerald-300' : 'text-slate-500'}">${ev.teams?.[m.name] === 'Team A' ? 'الفريق A' : ev.teams?.[m.name] === 'Team B' ? 'الفريق B' : 'بانتظار التوزيع'}</span>`}</td></tr>`).join('') : '<tr><td colspan="3" class="py-4 text-center text-slate-500">لا يوجد أعضاء سجلوا رغبتهم حتى الآن</td></tr>'}
-          </tbody></table></div>
-          ${canManage && members.length ? `<div class="flex flex-wrap gap-2"><button onclick="sortWeeklyTeamsByPower('${ev.id}')" class="px-3 py-2 rounded-lg bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-[11px] font-bold">اقتراح توزيع متوازن حسب القوة</button><span class="text-[10px] text-slate-500 self-center">يُقترح توزيع متوازن؛ ويمكن تعديل كل عضو يدويًا.</span></div>` : ''}`;
+          <div class="flex flex-wrap gap-2 text-[11px]"><span class="bg-slate-800 rounded-lg px-2 py-1 text-white">الأساسيون: ${members.length}</span><span class="bg-amber-500/10 border border-amber-500/20 rounded-lg px-2 py-1 text-amber-300">الاحتياط: ${reserves.length}</span><span class="bg-blue-500/10 border border-blue-500/20 rounded-lg px-2 py-1 text-blue-300">الفريق A: ${teamsCount['Team A']}</span><span class="bg-violet-500/10 border border-violet-500/20 rounded-lg px-2 py-1 text-violet-300">الفريق B: ${teamsCount['Team B']}</span></div>
+          <div><h5 class="text-xs font-black text-white mb-2">قائمة الأساسيين</h5><div class="overflow-x-auto"><table class="w-full text-right text-xs"><thead><tr class="text-slate-400 border-b border-slate-700"><th class="py-2 px-2">العضو</th><th class="py-2 px-2">قوة الفيلق الأول</th><th class="py-2 px-2">الفريق</th></tr></thead><tbody>
+          ${members.length ? members.map(m => `<tr class="border-b border-slate-800"><td class="py-2 px-2 text-white font-bold">${m.name}</td><td class="py-2 px-2 text-amber-300">${Number(m.sq1||0).toFixed(1)}M</td><td class="py-2 px-2">${canManage ? `<select onchange="setWeeklyTeam('${ev.id}','${m.name.replace(/'/g,"\'")}',this.value)" class="bg-cmd-bg border border-slate-700 rounded-lg p-1.5 text-white"><option value="" ${!ev.teams?.[m.name]?'selected':''}>غير موزع</option><option value="Team A" ${ev.teams?.[m.name]==='Team A'?'selected':''}>الفريق A</option><option value="Team B" ${ev.teams?.[m.name]==='Team B'?'selected':''}>الفريق B</option></select>` : `<span class="${ev.teams?.[m.name] ? 'text-emerald-300' : 'text-slate-500'}">${ev.teams?.[m.name] === 'Team A' ? 'الفريق A' : ev.teams?.[m.name] === 'Team B' ? 'الفريق B' : 'بانتظار التوزيع'}</span>`}</td></tr>`).join('') : '<tr><td colspan="3" class="py-4 text-center text-slate-500">لا يوجد أعضاء سجلوا كأساسيين حتى الآن</td></tr>'}
+          </tbody></table></div></div>
+          <div class="pt-2 border-t border-slate-700"><div class="flex items-center justify-between gap-2 mb-2"><h5 class="text-xs font-black text-amber-300">قائمة الاحتياط</h5><span class="text-[10px] text-slate-500">لا يُضاف الاحتياط إلى أي فريق إلا باختيار الإدارة</span></div>
+          ${reserves.length ? `<div class="overflow-x-auto"><table class="w-full text-right text-xs"><thead><tr class="text-slate-400 border-b border-slate-700"><th class="py-2 px-2">العضو</th><th class="py-2 px-2">قوة الفيلق الأول</th><th class="py-2 px-2">إضافة إلى الفريق</th></tr></thead><tbody>${reserves.map(m=>`<tr class="border-b border-slate-800"><td class="py-2 px-2 text-white font-bold">${m.name}</td><td class="py-2 px-2 text-amber-300">${Number(m.sq1||0).toFixed(1)}M</td><td class="py-2 px-2">${canManage?`<div class="flex gap-1.5 items-center"><select id="reserve-team-${ev.id}-${encodeURIComponent(m.name)}" class="bg-cmd-bg border border-slate-700 rounded-lg p-1.5 text-white"><option value="Team A">الفريق A</option><option value="Team B">الفريق B</option></select><button onclick="promoteWeeklyReserve('${ev.id}','${m.name.replace(/'/g,"\'")}',document.getElementById('reserve-team-${ev.id}-${encodeURIComponent(m.name)}').value)" class="px-2 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-black">إضافة</button></div>`:'<span class="text-amber-300">احتياط</span>'}</td></tr>`).join('')}</tbody></table></div>`:'<p class="text-xs text-slate-500">لا يوجد أعضاء في قائمة الاحتياط.</p>'}</div>
+          ${canManage && members.length ? `<div class="flex flex-wrap gap-2"><button onclick="sortWeeklyTeamsByPower('${ev.id}')" class="px-3 py-2 rounded-lg bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-[11px] font-bold">اقتراح توزيع متوازن حسب القوة</button><span class="text-[10px] text-slate-500 self-center">يشمل الأساسيين فقط؛ الاحتياط يبقى مستقلًا حتى تختاره الإدارة.</span></div>` : ''}`;
       }
     }
     function sortWeeklyTeamsByPower(eventId) {
       const ev = state.weeklyEventInstances.find(e => e.id === eventId); if (!ev) return;
       const typePermission = ev.type === 'desert' ? 'manage_desert_storm' : 'manage_canyon_storm';
       if (!hasPermission(typePermission)) return showToast('لا تملك صلاحية توزيع المشاركين');
-      const ranked = (ev.participants || []).map(name => ({ name, power:Number((state.members.find(m=>m.name===name)||{}).sq1||0) })).sort((a,b)=>b.power-a.power);
+      const ranked = (ev.participants || []).filter(name => (ev.participantTypes?.[name] || 'main') !== 'reserve').map(name => ({ name, power:Number((state.members.find(m=>m.name===name)||{}).sq1||0) })).sort((a,b)=>b.power-a.power);
       let aPower=0,bPower=0; ev.teams = ev.teams || {};
       ranked.forEach(m => { if (aPower <= bPower) { ev.teams[m.name]='Team A'; aPower+=m.power; } else { ev.teams[m.name]='Team B'; bPower+=m.power; } });
       logAuditAction('اقتراح توزيع متوازن', ev.title, `A: ${aPower.toFixed(1)}M / B: ${bPower.toFixed(1)}M - ${ev.date}`);
@@ -2302,11 +2340,13 @@
         const ended = weeklyEventEnded(ev);
         const canManage = ev.type === 'desert' ? hasPermission('manage_desert_storm') : hasPermission('manage_canyon_storm');
         const names = (ev.participants||[]).slice().sort((a,b)=>a.localeCompare(b));
-        const presentCount = names.filter(n=>ev.attendance?.[n]==='present').length;
-        const absentCount = names.filter(n=>ev.attendance?.[n]==='absent').length;
-        return `<div class="rounded-xl border ${ev.type==='desert'?'border-amber-500/25':'border-cyan-500/25'} bg-cmd-bg p-3 space-y-3"><div class="flex flex-wrap justify-between gap-2"><div><h4 class="font-black text-white">${ev.title}</h4><p class="text-[11px] text-slate-300 mt-1">${formatWeeklyDate(ev.date)} • ${ev.time} بتوقيت الرياض</p></div><div class="flex gap-1.5 text-[10px] self-start"><span class="bg-slate-800 rounded px-2 py-1 text-white">المسجلون ${names.length}</span>${ended?`<span class="bg-emerald-500/10 text-emerald-300 rounded px-2 py-1">حضر ${presentCount}</span><span class="bg-red-500/10 text-red-300 rounded px-2 py-1">لم يحضر ${absentCount}</span>`:'<span class="bg-amber-500/10 text-amber-300 rounded px-2 py-1">لم ينتهِ بعد</span>'}</div></div>
-        ${names.length ? `<div class="overflow-x-auto"><table class="w-full text-right text-xs"><thead><tr class="text-slate-400 border-b border-slate-700"><th class="py-2 px-2">الاسم</th><th class="py-2 px-2">قوة الفيلق الأول</th><th class="py-2 px-2">الفريق</th><th class="py-2 px-2">الحضور</th></tr></thead><tbody>${names.map(name=>{const m=state.members.find(x=>x.name===name)||{};const status=ev.attendance?.[name]||'';return `<tr class="border-b border-slate-800"><td class="py-2 px-2 text-white font-bold">${name}</td><td class="py-2 px-2 text-amber-300">${Number(m.sq1||0).toFixed(1)}M</td><td class="py-2 px-2 text-slate-300">${ev.teams?.[name]==='Team A'?'A':ev.teams?.[name]==='Team B'?'B':'—'}</td><td class="py-2 px-2">${ended && canManage ? `<div class="flex gap-1"><button onclick="setWeeklyAttendance('${ev.id}','${name.replace(/'/g,"\\'") }','present')" class="px-2 py-1 rounded ${status==='present'?'bg-emerald-600 text-white':'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20'}">حضر</button><button onclick="setWeeklyAttendance('${ev.id}','${name.replace(/'/g,"\\'") }','absent')" class="px-2 py-1 rounded ${status==='absent'?'bg-red-600 text-white':'bg-red-500/10 text-red-300 border border-red-500/20'}">لم يحضر</button></div>` : `<span class="${status==='present'?'text-emerald-300':status==='absent'?'text-red-300':'text-slate-500'}">${status==='present'?'حضر':status==='absent'?'لم يحضر':ended?'بانتظار تسجيل الحضور':'—'}</span>`}</td></tr>`}).join('')}</tbody></table></div>` : '<p class="text-xs text-slate-500">لا يوجد مسجلون في هذا الموعد.</p>'}
-        ${ended && canManage && names.some(n=>!ev.attendance?.[n]) ? '<p class="text-[10px] text-amber-300">يرجى تحديد حالة كل مسجل: حضر أو لم يحضر.</p>' : ''}</div>`;
+        const activeNames = names.filter(n => (ev.participantTypes?.[n] || 'main') !== 'reserve');
+        const reserveCount = names.length - activeNames.length;
+        const presentCount = activeNames.filter(n=>ev.attendance?.[n]==='present').length;
+        const absentCount = activeNames.filter(n=>ev.attendance?.[n]==='absent').length;
+        return `<div class="rounded-xl border ${ev.type==='desert'?'border-amber-500/25':'border-cyan-500/25'} bg-cmd-bg p-3 space-y-3"><div class="flex flex-wrap justify-between gap-2"><div><h4 class="font-black text-white">${ev.title}</h4><p class="text-[11px] text-slate-300 mt-1">${formatWeeklyDate(ev.date)} • ${ev.time} بتوقيت الرياض</p></div><div class="flex gap-1.5 text-[10px] self-start"><span class="bg-slate-800 rounded px-2 py-1 text-white">المسجلون ${names.length}</span>${reserveCount?`<span class="bg-amber-500/10 text-amber-300 rounded px-2 py-1">احتياط ${reserveCount}</span>`:''}${ended?`<span class="bg-emerald-500/10 text-emerald-300 rounded px-2 py-1">حضر ${presentCount}</span><span class="bg-red-500/10 text-red-300 rounded px-2 py-1">لم يحضر ${absentCount}</span>`:'<span class="bg-amber-500/10 text-amber-300 rounded px-2 py-1">لم ينتهِ بعد</span>'}</div></div>
+        ${names.length ? `<div class="overflow-x-auto"><table class="w-full text-right text-xs"><thead><tr class="text-slate-400 border-b border-slate-700"><th class="py-2 px-2">الاسم</th><th class="py-2 px-2">قوة الفيلق الأول</th><th class="py-2 px-2">الفريق</th><th class="py-2 px-2">الحضور</th></tr></thead><tbody>${names.map(name=>{const m=state.members.find(x=>x.name===name)||{};const status=ev.attendance?.[name]||'';return `<tr class="border-b border-slate-800"><td class="py-2 px-2 text-white font-bold">${name}</td><td class="py-2 px-2 text-amber-300">${Number(m.sq1||0).toFixed(1)}M</td><td class="py-2 px-2 text-slate-300">${ev.participantTypes?.[name]==='reserve'?'احتياط':ev.teams?.[name]==='Team A'?'A':ev.teams?.[name]==='Team B'?'B':'—'}</td><td class="py-2 px-2">${ev.participantTypes?.[name]==='reserve' ? '<span class="text-amber-300">احتياط غير مستدعى</span>' : ended && canManage ? `<div class="flex gap-1"><button onclick="setWeeklyAttendance('${ev.id}','${name.replace(/'/g,"\\'") }','present')" class="px-2 py-1 rounded ${status==='present'?'bg-emerald-600 text-white':'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20'}">حضر</button><button onclick="setWeeklyAttendance('${ev.id}','${name.replace(/'/g,"\\'") }','absent')" class="px-2 py-1 rounded ${status==='absent'?'bg-red-600 text-white':'bg-red-500/10 text-red-300 border border-red-500/20'}">لم يحضر</button></div>` : `<span class="${status==='present'?'text-emerald-300':status==='absent'?'text-red-300':'text-slate-500'}">${status==='present'?'حضر':status==='absent'?'لم يحضر':ended?'بانتظار تسجيل الحضور':'—'}</span>`}</td></tr>`}).join('')}</tbody></table></div>` : '<p class="text-xs text-slate-500">لا يوجد مسجلون في هذا الموعد.</p>'}
+        ${ended && canManage && activeNames.some(n=>!ev.attendance?.[n]) ? '<p class="text-[10px] text-amber-300">يرجى تحديد حالة كل أساسي أو احتياط تم استدعاؤه: حضر أو لم يحضر. الاحتياط غير المستدعى لا يُحتسب غيابًا.</p>' : ''}</div>`;
       }).join('');
       const datedGeneralEvents = (state.events || []).filter(ev => ev.date).slice().sort((a,b)=>(b.date+(b.time||'' )).localeCompare(a.date+(a.time||'')));
       if (datedGeneralEvents.length) {

@@ -256,7 +256,7 @@
         </div>
 
         <div class="flex items-center gap-1.5 shrink-0">
-          <button onclick="testSendAlertNow()" class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 border border-amber-400/40 text-amber-300 hover:bg-amber-500/30 transition text-xs font-black flex items-center gap-1.5 shadow" title="فحص الإرسال الفوري لتيليجرام وديسكورد">
+          <button data-permission="send_notifications" onclick="testSendAlertNow()" class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 border border-amber-400/40 text-amber-300 hover:bg-amber-500/30 transition text-xs font-black flex items-center gap-1.5 shadow" title="فحص الإرسال الفوري لتيليجرام وديسكورد">
             <i class="fa-solid fa-paper-plane text-xs"></i>
             <span class="hidden sm:inline">فحص التنبيهات</span>
           </button>
@@ -280,7 +280,7 @@
 
       <div class="flex items-center justify-between gap-2 pt-1 border-t border-slate-800/80 overflow-x-auto no-scrollbar">
         <div class="flex items-center gap-1.5" id="accounts-chips-container"></div>
-        <button onclick="openAddSubAccountModal()" id="btn-add-subaccount" class="shrink-0 text-xs px-2.5 py-1 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/20 font-bold flex items-center gap-1">
+        <button onclick="openAddSubAccountModal()" data-permission="manage_subaccounts" id="btn-add-subaccount" class="shrink-0 text-xs px-2.5 py-1 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/20 font-bold flex items-center gap-1">
           <i class="fa-solid fa-plus"></i> إضافة حساب فرعي (Alt/Farm)
         </button>
       </div>
@@ -352,11 +352,11 @@
             <button onclick="switchMainTab('profile')" class="flex-1 sm:flex-initial justify-center px-3.5 py-2.5 rounded-xl bg-cyan-500 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow">
               <i class="fa-solid fa-pen-to-square"></i> تحديث قوتي
             </button>
-            <button onclick="openMemberModal()" class="role-protected-mod flex-1 sm:flex-initial justify-center px-3.5 py-2.5 rounded-xl bg-emerald-600 text-white font-black text-xs flex items-center gap-1.5 shadow">
+            <button data-permission="add_member" onclick="openMemberModal()" class="role-protected-mod flex-1 sm:flex-initial justify-center px-3.5 py-2.5 rounded-xl bg-emerald-600 text-white font-black text-xs flex items-center gap-1.5 shadow">
               <i class="fa-solid fa-user-plus"></i> إضافة عضو
             </button>
-            <button onclick="exportRosterCSV()" class="px-2.5 py-2.5 rounded-xl bg-cmd-panel border border-cmd-border text-slate-200 text-xs font-bold">CSV</button>
-            <button onclick="exportRosterJSON()" class="px-2.5 py-2.5 rounded-xl bg-cmd-panel border border-cmd-border text-slate-200 text-xs font-bold">JSON</button>
+            <button data-permission="export_roster" onclick="exportRosterCSV()" class="px-2.5 py-2.5 rounded-xl bg-cmd-panel border border-cmd-border text-slate-200 text-xs font-bold">CSV</button>
+            <button data-permission="export_roster" onclick="exportRosterJSON()" class="px-2.5 py-2.5 rounded-xl bg-cmd-panel border border-cmd-border text-slate-200 text-xs font-bold">JSON</button>
           </div>
         </div>
 
@@ -428,14 +428,14 @@
             <input type="text" id="ds-battle-time-input" value="السبت 20:00 بتوقيت الرياض" oninput="renderDesertStorm()" class="flex-1 min-w-[170px] bg-cmd-bg border border-cmd-border rounded-xl px-3 py-2 text-xs text-white font-bold" />
           </div>
           <div class="flex items-center gap-2 w-full sm:w-auto">
-            <button onclick="clearDesertStormAssignments()" class="role-protected-officer px-3 py-2.5 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs font-bold">تصفير</button>
-            <button onclick="exportOfficialBattlePNG('desert-storm-official-poster', 'HFO-806-Desert-Storm.png')" class="flex-1 sm:flex-initial justify-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg">
+            <button onclick="clearDesertStormAssignments()" data-permission="manage_desert_storm" class="role-protected-officer px-3 py-2.5 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs font-bold">تصفير</button>
+            <button data-permission="export_battle_plans" onclick="exportOfficialBattlePNG('desert-storm-official-poster', 'HFO-806-Desert-Storm.png')" class="flex-1 sm:flex-initial justify-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg">
               <i class="fa-solid fa-camera"></i> تصدير خطة عاصفة الصحراء PNG
             </button>
           </div>
         </div>
 
-        <div class="bg-cmd-card border border-cmd-border rounded-2xl p-3 role-protected-officer">
+        <div data-permission="manage_desert_storm" class="bg-cmd-card border border-cmd-border rounded-2xl p-3 role-protected-officer">
           <h4 class="text-xs font-black text-cyan-400 mb-2">تثبيت لاعب في مباني عاصفة الصحراء:</h4>
           <div class="grid grid-cols-1 sm:grid-cols-5 gap-2">
             <select id="ds-assign-player" class="bg-cmd-bg border border-cmd-border rounded-xl px-2.5 py-2 text-xs text-white font-bold"></select>
@@ -462,7 +462,7 @@
               <option value="دفاع">🛡️ دفاع (DEF)</option>
               <option value="إسناد">⚡ إسناد (Roam)</option>
             </select>
-            <button onclick="assignPlayerDesertStorm()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl py-2.5 px-3">+ تثبيت</button>
+            <button data-permission="manage_desert_storm" onclick="assignPlayerDesertStorm()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl py-2.5 px-3">+ تثبيت</button>
           </div>
         </div>
 
@@ -528,14 +528,14 @@
             <input type="text" id="cs-battle-time-input" value="الأحد 20:00 بتوقيت الرياض" oninput="renderCanyonStorm()" class="flex-1 bg-cmd-bg border border-cmd-border rounded-xl px-3 py-2 text-xs text-white font-bold" />
           </div>
           <div class="flex items-center gap-2 w-full sm:w-auto">
-            <button onclick="clearCanyonStormAssignments()" class="role-protected-officer px-3 py-2.5 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs font-bold">تصفير</button>
-            <button onclick="exportOfficialBattlePNG('canyon-storm-official-poster', 'HFO-806-Canyon-Storm.png')" class="flex-1 sm:flex-initial justify-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg">
+            <button data-permission="manage_canyon_storm" onclick="clearCanyonStormAssignments()" class="role-protected-officer px-3 py-2.5 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs font-bold">تصفير</button>
+            <button data-permission="export_battle_plans" onclick="exportOfficialBattlePNG('canyon-storm-official-poster', 'HFO-806-Canyon-Storm.png')" class="flex-1 sm:flex-initial justify-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg">
               <i class="fa-solid fa-camera"></i> تصدير خطة عاصفة الوادي PNG
             </button>
           </div>
         </div>
 
-        <div class="bg-cmd-card border border-cmd-border rounded-2xl p-3 role-protected-officer">
+        <div data-permission="manage_canyon_storm" class="bg-cmd-card border border-cmd-border rounded-2xl p-3 role-protected-officer">
           <h4 class="text-xs font-black text-cyan-400 mb-2">تعيين عضو في مباني عاصفة الوادي:</h4>
           <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
             <select id="cs-assign-player" class="bg-cmd-bg border border-cmd-border rounded-xl px-2.5 py-2 text-xs text-white font-bold"></select>
@@ -546,7 +546,7 @@
               <option value="نقل عينات">🧪 نقل عينات (Carrier)</option>
               <option value="إسناد سريع">⚡ إسناد سريع (Roam)</option>
             </select>
-            <button onclick="updateCanyonAssignment()" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs rounded-xl py-2.5 px-3">+ تثبيت</button>
+            <button data-permission="manage_canyon_storm" onclick="updateCanyonAssignment()" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs rounded-xl py-2.5 px-3">+ تثبيت</button>
           </div>
         </div>
 
@@ -598,7 +598,7 @@
       <div id="ev-panel-upcoming" class="ev-subpanel hidden space-y-4">
         <div class="flex items-center justify-between">
           <h3 class="font-black text-base text-white">الفعاليات القادمة للتحالف</h3>
-          <button onclick="openCreateEventModal()" class="role-protected-officer px-3.5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-black shadow flex items-center gap-1.5">
+          <button data-permission="manage_events" onclick="openCreateEventModal()" class="role-protected-officer px-3.5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-black shadow flex items-center gap-1.5">
             <i class="fa-solid fa-plus"></i> إنشاء فعالية جديدة
           </button>
         </div>
@@ -609,7 +609,7 @@
       <div id="ev-panel-polls" class="ev-subpanel hidden space-y-4">
         <div class="flex items-center justify-between">
           <h3 class="font-black text-base text-white">استفتاءات التحالف والتصويت الحي</h3>
-          <button onclick="openCreatePollModal()" class="role-protected-officer px-3.5 py-2 rounded-xl bg-cyan-500 text-slate-950 font-black text-xs shadow flex items-center gap-1.5">
+          <button data-permission="manage_polls" onclick="openCreatePollModal()" class="role-protected-officer px-3.5 py-2 rounded-xl bg-cyan-500 text-slate-950 font-black text-xs shadow flex items-center gap-1.5">
             <i class="fa-solid fa-square-poll-vertical"></i> إنشاء استفتاء جديد
           </button>
         </div>
@@ -649,10 +649,10 @@
               <p class="text-xs text-slate-400">يمكنك تحديد السائق والراكب دون نشر، ثم الضغط على زر «نشر» عند الاعتماد</p>
             </div>
             <div class="flex items-center gap-2">
-              <button onclick="generateTrainVipTable()" class="role-protected-officer px-3 py-2 rounded-xl bg-cmd-panel border border-slate-700 text-slate-200 font-bold text-xs flex items-center gap-1.5 shadow">
+              <button data-permission="manage_train" onclick="generateTrainVipTable()" class="role-protected-officer px-3 py-2 rounded-xl bg-cmd-panel border border-slate-700 text-slate-200 font-bold text-xs flex items-center gap-1.5 shadow">
                 <i class="fa-solid fa-rotate"></i> تدوير عادل
               </button>
-              <button onclick="publishTrainSchedule()" class="role-protected-officer px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center gap-1.5 shadow-lg">
+              <button data-permission="publish_train" onclick="publishTrainSchedule()" class="role-protected-officer px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center gap-1.5 shadow-lg">
                 <i class="fa-solid fa-bullhorn"></i> نشر جدول القطار
               </button>
             </div>
@@ -678,7 +678,7 @@
                 <span class="text-[11px] text-amber-400 font-bold block"><i class="fa-solid fa-train-subway ml-1"></i> قائد القطار (Conductor)</span>
                 <div class="flex items-center justify-between">
                   <strong class="text-lg text-white font-black" id="train-conductor-name">Abo S3D</strong>
-                  <select id="train-conductor-select" onchange="stageChangeConductor(this.value)" class="export-hide role-protected-officer bg-cmd-card border border-amber-500/40 rounded px-2 py-1 text-xs text-amber-300 font-bold"></select>
+                  <select data-permission="manage_train" id="train-conductor-select" onchange="stageChangeConductor(this.value)" class="export-hide role-protected-officer bg-cmd-card border border-amber-500/40 rounded px-2 py-1 text-xs text-amber-300 font-bold"></select>
                 </div>
               </div>
 
@@ -686,14 +686,14 @@
                 <span class="text-[11px] text-cyan-400 font-bold block"><i class="fa-solid fa-crown ml-1"></i> راكب الـ VIP (VIP Passenger)</span>
                 <div class="flex items-center justify-between">
                   <strong class="text-lg text-white font-black" id="train-vip-name">— غير محدد —</strong>
-                  <select id="train-vip-select" onchange="stageChangeVip(this.value)" class="export-hide role-protected-officer bg-cmd-card border border-cyan-500/40 rounded px-2 py-1 text-xs text-cyan-300 font-bold"></select>
+                  <select data-permission="manage_train" id="train-vip-select" onchange="stageChangeVip(this.value)" class="export-hide role-protected-officer bg-cmd-card border border-cyan-500/40 rounded px-2 py-1 text-xs text-cyan-300 font-bold"></select>
                 </div>
               </div>
             </div>
           </div>
 
           <div class="flex justify-end pt-1">
-            <button onclick="exportOfficialBattlePNG('train-export-card', 'HFO-806-Train-Sunday.png')" class="px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg">
+            <button data-permission="export_battle_plans" onclick="exportOfficialBattlePNG('train-export-card', 'HFO-806-Train-Sunday.png')" class="px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg">
               <i class="fa-solid fa-camera"></i> تصدير جدول القطار الأسبوعي PNG
             </button>
           </div>
@@ -804,7 +804,7 @@
       </div>
 
       <div id="al-panel-announcements" class="al-subpanel hidden space-y-4">
-        <div class="bg-cmd-card border border-cmd-border rounded-2xl p-4 space-y-3 role-protected-leader">
+        <div data-permission="manage_announcements" class="bg-cmd-card border border-cmd-border rounded-2xl p-4 space-y-3 role-protected-leader">
           <input type="text" id="ann-title" placeholder="عنوان الإعلان..." class="w-full bg-cmd-bg border rounded-xl p-2.5 text-xs text-white font-bold" />
           <textarea id="ann-body" placeholder="نص الإعلان أو التعليمات..." class="w-full bg-cmd-bg border rounded-xl p-2.5 text-xs text-white" rows="2"></textarea>
           <button onclick="publishAnnouncement()" class="px-4 py-2 rounded-xl bg-cyan-500 text-slate-950 font-black text-xs shadow">نشر الإعلان لجميع القنوات (ديسكورد + تيليجرام)</button>
@@ -819,7 +819,7 @@
             <h4 class="font-black text-sm text-white">بطاقة التجنيد الرسمية المعتمدة</h4>
             <p class="text-slate-400 text-xs">تم تثبيت النص الرسمي لبطاقة التجنيد الخاصة بتحالف HFO في سيرفر 806. اضغط على الزر أدناه لتصديرها كصورة عالية الدقة PNG لنشرها:</p>
           </div>
-          <button onclick="exportOfficialBattlePNG('recruitment-card-preview', 'HFO-806-Recruitment.png')" class="w-full py-3 bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-black rounded-xl shadow-lg">
+          <button data-permission="export_recruitment" onclick="exportOfficialBattlePNG('recruitment-card-preview', 'HFO-806-Recruitment.png')" class="w-full py-3 bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-black rounded-xl shadow-lg">
             <i class="fa-solid fa-camera ml-1"></i> تصدير بطاقة التجنيد الرسمية PNG
           </button>
         </div>
@@ -878,7 +878,7 @@
             <button onclick="logoutCurrentUser()" class="px-4 py-2.5 rounded-xl bg-red-500/20 text-red-300 border border-red-500/30 text-xs font-bold">
               <i class="fa-solid fa-right-from-bracket ml-1"></i> تسجيل الخروج
             </button>
-            <button onclick="saveActiveProfile()" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-lg">
+            <button data-permission="edit_own_profile" onclick="saveActiveProfile()" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-lg">
               <i class="fa-solid fa-cloud-arrow-up ml-1"></i> حفظ وتحديث بياناتي
             </button>
           </div>
@@ -1127,6 +1127,85 @@
     let tempPollOptions = ['نعم', 'لا', 'احتياط'];
     let tempEventParticipants = [];
 
+    // ==================== نظام الصلاحيات الفردية ====================
+    // كل صلاحية مستقلة ويمكن منحها أو سحبها لكل عضو بدون الاعتماد على الرتب.
+    const PERMISSION_DEFS = {
+      edit_own_profile:      { label: 'تعديل ملفي وبيانات قوتي', group: 'الملف الشخصي' },
+      register_events:       { label: 'التسجيل وإلغاء التسجيل في الفعاليات', group: 'المشاركة' },
+      vote_polls:            { label: 'التصويت في الاستفتاءات', group: 'المشاركة' },
+      add_member:            { label: 'إضافة عضو جديد', group: 'إدارة الأعضاء' },
+      edit_members:          { label: 'تعديل بيانات الأعضاء', group: 'إدارة الأعضاء' },
+      delete_members:        { label: 'حذف الأعضاء', group: 'إدارة الأعضاء' },
+      manage_subaccounts:    { label: 'إدارة الحسابات الفرعية (Alt/Farm)', group: 'إدارة الأعضاء' },
+      change_ranks:           { label: 'تعديل رتب R1–R5', group: 'إدارة الأعضاء' },
+      manage_permissions:    { label: 'إدارة صلاحيات الأعضاء', group: 'إدارة النظام' },
+      manage_desert_storm:   { label: 'إدارة عاصفة الصحراء', group: 'الفعاليات والحروب' },
+      manage_canyon_storm:   { label: 'إدارة عاصفة الوادي', group: 'الفعاليات والحروب' },
+      manage_events:         { label: 'إنشاء وتعديل وحذف الفعاليات', group: 'الفعاليات والحروب' },
+      manage_polls:          { label: 'إنشاء وتعديل وحذف الاستفتاءات', group: 'الفعاليات والحروب' },
+      manage_train:          { label: 'إدارة قطار التحالف', group: 'الفعاليات والحروب' },
+      publish_train:         { label: 'نشر جدول القطار وإرسال تنبيهه', group: 'الفعاليات والحروب' },
+      manage_announcements:  { label: 'إنشاء ونشر إعلانات التحالف', group: 'الإعلانات والتنبيهات' },
+      send_notifications:    { label: 'إرسال/اختبار تنبيهات Discord وTelegram', group: 'الإعلانات والتنبيهات' },
+      export_roster:         { label: 'تصدير كشف الأعضاء CSV / JSON', group: 'التقارير والتصدير' },
+      export_battle_plans:   { label: 'تصدير خطط عواصف الصحراء والوادي والقطار PNG', group: 'التقارير والتصدير' },
+      export_recruitment:    { label: 'تصدير بطاقة التجنيد PNG', group: 'التقارير والتصدير' },
+      view_audit_log:        { label: 'عرض سجل التدقيق والنشاط', group: 'إدارة النظام' }
+    };
+
+    const PERMISSION_GROUP_ORDER = ['الملف الشخصي', 'المشاركة', 'إدارة الأعضاء', 'الفعاليات والحروب', 'الإعلانات والتنبيهات', 'التقارير والتصدير', 'إدارة النظام'];
+
+    function permissionsForRole(sysRole) {
+      const all = Object.keys(PERMISSION_DEFS);
+      const base = {
+        Member: ['edit_own_profile', 'register_events', 'vote_polls'],
+        Moderator: ['edit_own_profile', 'edit_members', 'delete_members'],
+        Officer: ['edit_own_profile', 'manage_desert_storm', 'manage_canyon_storm', 'manage_events', 'manage_polls', 'manage_train', 'publish_train', 'send_notifications', 'export_battle_plans'],
+        Leader: ['edit_own_profile', 'add_member', 'edit_members', 'delete_members', 'manage_subaccounts', 'manage_desert_storm', 'manage_canyon_storm', 'manage_events', 'manage_polls', 'manage_train', 'publish_train', 'manage_announcements', 'send_notifications', 'export_roster', 'export_battle_plans', 'export_recruitment', 'view_audit_log'],
+        Owner: all
+      };
+      const selected = base[sysRole] || base.Member;
+      return new Set([...selected, 'register_events', 'vote_polls']);
+    }
+
+    function ensurePermissionState() {
+      if (!state.customPermissions || typeof state.customPermissions !== 'object') state.customPermissions = {};
+      if (!Array.isArray(state.members)) state.members = [];
+      state.members.forEach(member => {
+        if (isOwnerName(member.name)) {
+          state.customPermissions[member.id] = Object.fromEntries(Object.keys(PERMISSION_DEFS).map(k => [k, true]));
+          return;
+        }
+        if (!state.customPermissions[member.id] || typeof state.customPermissions[member.id] !== 'object') {
+          const defaults = permissionsForRole(member.sysRole || 'Member');
+          state.customPermissions[member.id] = Object.fromEntries(Object.keys(PERMISSION_DEFS).map(k => [k, defaults.has(k)]));
+        } else {
+          Object.keys(PERMISSION_DEFS).forEach(k => {
+            if (typeof state.customPermissions[member.id][k] !== 'boolean') {
+              state.customPermissions[member.id][k] = permissionsForRole(member.sysRole || 'Member').has(k);
+            }
+          });
+        }
+      });
+    }
+
+    function hasPermission(permissionKey) {
+      if (isOwner()) return true;
+      const member = state.members.find(m => m.name && state.loggedInUserName && m.name.toLowerCase() === state.loggedInUserName.toLowerCase());
+      if (!member) return false;
+      ensurePermissionState();
+      return state.customPermissions?.[member.id]?.[permissionKey] === true;
+    }
+
+    function canViewAuditLog() { return hasPermission('view_audit_log'); }
+    function canManagePermissions() { return isOwner() || hasPermission('manage_permissions'); }
+    function canManageAlliance() { return hasPermission('manage_announcements'); }
+    function canManageEvents() { return hasPermission('manage_events'); }
+    function canEditAllMembers() { return hasPermission('edit_members'); }
+    function canAddMember() { return hasPermission('add_member'); }
+    function canDeleteMembers() { return hasPermission('delete_members'); }
+    function canManageSubaccounts() { return hasPermission('manage_subaccounts'); }
+
     // تشفير الرمز السري عبر Web Crypto API (SHA-256)
     async function hashPin(pinString) {
       if (!pinString) return '';
@@ -1207,10 +1286,12 @@
       canyonStorm: { assignments: [] },
       announcements: [],
       notifications: [],
-      auditLog: []
+      auditLog: [],
+      customPermissions: {}
     };
 
     let state = loadState();
+    ensurePermissionState();
 
     // 10. دالة تسجيل التدقيق والنشاط الموحدة
     function logAuditAction(actionType, targetItem, detailsText = '') {
@@ -1291,6 +1372,7 @@
     }
 
     async function testSendAlertNow() {
+      if (!hasPermission('send_notifications')) return showToast('لا تملك صلاحية إرسال التنبيهات');
       showToast('جاري إرسال فحص التنبيهات عبر خادم Vercel...');
       await sendAllianceExternalAlert(
         'اختبار ربط التنبيهات المباشرة الآمن ✅',
@@ -1354,6 +1436,7 @@
           }));
         }
         ensureOwnerExists();
+        ensurePermissionState();
 
         const { data: stRow } = await sbClient.from('hfo_alliance_state').select('*').eq('id', 'HFO_806').maybeSingle();
         if (stRow && stRow.payload) {
@@ -1367,6 +1450,7 @@
           state.announcements = p.announcements || [];
           state.notifications = p.notifications || [];
           if (Array.isArray(p.auditLog)) state.auditLog = p.auditLog;
+          if (p.customPermissions && typeof p.customPermissions === 'object') state.customPermissions = p.customPermissions;
         }
         refreshLoggedUserRole();
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -1472,30 +1556,66 @@
     }
 
     async function handleMemberLogin() {
-      const name = document.getElementById('login-name').value.trim();
-      const rawPin = document.getElementById('login-pin').value.trim();
+      const nameEl = document.getElementById('login-name');
+      const pinEl = document.getElementById('login-pin');
+      const name = (nameEl?.value || '').trim();
+      const rawPin = (pinEl?.value || '').trim();
       if (!name || !rawPin) return showToast('أدخل الاسم والرمز السري');
 
-      await syncFromCloud(false);
-      let found = state.members.find(m => m.name.toLowerCase() === name.toLowerCase());
+      // تسجيل الدخول لا يعتمد على الصلاحيات ولا ينتظر الاتصال السحابي بلا نهاية.
+      const loginButton = document.querySelector('#auth-form-login button[onclick="handleMemberLogin()"]');
+      const originalButtonText = loginButton?.textContent;
+      if (loginButton) { loginButton.disabled = true; loginButton.textContent = 'جارٍ التحقق...'; }
 
-      if (!found && isOwnerName(name)) {
-        found = state.members[0];
+      try {
+        let found = state.members.find(m => (m.name || '').toLowerCase() === name.toLowerCase());
+
+        // إذا لم يوجد العضو محلياً، نجرب المزامنة السحابية بمهلة قصيرة فقط.
+        if (!found && sbClient) {
+          try {
+            await Promise.race([
+              syncFromCloud(false),
+              new Promise((_, reject) => setTimeout(() => reject(new Error('login-sync-timeout')), 2500))
+            ]);
+          } catch (syncError) {
+            console.warn('Login continuing without cloud sync:', syncError);
+          }
+          found = state.members.find(m => (m.name || '').toLowerCase() === name.toLowerCase());
+        }
+
+        if (!found && isOwnerName(name)) found = state.members.find(m => isOwnerName(m.name)) || state.members[0];
+        if (!found) return showToast('الاسم غير مسجل — اضغط تسجيل عضو جديد');
+
+        const storedPin = String(found.pin ?? '').trim();
+        let isPinMatch = storedPin === rawPin; // يدعم الرموز القديمة المخزنة كنص صريح
+        if (!isPinMatch && storedPin) {
+          try {
+            const looksHashed = /^[a-f0-9]{64}$/i.test(storedPin);
+            if (looksHashed && window.crypto?.subtle && window.isSecureContext) {
+              isPinMatch = storedPin.toLowerCase() === (await hashPin(rawPin)).toLowerCase();
+            } else if (!looksHashed) {
+              // دعم البيانات القديمة التي قد تحتوي على صيغة غير SHA-256.
+              isPinMatch = storedPin === rawPin;
+            }
+          } catch (hashError) {
+            console.error('PIN verification error:', hashError);
+            return showToast('تعذر التحقق من الرمز على هذا الاتصال. افتح الموقع عبر HTTPS ثم حاول مجدداً.');
+          }
+        }
+        if (!isPinMatch) return showToast('الرمز السري غير صحيح');
+
+        if (isOwnerName(found.name)) { found.sysRole = 'Owner'; found.role = 'R4'; }
+        setLoggedUserSession(found.name);
+        document.getElementById('auth-gate-modal')?.classList.add('hidden');
+        logAuditAction('تسجيل دخول', found.name, 'دخول ناجح إلى مركز القيادة');
+        renderAll();
+        showToast(`أهلاً بك يا ${found.name}`);
+      } catch (error) {
+        console.error('Login failed:', error);
+        showToast('تعذر تسجيل الدخول بسبب خطأ داخلي. افتح أدوات المطور لمعرفة التفاصيل.');
+      } finally {
+        if (loginButton) { loginButton.disabled = false; loginButton.textContent = originalButtonText || 'تسجيل الدخول'; }
       }
-
-      if (!found) return showToast('الاسم غير مسجل — اضغط تسجيل عضو جديد');
-      
-      const hashedEnteredPin = await hashPin(rawPin);
-      const isPinMatch = (String(found.pin) === String(rawPin)) || (String(found.pin) === String(hashedEnteredPin));
-      
-      if (!isPinMatch) return showToast('الرمز السري غير صحيح');
-
-      if (isOwnerName(found.name)) { found.sysRole = 'Owner'; found.role = 'R4'; }
-      setLoggedUserSession(found.name);
-      document.getElementById('auth-gate-modal').classList.add('hidden');
-      logAuditAction('تسجيل دخول', found.name, 'دخول ناجح إلى مركز القيادة');
-      renderAll();
-      showToast(`أهلاً بك يا ${found.name}`);
     }
 
     async function handleMemberRegister() {
@@ -1586,14 +1706,12 @@
     }
 
     function isOwner() { return state.currentRole === 'Owner' || isOwnerName(state.loggedInUserName); }
-    function canManagePermissions() { return isOwner(); }
-    function canManageAlliance() { return isOwner() || state.currentRole === 'Leader'; }
-    function canManageEvents() { return isOwner() || ['Leader', 'Officer'].includes(state.currentRole); }
-    function canEditAllMembers() { return isOwner() || ['Leader', 'Moderator'].includes(state.currentRole); }
     function canEditSpecificMember(memberObj) {
-      if (canEditAllMembers()) return true;
       if (!state.loggedInUserName || !memberObj) return false;
-      return memberObj.name.toLowerCase() === state.loggedInUserName.toLowerCase() || (memberObj.parentOwner && memberObj.parentOwner.toLowerCase() === state.loggedInUserName.toLowerCase());
+      if (canEditAllMembers()) return true;
+      if (!hasPermission('edit_own_profile')) return false;
+      return memberObj.name.toLowerCase() === state.loggedInUserName.toLowerCase() ||
+        (memberObj.parentOwner && memberObj.parentOwner.toLowerCase() === state.loggedInUserName.toLowerCase());
     }
 
     function applyRolePermissions() {
@@ -1607,10 +1725,19 @@
       badge.textContent = isActOwner ? 'Owner R4' : state.currentRole;
       badge.className = isActOwner ? 'px-1.5 py-0.2 rounded bg-amber-500 text-slate-950 text-[10px] font-hud font-black' : 'px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 text-[10px] font-hud font-bold';
 
-      document.querySelectorAll('.role-protected-owner').forEach(el => el.style.display = isActOwner ? '' : 'none');
-      document.querySelectorAll('.role-protected-leader').forEach(el => el.style.display = canManageAlliance() ? '' : 'none');
-      document.querySelectorAll('.role-protected-officer').forEach(el => el.style.display = canManageEvents() ? '' : 'none');
-      document.querySelectorAll('.role-protected-mod').forEach(el => el.style.display = canEditAllMembers() ? '' : 'none');
+      document.querySelectorAll('[data-permission]').forEach(el => {
+        const key = el.getAttribute('data-permission');
+        el.style.display = (isActOwner || hasPermission(key)) ? '' : 'none';
+      });
+      document.querySelectorAll('.role-protected-owner:not([data-permission])').forEach(el => el.style.display = isActOwner ? '' : 'none');
+      document.querySelectorAll('.role-protected-leader:not([data-permission])').forEach(el => el.style.display = canManageAlliance() ? '' : 'none');
+      document.querySelectorAll('.role-protected-officer:not([data-permission])').forEach(el => el.style.display = canManageEvents() ? '' : 'none');
+      document.querySelectorAll('.role-protected-mod:not([data-permission])').forEach(el => el.style.display = canEditAllMembers() ? '' : 'none');
+
+      const permTab = document.getElementById('al-sub-permissions');
+      const auditTab = document.getElementById('al-sub-stats');
+      if (permTab) permTab.style.display = canManagePermissions() ? '' : 'none';
+      if (auditTab) auditTab.style.display = canViewAuditLog() ? '' : 'none';
     }
 
     const mapControllers = {
@@ -1709,6 +1836,12 @@
     }
 
     function switchAllianceSubTab(sub) {
+      if (sub === 'permissions' && !canManagePermissions()) {
+        sub = canViewAuditLog() ? 'stats' : 'announcements';
+      }
+      if (sub === 'stats' && !canViewAuditLog()) {
+        sub = canManagePermissions() ? 'permissions' : 'announcements';
+      }
       document.querySelectorAll('.al-subpanel').forEach(el => el.classList.add('hidden'));
       document.getElementById(`al-panel-${sub}`).classList.remove('hidden');
       document.querySelectorAll('.al-subtab-btn').forEach(b => b.classList.remove('subtab-active'));
@@ -1729,9 +1862,13 @@
     }
 
     function switchActiveSubAccount(accName) { state.activeAccountName = accName; renderAll(); populateProfileForm(); }
-    function openAddSubAccountModal() { toggleModal('add-account-modal'); }
+    function openAddSubAccountModal() {
+      if (!canManageSubaccounts()) return showToast('لا تملك صلاحية إدارة الحسابات الفرعية');
+      toggleModal('add-account-modal');
+    }
 
     async function addNewSubAccount() {
+      if (!canManageSubaccounts()) return showToast('لا تملك صلاحية إدارة الحسابات الفرعية');
       const name = document.getElementById('new-acc-name').value.trim();
       const tag = document.getElementById('new-acc-tag').value;
       const hq = parseInt(document.getElementById('new-acc-hq').value) || 27;
@@ -1836,7 +1973,7 @@
               ${editable ? `
                 <div class="flex items-center justify-center gap-1">
                   <button onclick="openMemberModal('${m.id}')" class="px-2 py-1 rounded-lg bg-cmd-panel border border-cmd-border hover:border-cyan-400 text-xs text-cyan-400 font-bold">تعديل</button>
-                  ${canEditAllMembers() && !isOwnerName(m.name) ? `<button onclick="deleteMember('${m.id}')" class="px-2 py-1 rounded-lg bg-red-500/10 border border-red-500/30 text-xs text-red-400 font-bold"><i class="fa-solid fa-trash"></i></button>` : ''}
+                  ${hasPermission('delete_members') && !isOwnerName(m.name) ? `<button onclick="deleteMember('${m.id}')" class="px-2 py-1 rounded-lg bg-red-500/10 border border-red-500/30 text-xs text-red-400 font-bold"><i class="fa-solid fa-trash"></i></button>` : ''}
                 </div>
               ` : `<span class="text-[11px] text-slate-500">محمي</span>`}
             </td>
@@ -1868,7 +2005,7 @@
               ${editable ? `
                 <div class="flex gap-1.5">
                   <button onclick="openMemberModal('${m.id}')" class="px-3 py-1 rounded-lg bg-cmd-panel border border-cmd-border text-cyan-400 font-bold">تعديل</button>
-                  ${canEditAllMembers() && !isOwnerName(m.name) ? `<button onclick="deleteMember('${m.id}')" class="px-2.5 py-1 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 font-bold">حذف</button>` : ''}
+                  ${hasPermission('delete_members') && !isOwnerName(m.name) ? `<button onclick="deleteMember('${m.id}')" class="px-2.5 py-1 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 font-bold">حذف</button>` : ''}
                 </div>
               ` : `<span class="text-[11px] text-slate-500">خاص بالعضو</span>`}
             </div>
@@ -1896,7 +2033,7 @@
         document.getElementById('mem-activity').value = m.activity || 'نشط جدًا';
         document.getElementById('mem-role').value = m.role || 'R3';
       } else {
-        if (!canEditAllMembers()) return showToast('إضافة الأعضاء متاحة للقادة فقط');
+        if (!canAddMember()) return showToast('لا تملك صلاحية إضافة أعضاء');
         if (titleEl) titleEl.textContent = 'إضافة عضو جديد للتحالف';
         document.getElementById('edit-member-id').value = '';
         document.getElementById('mem-name').value = '';
@@ -1915,6 +2052,12 @@
 
     async function saveMemberFromModal() {
       const id = document.getElementById('edit-member-id').value.trim();
+      if (id) {
+        const existing = state.members.find(x => x.id === id);
+        if (!canEditSpecificMember(existing)) return showToast('لا تملك صلاحية تعديل هذا العضو');
+      } else if (!canAddMember()) {
+        return showToast('لا تملك صلاحية إضافة أعضاء');
+      }
       const name = document.getElementById('mem-name').value.trim();
       const pinVal = document.getElementById('mem-pin').value.trim();
       if (!name) return showToast('يرجى إدخال اسم اللاعب');
@@ -1970,7 +2113,7 @@
     }
 
     async function deleteMember(id) {
-      if (!canEditAllMembers()) return;
+      if (!canDeleteMembers()) return showToast('لا تملك صلاحية حذف الأعضاء');
       const m = state.members.find(x => x.id === id);
       if (m && isOwnerName(m.name)) return showToast('لا يمكن حذف حساب المالك (Owner)');
       state.members = state.members.filter(x => x.id !== id);
@@ -2009,14 +2152,15 @@
     }
 
     function selectBuildingForQuickAssign(mapType, code) {
-      if (!canManageEvents()) return;
+      const allowed = mapType === 'desert' ? hasPermission('manage_desert_storm') : hasPermission('manage_canyon_storm');
+      if (!allowed) return;
       if (mapType === 'desert') document.getElementById('ds-assign-building').value = code;
       if (mapType === 'canyon') document.getElementById('canyon-building-select-options').value = code;
       showToast(`تم تحديد المبنى: ${code}`);
     }
 
     async function assignPlayerDesertStorm() {
-      if (!canManageEvents()) return showToast('متاح للمشرفين فقط');
+      if (!hasPermission('manage_desert_storm')) return showToast('لا تملك صلاحية إدارة عاصفة الصحراء');
       const player = document.getElementById('ds-assign-player').value;
       const team = document.getElementById('ds-assign-team').value;
       const building = document.getElementById('ds-assign-building').value;
@@ -2032,7 +2176,7 @@
     }
 
     function clearDesertStormAssignments() {
-      if (!canManageEvents()) return;
+      if (!hasPermission('manage_desert_storm')) return showToast('لا تملك صلاحية إدارة عاصفة الصحراء');
       state.desertStorm.assignments = [];
       logAuditAction('تصفير عاصفة الصحراء', 'خطة كاملة');
       renderDesertStorm();
@@ -2067,7 +2211,7 @@
     }
 
     function updateCanyonAssignment() {
-      if (!canManageEvents()) return;
+      if (!hasPermission('manage_canyon_storm')) return showToast('لا تملك صلاحية إدارة عاصفة الوادي');
       const player = document.getElementById('cs-assign-player').value;
       const stage = document.getElementById('canyon-building-select-options').value;
       const role = document.getElementById('cs-assign-role').value;
@@ -2080,7 +2224,7 @@
     }
 
     function clearCanyonStormAssignments() {
-      if (!canManageEvents()) return;
+      if (!hasPermission('manage_canyon_storm')) return showToast('لا تملك صلاحية إدارة عاصفة الوادي');
       state.canyonStorm.assignments = [];
       logAuditAction('تصفير عاصفة الوادي', 'خطة كاملة');
       renderCanyonStorm();
@@ -2096,7 +2240,7 @@
 
       container.innerHTML = state.events.map(ev => {
         const isRegistered = ev.participants.includes(state.loggedInUserName);
-        const canManage = canManageEvents();
+        const canManage = hasPermission('manage_events');
         return `
           <div class="bg-cmd-card border border-cmd-border rounded-2xl p-4 space-y-3 text-xs shadow-lg flex flex-col justify-between">
             <div class="space-y-2">
@@ -2141,6 +2285,7 @@
     }
 
     function openCreateEventModal() {
+      if (!hasPermission('manage_events')) return showToast('لا تملك صلاحية إدارة الفعاليات');
       document.getElementById('event-modal-title').textContent = 'إنشاء فعالية جديدة';
       document.getElementById('ev-edit-id').value = '';
       document.getElementById('ev-edit-title').value = '';
@@ -2155,6 +2300,7 @@
     }
 
     function openEditEventModal(evId) {
+      if (!hasPermission('manage_events')) return showToast('لا تملك صلاحية إدارة الفعاليات');
       const ev = state.events.find(e => e.id === evId);
       if (!ev) return;
       document.getElementById('event-modal-title').textContent = 'تعديل الفعالية';
@@ -2177,6 +2323,7 @@
     }
 
     function addParticipantToActiveEvent() {
+      if (!hasPermission('manage_events')) return showToast('لا تملك صلاحية إدارة الفعاليات');
       const player = document.getElementById('ev-add-participant-select').value;
       if (!player) return;
       if (!tempEventParticipants.includes(player)) {
@@ -2186,6 +2333,7 @@
     }
 
     function removeTempEventParticipant(player) {
+      if (!hasPermission('manage_events')) return;
       tempEventParticipants = tempEventParticipants.filter(p => p !== player);
       renderTempEventParticipants();
     }
@@ -2200,6 +2348,7 @@
     }
 
     function saveEventFromModal() {
+      if (!hasPermission('manage_events')) return showToast('لا تملك صلاحية إدارة الفعاليات');
       const id = document.getElementById('ev-edit-id').value;
       const title = document.getElementById('ev-edit-title').value.trim();
       const day = document.getElementById('ev-edit-day').value.trim() || 'السبت';
@@ -2242,6 +2391,7 @@
     }
 
     function toggleEventRegistration(evId) {
+      if (!hasPermission('register_events')) return showToast('لا تملك صلاحية التسجيل في الفعاليات');
       const ev = state.events.find(e => e.id === evId);
       if (!ev) return;
       const user = state.loggedInUserName || 'Abo S3D';
@@ -2259,7 +2409,7 @@
     }
 
     function removeParticipantFromEvent(evId, player) {
-      if (!canManageEvents()) return;
+      if (!hasPermission('manage_events')) return;
       const ev = state.events.find(e => e.id === evId);
       if (!ev) return;
       ev.participants = ev.participants.filter(p => p !== player);
@@ -2278,7 +2428,7 @@
 
       container.innerHTML = state.polls.map(poll => {
         const user = state.loggedInUserName || 'Abo S3D';
-        const canManage = canManageEvents();
+        const canManage = hasPermission('manage_polls');
         const options = poll.options || [
           { key: 'yes', label: 'نعم', votes: poll.yes || [] },
           { key: 'no', label: 'لا', votes: poll.no || [] }
@@ -2332,6 +2482,7 @@
     }
 
     function openCreatePollModal() {
+      if (!hasPermission('manage_polls')) return showToast('لا تملك صلاحية إدارة الاستفتاءات');
       document.getElementById('poll-modal-title').textContent = 'إنشاء استفتاء جديد';
       document.getElementById('poll-edit-id').value = '';
       document.getElementById('poll-edit-q').value = '';
@@ -2342,6 +2493,7 @@
     }
 
     function openEditPollModal(pollId) {
+      if (!hasPermission('manage_polls')) return showToast('لا تملك صلاحية إدارة الاستفتاءات');
       const poll = state.polls.find(p => p.id === pollId);
       if (!poll) return;
       document.getElementById('poll-modal-title').textContent = 'تعديل الاستفتاء';
@@ -2354,6 +2506,7 @@
     }
 
     function addCustomPollOption() {
+      if (!hasPermission('manage_polls')) return showToast('لا تملك صلاحية إدارة الاستفتاءات');
       const val = document.getElementById('poll-new-opt-input').value.trim();
       if (!val) return;
       if (!tempPollOptions.includes(val)) {
@@ -2364,6 +2517,7 @@
     }
 
     function removeTempPollOption(idx) {
+      if (!hasPermission('manage_polls')) return showToast('لا تملك صلاحية إدارة الاستفتاءات');
       if (tempPollOptions.length <= 2) return showToast('يجب أن يحتوي الاستفتاء على خيارين على الأقل');
       tempPollOptions.splice(idx, 1);
       renderTempPollOptions();
@@ -2380,6 +2534,7 @@
     }
 
     function savePollFromModal() {
+      if (!hasPermission('manage_polls')) return showToast('لا تملك صلاحية إدارة الاستفتاءات');
       const id = document.getElementById('poll-edit-id').value;
       const q = document.getElementById('poll-edit-q').value.trim();
       const desc = document.getElementById('poll-edit-desc').value.trim();
@@ -2418,6 +2573,7 @@
     }
 
     function castCustomVote(pollId, optionKey) {
+      if (!hasPermission('vote_polls')) return showToast('لا تملك صلاحية التصويت');
       const poll = state.polls.find(p => p.id === pollId);
       if (!poll) return;
       const user = state.loggedInUserName || 'Abo S3D';
@@ -2444,6 +2600,7 @@
     }
 
     function remindNonVoters(pollId) {
+      if (!hasPermission('send_notifications')) return showToast('لا تملك صلاحية إرسال التنبيهات');
       const poll = state.polls.find(p => p.id === pollId);
       const all = getAvailablePlayerNames();
       const voted = new Set();
@@ -2460,6 +2617,8 @@
     }
 
     function requestDeleteConfirmation(type, id, title) {
+      if (type === 'event' && !hasPermission('manage_events')) return showToast('لا تملك صلاحية حذف الفعاليات');
+      if (type === 'poll' && !hasPermission('manage_polls')) return showToast('لا تملك صلاحية حذف الاستفتاءات');
       document.getElementById('confirm-delete-action').value = type;
       document.getElementById('confirm-delete-target-id').value = id;
       document.getElementById('confirm-delete-msg').textContent = `هل أنت متأكد من رغبتك في حذف: "${title}"؟`;
@@ -2471,12 +2630,14 @@
       const id = document.getElementById('confirm-delete-target-id').value;
 
       if (type === 'event') {
+        if (!hasPermission('manage_events')) return showToast('لا تملك صلاحية حذف الفعاليات');
         const ev = state.events.find(e => e.id === id);
         state.events = state.events.filter(e => e.id !== id);
         logAuditAction('حذف فعالية', ev ? ev.title : id);
         renderEventsTimeline();
         showToast('تم حذف الفعالية بنجاح');
       } else if (type === 'poll') {
+        if (!hasPermission('manage_polls')) return showToast('لا تملك صلاحية حذف الاستفتاءات');
         const p = state.polls.find(x => x.id === id);
         state.polls = state.polls.filter(x => x.id !== id);
         logAuditAction('حذف استفتاء', p ? p.question : id);
@@ -2506,7 +2667,7 @@
     }
 
     function stageChangeConductor(name) {
-      if (!canManageEvents()) return;
+      if (!hasPermission('manage_train')) return;
       state.trainConductor = name;
       document.getElementById('train-status-badge').textContent = 'تعديل غير منشور';
       document.getElementById('train-status-badge').className = 'text-xs font-black text-amber-400 block';
@@ -2515,7 +2676,7 @@
     }
 
     function stageChangeVip(name) {
-      if (!canManageEvents()) return;
+      if (!hasPermission('manage_train')) return;
       state.trainVip = name;
       document.getElementById('train-status-badge').textContent = 'تعديل غير منشور';
       document.getElementById('train-status-badge').className = 'text-xs font-black text-amber-400 block';
@@ -2524,7 +2685,7 @@
     }
 
     function generateTrainVipTable() {
-      if (!canManageEvents()) return;
+      if (!hasPermission('manage_train')) return;
       const active = state.members.map(m => m.name);
       if (active.length === 0) return showToast('أضف أعضاء أولاً في التحالف');
       state.trainConductor = active[0] || 'Abo S3D';
@@ -2535,7 +2696,7 @@
     }
 
     async function publishTrainSchedule() {
-      if (!canManageEvents()) return showToast('متاح للمشرفين فقط');
+      if (!hasPermission('publish_train')) return showToast('لا تملك صلاحية نشر جدول القطار');
       document.getElementById('train-status-badge').textContent = 'منشور ومعتمد ✅';
       document.getElementById('train-status-badge').className = 'text-xs font-black text-emerald-400 block';
 
@@ -2548,58 +2709,120 @@
       showToast('تم نشر جدول القطار وإرسال التنبيه للأعضاء بنجاح');
     }
 
+    function updateCustomPermission(memberId, permissionKey, enabled) {
+      if (!canManagePermissions()) return showToast('إدارة الصلاحيات متاحة للمالك فقط');
+      if (!PERMISSION_DEFS[permissionKey]) return;
+      const member = state.members.find(m => m.id === memberId);
+      if (!member) return;
+      if (isOwnerName(member.name)) return showToast('صلاحيات المالك ثابتة ولا يمكن تعطيلها');
+      ensurePermissionState();
+      state.customPermissions[memberId][permissionKey] = !!enabled;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      pushAllianceStateToCloud();
+      logAuditAction('تعديل صلاحية فردية', member.name, `${PERMISSION_DEFS[permissionKey].label}: ${enabled ? 'تفعيل' : 'تعطيل'}`);
+      renderAllianceTab();
+      applyRolePermissions();
+    }
+
+    function setAllMemberPermissions(memberId, enabled) {
+      if (!canManagePermissions()) return showToast('إدارة الصلاحيات متاحة للمالك فقط');
+      const member = state.members.find(m => m.id === memberId);
+      if (!member || isOwnerName(member.name)) return;
+      ensurePermissionState();
+      Object.keys(PERMISSION_DEFS).forEach(key => {
+        state.customPermissions[memberId][key] = !!enabled;
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      pushAllianceStateToCloud();
+      logAuditAction('تعديل جميع الصلاحيات', member.name, enabled ? 'تفعيل جميع الصلاحيات' : 'إلغاء جميع الصلاحيات');
+      renderAllianceTab();
+      applyRolePermissions();
+    }
+
     function renderAllianceTab() {
+      ensurePermissionState();
       const permBox = document.getElementById('permissions-management-list');
       if (!permBox) return;
 
-      const q = (document.getElementById('perm-search')?.value || '').trim().toLowerCase();
-      let list = state.members.filter(m => !q || m.name.toLowerCase().includes(q));
+      if (!canManagePermissions()) {
+        permBox.innerHTML = `<div class="bg-cmd-bg border border-slate-800 rounded-xl p-4 text-center text-xs text-slate-400">
+          إدارة الصلاحيات الفردية متاحة للمالك أو من مُنح هذه الصلاحية.
+        </div>`;
+      } else {
+        const q = (document.getElementById('perm-search')?.value || '').trim().toLowerCase();
+        const list = state.members.filter(m => !q || m.name.toLowerCase().includes(q));
 
-      permBox.innerHTML = list.map(m => {
-        const isMainOwner = isOwnerName(m.name);
-        return `
-          <div class="bg-cmd-bg border border-cmd-border rounded-xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs shadow">
-            <div class="flex items-center gap-2">
-              <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-hud font-bold">${m.role}</span>
-              <div>
-                <strong class="text-white text-sm">${m.name}</strong>
-                <span class="text-slate-400 text-[11px] mr-2">HQ ${m.hq} • ${Number(m.power).toFixed(1)}M • ${normalizeFormation(m.formation)}</span>
-              </div>
-              ${isMainOwner ? '<span class="px-2 py-0.5 rounded bg-amber-500 text-slate-950 font-hud font-black text-[10px]">OWNER R4 👑</span>' : ''}
-            </div>
+        permBox.innerHTML = list.map(m => {
+          const isMainOwner = isOwnerName(m.name);
+          const memberPerms = state.customPermissions[m.id] || {};
+          const grouped = {};
+          Object.entries(PERMISSION_DEFS).forEach(([key, def]) => {
+            if (!grouped[def.group]) grouped[def.group] = [];
+            grouped[def.group].push([key, def]);
+          });
 
-            <div class="flex items-center gap-2 flex-wrap">
-              <div class="flex items-center gap-1">
-                <span class="text-slate-400 text-[11px]">الرتبة:</span>
-                <select onchange="updateMemberRankByOwner('${m.id}', this.value)" class="bg-cmd-card border border-amber-500/40 rounded-lg px-2 py-1 text-xs font-bold text-amber-300 font-hud">
-                  ${['R5', 'R4', 'R3', 'R2', 'R1'].map(r => `<option value="${r}" ${m.role === r ? 'selected' : ''}>${r}</option>`).join('')}
-                </select>
-              </div>
-
-              ${isMainOwner ? '' : `
-                <div class="flex items-center gap-1">
-                  <span class="text-slate-400 text-[11px]">الصلاحية:</span>
-                  <select onchange="updateMemberPermissionByOwner('${m.id}', this.value)" class="bg-cmd-card border border-cyan-500/40 rounded-lg px-2 py-1 text-xs font-bold text-cyan-300">
-                    <option value="Leader" ${m.sysRole==='Leader'?'selected':''}>Leader (نائب)</option>
-                    <option value="Officer" ${m.sysRole==='Officer'?'selected':''}>Officer (مشرف)</option>
-                    <option value="Moderator" ${m.sysRole==='Moderator'?'selected':''}>Moderator</option>
-                    <option value="Member" ${m.sysRole==='Member'?'selected':''}>Member (عضو)</option>
-                  </select>
+          const groupsHtml = PERMISSION_GROUP_ORDER.map(group => {
+            const items = grouped[group] || [];
+            return `
+              <div class="border border-slate-800 rounded-xl p-2.5">
+                <div class="text-[11px] font-black text-cyan-400 mb-2">${group}</div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1.5">
+                  ${items.map(([key, def]) => `
+                    <label class="flex items-center gap-2 bg-cmd-bg border border-slate-800 rounded-lg px-2.5 py-2 cursor-pointer hover:border-cyan-500/40">
+                      <input type="checkbox"
+                        ${memberPerms[key] ? 'checked' : ''}
+                        ${isMainOwner ? 'checked disabled' : ''}
+                        onchange="updateCustomPermission('${m.id}', '${key}', this.checked)"
+                        class="accent-cyan-500 w-4 h-4 shrink-0" />
+                      <span class="text-[10px] text-slate-300 leading-snug">${def.label}</span>
+                    </label>
+                  `).join('')}
                 </div>
+              </div>
+            `;
+          }).join('');
 
-                <button onclick="toggleMemberNotificationByOwner('${m.id}')" class="px-2.5 py-1 rounded-lg border text-xs font-bold flex items-center gap-1 transition ${m.canNotify ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-slate-800 text-slate-400 border-slate-700'}" title="التحكم بصلاحية إرسال التنبيهات لتيليجرام وديسكورد">
-                  <i class="fa-solid ${m.canNotify ? 'fa-bell' : 'fa-bell-slash'}"></i>
-                  <span>${m.canNotify ? 'إشعار: مسموح' : 'إشعار: معطل'}</span>
-                </button>
-              `}
+          return `
+            <div class="bg-cmd-bg border border-cmd-border rounded-xl p-3 space-y-3 shadow">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-hud font-bold">${m.role || 'R3'}</span>
+                  <div>
+                    <strong class="text-white text-sm">${m.name}</strong>
+                    <span class="text-slate-400 text-[11px] mr-2">HQ ${m.hq} • ${Number(m.power).toFixed(1)}M • ${normalizeFormation(m.formation)}</span>
+                  </div>
+                  ${isMainOwner ? '<span class="px-2 py-0.5 rounded bg-amber-500 text-slate-950 font-hud font-black text-[10px]">OWNER R4 👑 • كل الصلاحيات</span>' : ''}
+                </div>
+                ${isMainOwner ? '' : `
+                  <div class="flex items-center gap-1.5">
+                    <button onclick="setAllMemberPermissions('${m.id}', true)" class="px-2.5 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-black">تفعيل الكل</button>
+                    <button onclick="setAllMemberPermissions('${m.id}', false)" class="px-2.5 py-1.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-[10px] font-black">إلغاء الكل</button>
+                  </div>
+                `}
+              </div>
+
+              <div class="flex items-center gap-2 flex-wrap border-t border-slate-800 pt-2">
+                <span class="text-[10px] text-slate-500">الرتبة الحالية: ${m.role || 'R3'}</span>
+                ${isMainOwner ? '' : (hasPermission('change_ranks') ? `
+                  <select onchange="updateMemberRankByOwner('${m.id}', this.value)" class="bg-cmd-card border border-amber-500/40 rounded-lg px-2 py-1 text-[10px] font-bold text-amber-300 font-hud">
+                    ${['R5', 'R4', 'R3', 'R2', 'R1'].map(r => `<option value="${r}" ${m.role === r ? 'selected' : ''}>${r}</option>`).join('')}
+                  </select>
+                ` : '')}
+              </div>
+
+              <div class="space-y-2">
+                ${groupsHtml}
+              </div>
             </div>
-          </div>
-        `;
-      }).join('');
+          `;
+        }).join('');
+      }
 
       const logBox = document.getElementById('audit-log-container');
       if (logBox) {
-        if (!state.auditLog || state.auditLog.length === 0) {
+        if (!canViewAuditLog()) {
+          logBox.innerHTML = `<div class="bg-cmd-bg border border-slate-800 rounded-xl p-4 text-center text-xs text-slate-500">هذا السجل محمي بصلاحية مستقلة: «عرض سجل التدقيق والنشاط».</div>`;
+        } else if (!state.auditLog || state.auditLog.length === 0) {
           logBox.innerHTML = `<div class="text-slate-400 text-center py-4">لا توجد سجلات تدقيق سابقة. سيتم تسجيل كل عملية جديدة هنا فور تنفيذها.</div>`;
         } else {
           logBox.innerHTML = state.auditLog.map(log => `
@@ -2621,7 +2844,7 @@
     }
 
     async function updateMemberRankByOwner(memberId, newRank) {
-      if (!isOwner()) return showToast('تعديل الرتب متاح للمالك فقط');
+      if (!hasPermission('change_ranks')) return showToast('لا تملك صلاحية تعديل الرتب');
       const m = state.members.find(x => x.id === memberId);
       if (!m) return;
       m.role = newRank;
@@ -2632,7 +2855,7 @@
     }
 
     async function updateMemberPermissionByOwner(memberId, newSysRole) {
-      if (!isOwner()) return showToast('تعديل الصلاحيات متاح للمالك فقط');
+      if (!canManagePermissions()) return showToast('إدارة الصلاحيات متاحة للمالك فقط');
       const m = state.members.find(x => x.id === memberId);
       if (!m) return;
       m.sysRole = newSysRole;
@@ -2643,7 +2866,7 @@
     }
 
     async function toggleMemberNotificationByOwner(memberId) {
-      if (!isOwner()) return showToast('التحكم بصلاحيات التنبيه للمالك فقط');
+      if (!canManagePermissions()) return showToast('إدارة صلاحيات التنبيه متاحة للمالك فقط');
       const m = state.members.find(x => x.id === memberId);
       if (!m) return;
       m.canNotify = !m.canNotify;
@@ -2654,10 +2877,8 @@
     }
 
     function publishAnnouncement() {
+      if (!hasPermission('manage_announcements')) return showToast('لا تملك صلاحية نشر الإعلانات');
       const acc = getActiveAccount();
-      if (!isOwner() && !acc.canNotify && !canManageAlliance()) {
-        return showToast('ليس لديك صلاحية إرسال التنبيهات والإعلانات');
-      }
       const title = document.getElementById('ann-title').value.trim();
       const body = document.getElementById('ann-body').value.trim();
       if (!title || !body) return showToast('يرجى كتابة عنوان ونص الإعلان');
@@ -2687,6 +2908,7 @@
     }
 
     async function saveActiveProfile() {
+      if (!hasPermission('edit_own_profile')) return showToast('لا تملك صلاحية تعديل ملفك الشخصي');
       const acc = getActiveAccount();
       acc.hq = Number(document.getElementById('prof-hq').value) || 30;
       acc.power = Number(document.getElementById('prof-power').value) || 0;
@@ -2713,6 +2935,8 @@
     }
 
     function exportOfficialBattlePNG(elementId, filename) {
+      const requiredPermission = elementId === 'recruitment-card-preview' ? 'export_recruitment' : 'export_battle_plans';
+      if (!hasPermission(requiredPermission)) return showToast('لا تملك صلاحية التصدير');
       const el = document.getElementById(elementId);
       if (!el || typeof html2canvas === 'undefined') return;
       const hiddenControls = el.querySelectorAll('.export-hide');
@@ -2737,12 +2961,14 @@
     }
 
     function exportRosterCSV() {
+      if (!hasPermission('export_roster')) return showToast('لا تملك صلاحية تصدير كشف الأعضاء');
       const headers = ['Name,Role,HQ,TotalPower,Squad1,Squad2,Squad3,Formation,Activity'];
       const rows = state.members.map(m => `"${m.name}",${m.role},${m.hq},${m.power},${m.sq1},${m.sq2},${m.sq3},"${normalizeFormation(m.formation)}","${m.activity}"`);
       downloadTextFile(headers.concat(rows).join('\n'), 'HFO-806-Roster.csv', 'text/csv;charset=utf-8;');
     }
 
     function exportRosterJSON() {
+      if (!hasPermission('export_roster')) return showToast('لا تملك صلاحية تصدير كشف الأعضاء');
       downloadTextFile(JSON.stringify(state.members, null, 2), 'HFO-806-Roster.json', 'application/json');
     }
 
@@ -2789,6 +3015,7 @@
     }
 
     function renderAll() {
+      ensurePermissionState();
       applyRolePermissions();
       renderAccountsChips();
       renderSmartActionBanner();
@@ -2803,6 +3030,7 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       ensureOwnerExists();
+      ensurePermissionState();
       initSupabaseConnection();
 
       // 1. تشغيل ساعة توقيت الرياض فوراً

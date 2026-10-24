@@ -499,7 +499,6 @@
                 <line x1="68" y1="32" x2="88" y2="12" stroke="#ef4444" stroke-width="0.7" stroke-dasharray="2,2" />
                 <line x1="15" y1="50" x2="85" y2="50" stroke="#f59e0b" stroke-width="0.5" stroke-dasharray="1.5,1.5" />
                 <line x1="50" y1="14" x2="50" y2="86" stroke="#f59e0b" stroke-width="0.5" stroke-dasharray="1.5,1.5" />
-                <circle cx="50" cy="50" r="12" fill="none" stroke="#f59e0b" stroke-width="0.5" stroke-dasharray="2,2" />
               </svg>
 
               <div class="absolute left-[3%] bottom-[3%] bg-blue-950/95 border-2 border-blue-400 rounded-xl px-3 py-2 shadow-xl">
@@ -779,18 +778,23 @@
       </div>
     </section>
 
-    <!-- 5. تبويب التحالف (8. ظهور أسماء الأعضاء + 9. بطاقة التجنيد + 10. سجل التدقيق الأصلي) -->
+    <!-- 5. تبويب التحالف وإدارة الصلاحيات -->
     <section id="view-alliance" class="tab-view hidden space-y-4">
       <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar bg-cmd-card p-1.5 rounded-2xl border border-cmd-border">
         <button onclick="switchAllianceSubTab('permissions')" id="al-sub-permissions" class="al-subtab-btn subtab-active px-3.5 py-2 rounded-xl text-xs font-bold shrink-0">🔑 الصلاحيات والرتب والإشعارات</button>
         <button onclick="switchAllianceSubTab('announcements')" id="al-sub-announcements" class="al-subtab-btn px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 shrink-0">📢 الإعلانات</button>
         <button onclick="switchAllianceSubTab('recruitment')" id="al-sub-recruitment" class="al-subtab-btn px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 shrink-0">🪪 بطاقة التجنيد</button>
-        <button onclick="switchAllianceSubTab('stats')" id="al-sub-stats" class="al-subtab-btn px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 shrink-0">📈 سجل التدقيق والنشاط</button>
+        <!-- هذا الزر مخفي افتراضياً، وسيتم إظهاره فقط إذا كان المستخدم يملك الصلاحية من خلال جافاسكريبت -->
+        <button onclick="switchAllianceSubTab('stats')" id="al-sub-stats" class="al-subtab-btn hidden px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 shrink-0">📈 سجل التدقيق والنشاط</button>
       </div>
 
-      <!-- 8. إدارة الصلاحيات والرتب والإشعارات مع ظهور أسماء جميع الأعضاء بوضوح -->
+      <!-- 8. إدارة الصلاحيات والرتب والإشعارات -->
       <div id="al-panel-permissions" class="al-subpanel bg-cmd-card border border-cmd-border rounded-2xl p-4 space-y-3">
-        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+        
+        <!-- قسم الصلاحيات الفردية المعزول (خاص بالمالك فقط) -->
+        <div id="special-permissions-container"></div>
+
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3 mt-2">
           <div>
             <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-400">لوحة المالك (Abo S3D - Owner R4)</span>
             <h3 class="font-black text-base text-white mt-1">تحرير رتب الأعضاء (R1 إلى R5) وصلاحية إرسال التنبيهات</h3>
@@ -812,7 +816,7 @@
         <div class="space-y-2.5" id="announcements-list"></div>
       </div>
 
-      <!-- 9. بطاقة التجنيد بالنص المطابق تماماً والمثبت رسمياً -->
+      <!-- 9. بطاقة التجنيد -->
       <div id="al-panel-recruitment" class="al-subpanel hidden grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div class="bg-cmd-card border border-cmd-border rounded-2xl p-4 space-y-3 text-xs flex flex-col justify-between">
           <div class="space-y-2">
@@ -853,7 +857,7 @@
         </div>
       </div>
 
-      <!-- 10. سجل التدقيق والنشاط (يعرض العمليات الفعلية وتوقيتها في الرياض) -->
+      <!-- 10. سجل التدقيق والنشاط (مغلق ومحمي) -->
       <div id="al-panel-stats" class="al-subpanel hidden space-y-3">
         <div class="flex items-center justify-between border-b border-slate-800 pb-2">
           <h4 class="font-black text-sm text-white"><i class="fa-solid fa-list-check text-cyan-400 ml-1"></i> سجل العمليات والتدقيق الحي</h4>
@@ -890,8 +894,8 @@
           <div><label class="text-slate-400 block mb-1">مستوى المقر (HQ)</label><input type="number" id="prof-hq" class="w-full bg-cmd-bg border rounded-xl p-2.5 text-cyan-400 font-black" /></div>
           <div><label class="text-slate-400 block mb-1">إجمالي القوة (M)</label><input type="number" id="prof-power" step="0.1" class="w-full bg-cmd-bg border rounded-xl p-2.5 text-emerald-400 font-black" /></div>
           <div><label class="text-slate-400 block mb-1">فريق 1 (M)</label><input type="number" id="prof-sq1" step="0.1" class="w-full bg-cmd-bg border rounded-xl p-2.5 text-white font-bold" /></div>
-          <div><label class="text-slate-400 block mb-1">فريق 2 (M)</label><input type="number" id="prof-sq2" step="0.1" class="w-full bg-cmd-bg border rounded-xl p-2.5 text-white" /></div>
-          <div><label class="text-slate-400 block mb-1">فريق 3 (M)</label><input type="number" id="prof-sq3" step="0.1" class="w-full bg-cmd-bg border rounded-xl p-2.5 text-white" /></div>
+          <div><label class="text-slate-400 block mb-1">فريق 2 (M)</label><input type="number" id="prof-sq2" step="0.1" class="w-full bg-cmd-bg border rounded-xl p-2.5 text-white font-bold" /></div>
+          <div><label class="text-slate-400 block mb-1">فريق 3 (M)</label><input type="number" id="prof-sq3" step="0.1" class="w-full bg-cmd-bg border rounded-xl p-2.5 text-white font-bold" /></div>
           <div>
             <!-- 3. تسمية الفيالق بالعربية -->
             <label class="text-slate-400 block mb-1">الفيلق الأساسي</label>
@@ -917,9 +921,7 @@
     <button onclick="switchMainTab('profile')" id="mob-tab-profile" class="mob-tab-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-[11px] font-bold text-slate-400"><i class="fa-solid fa-user-astronaut text-sm"></i><span>ملفي</span></button>
   </nav>
 
-  <!-- ==================== النوافذ التفاعلية (Modals) ==================== -->
-
-  <!-- نافذة تعديل/إنشاء فعالية (5. إدارة الفعاليات) -->
+  <!-- Modals -->
   <div id="event-editor-modal" class="fixed inset-0 z-50 hidden bg-black/75 flex items-center justify-center p-4">
     <div class="bg-cmd-card border border-cmd-border rounded-2xl max-w-md w-full p-4 space-y-3 text-xs shadow-2xl">
       <h3 class="font-black text-base text-white" id="event-modal-title">إدارة الفعالية</h3>
@@ -948,7 +950,6 @@
           <input type="number" id="ev-edit-minpower" value="0" step="0.1" class="w-full bg-cmd-bg border rounded-xl p-2.5 text-emerald-400 font-bold" />
         </div>
       </div>
-      <!-- إضافة المسجلين من القائمة -->
       <div>
         <label class="text-slate-400 block mb-1">إضافة لاعب مسجل مباشرة:</label>
         <div class="flex gap-2">
@@ -964,7 +965,6 @@
     </div>
   </div>
 
-  <!-- نافذة إنشاء/تعديل استفتاء (6. الاستفتاءات والتصويت) -->
   <div id="poll-editor-modal" class="fixed inset-0 z-50 hidden bg-black/75 flex items-center justify-center p-4">
     <div class="bg-cmd-card border border-cmd-border rounded-2xl max-w-md w-full p-4 space-y-3 text-xs shadow-2xl">
       <h3 class="font-black text-base text-white" id="poll-modal-title">إنشاء استفتاء جديد</h3>
@@ -992,7 +992,6 @@
     </div>
   </div>
 
-  <!-- نافذة تأكيد الحذف الآمنة (فعاليات واستفتاءات) -->
   <div id="confirm-delete-modal" class="fixed inset-0 z-50 hidden bg-black/80 flex items-center justify-center p-4">
     <div class="bg-cmd-card border border-red-500/50 rounded-2xl max-w-sm w-full p-4 space-y-3 text-xs text-center shadow-2xl">
       <div class="w-12 h-12 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center mx-auto text-xl">
@@ -1009,7 +1008,6 @@
     </div>
   </div>
 
-  <!-- نافذة إضافة / تعديل عضو -->
   <div id="member-modal" class="fixed inset-0 z-50 hidden bg-black/75 flex items-center justify-center p-4">
     <div class="bg-cmd-card border border-cmd-border rounded-2xl max-w-lg w-full p-4 space-y-3 text-xs">
       <h3 class="font-black text-base text-white" id="member-modal-title">بيانات العضو</h3>
@@ -1044,7 +1042,6 @@
           <input type="number" id="mem-sq3" step="0.1" value="0" class="w-full bg-cmd-bg border rounded p-2 text-white" />
         </div>
         <div>
-          <!-- 3. تسمية الفيالق بالعربية -->
           <label class="text-slate-400 block mb-1">الفيلق</label>
           <select id="mem-formation" class="w-full bg-cmd-bg border rounded p-2 text-amber-400 font-bold">
             <option value="دبابات">دبابات</option>
@@ -1113,7 +1110,7 @@
     <i class="fa-solid fa-circle-check"></i> <span id="toast-msg">تم</span>
   </div>
 
-  <!-- ==================== المحرك البرمجي المدمج ==================== -->
+  <!-- المحرك البرمجي المدمج -->
   <script>
     const DEFAULT_SUPABASE_URL = 'https://bwwbbbcfxhyiqeqrlfje.supabase.co';
     const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3d2JiYmNmeGh5aXFlcXJsZmplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3MDgwMzcsImV4cCI6MjEwODI4NDAzN30.tnaZHaYkVI6KYBxmu6z0EwRu1HOkbWj-6HcqTlDbZ1g';
@@ -1123,11 +1120,9 @@
     const SESSION_USER_KEY = 'HFO_806_LOGGED_USER';
     let sbClient = null;
 
-    // ذاكرة مؤقتة لخيارات الاستفتاء والفعالية أثناء الإنشاء
     let tempPollOptions = ['نعم', 'لا', 'احتياط'];
     let tempEventParticipants = [];
 
-    // تشفير الرمز السري عبر Web Crypto API (SHA-256)
     async function hashPin(pinString) {
       if (!pinString) return '';
       const clean = String(pinString).trim();
@@ -1137,11 +1132,9 @@
       return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
-    // 1. عرض وتحديث توقيت الرياض باستمرار وبدقة
     function updateClock() {
       try {
-        const now = new Date();
-        const timeStr = now.toLocaleTimeString('ar-SA', {
+        const timeStr = new Date().toLocaleTimeString('ar-SA', {
           timeZone: 'Asia/Riyadh',
           hour: '2-digit',
           minute: '2-digit',
@@ -1155,7 +1148,6 @@
       }
     }
 
-    // مباني عاصفة الصحراء الـ 11 الرسمية
     const OFFICIAL_DESERT_BUILDINGS = [
       { code: 'OIL_1', nameAr: 'مصفاة النفط الشمالية', nameEn: 'North Oil Refinery', stage: 'Stage 1 (00:00)', x: 50, y: 12, icon: 'fa-oil-well', color: 'border-yellow-500/80 bg-stone-900/95' },
       { code: 'HOSPITAL_1', nameAr: 'المستشفى 1 (NW)', nameEn: 'Hospital I', stage: 'Stage 1 (00:00)', x: 18, y: 16, icon: 'fa-kit-medical', color: 'border-emerald-400/80 bg-stone-900/95' },
@@ -1170,21 +1162,15 @@
       { code: 'OIL_2', nameAr: 'مصفاة النفط الجنوبية', nameEn: 'South Oil Refinery', stage: 'Stage 1 (00:00)', x: 50, y: 86, icon: 'fa-oil-well', color: 'border-yellow-500/80 bg-stone-900/95' }
     ];
 
-    // 4. مباني مخطط عاصفة الوادي الكاملة المطابقة للعبة (3 مسارات رسمية)
     const OFFICIAL_CANYON_BUILDINGS = [
-      // المسار الشمالي
       { code: 'NORTH_OUTPOST_1', nameAr: 'الحصن الشمالي الأول', nameEn: 'North Outpost I', stage: 'Stage 1 (00:00)', x: 20, y: 18, color: 'border-emerald-400 bg-slate-900/95' },
       { code: 'NORTH_TOWER', nameAr: 'برج الطاقة الشمالي', nameEn: 'North Power Tower', stage: 'Stage 2 (10:00)', x: 50, y: 16, color: 'border-sky-400 bg-slate-900/95' },
       { code: 'NORTH_OUTPOST_2', nameAr: 'الحصن الشمالي الثاني', nameEn: 'North Outpost II', stage: 'Stage 1 (00:00)', x: 80, y: 18, color: 'border-emerald-400 bg-slate-900/95' },
       { code: 'NORTH_HOSPITAL', nameAr: 'المستشفى الميداني الشمالي', nameEn: 'North Field Hospital', stage: 'Stage 1 (00:00)', x: 35, y: 26, color: 'border-teal-400 bg-slate-900/95' },
       { code: 'VIRUS_LAB', nameAr: 'مختبر العينات الفيروسية', nameEn: 'Virus Research Lab', stage: 'Stage 2 (10:00)', x: 65, y: 26, color: 'border-purple-400 bg-slate-900/95' },
-      
-      // المسار الأوسط
       { code: 'WEST_PASS', nameAr: 'معبر الوادي الغربي', nameEn: 'West Canyon Pass', stage: 'Stage 1 (00:00)', x: 22, y: 50, color: 'border-cyan-400 bg-slate-900/95' },
       { code: 'CITADEL_CORE', nameAr: 'قلعة الوادي المركزية', nameEn: 'Canyon Citadel (Core)', stage: 'Stage 3 (15:00)', x: 50, y: 50, color: 'border-amber-400 bg-amber-950/95' },
       { code: 'EAST_PASS', nameAr: 'معبر الوادي الشرقي', nameEn: 'East Canyon Pass', stage: 'Stage 1 (00:00)', x: 78, y: 50, color: 'border-cyan-400 bg-slate-900/95' },
-      
-      // المسار الجنوبي
       { code: 'SOUTH_HOSPITAL', nameAr: 'المستشفى الميداني الجنوبي', nameEn: 'South Field Hospital', stage: 'Stage 1 (00:00)', x: 35, y: 74, color: 'border-teal-400 bg-slate-900/95' },
       { code: 'DATA_HUB', nameAr: 'مركز الإمداد والبيانات', nameEn: 'Data Supply Hub', stage: 'Stage 2 (10:00)', x: 65, y: 74, color: 'border-blue-400 bg-slate-900/95' },
       { code: 'SOUTH_OUTPOST_1', nameAr: 'الحصن الجنوبي الأول', nameEn: 'South Outpost I', stage: 'Stage 1 (00:00)', x: 20, y: 82, color: 'border-emerald-400 bg-slate-900/95' },
@@ -1207,12 +1193,88 @@
       canyonStorm: { assignments: [] },
       announcements: [],
       notifications: [],
-      auditLog: []
+      auditLog: [],
+      customPermissions: {} // تم إضافة التخزين المعزول للصلاحيات الفردية هنا
     };
 
     let state = loadState();
 
-    // 10. دالة تسجيل التدقيق والنشاط الموحدة
+    // ---------------------------------------------------------
+    // نظام الصلاحيات الفردية المعزول (خطوة 1)
+    // ---------------------------------------------------------
+    
+    // هذه الدالة تفحص هل المستخدم يملك الصلاحية من خلال القائمة المخصصة
+    function hasPermission(permKey) {
+      if (isOwner()) return true; // المالك يمتلك جميع الصلاحيات دائماً
+      const activeName = state.loggedInUserName;
+      if (!activeName) return false;
+      
+      // نبحث في الكائن المعزول للصلاحيات (إذا كان موجوداً)
+      if (state.customPermissions && Array.isArray(state.customPermissions[activeName])) {
+         return state.customPermissions[activeName].includes(permKey);
+      }
+      return false; // لا يمتلك الصلاحية بشكل افتراضي
+    }
+
+    // هذه الدالة تعرض واجهة إدارة الصلاحيات للمالك فقط
+    function renderSpecialPermissionsUI() {
+        if (!isOwner()) return '';
+        const allPlayers = state.members.map(m => m.name);
+        return `
+        <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 mb-4 space-y-2">
+            <h4 class="font-black text-amber-400 text-sm">إدارة الصلاحيات الفردية (خاص بالمالك)</h4>
+            <div class="flex flex-wrap items-center gap-2">
+                <select id="sp-member-select" onchange="loadMemberSpecialPerms()" class="bg-cmd-bg border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white font-bold min-w-[150px]">
+                    <option value="">-- اختر العضو --</option>
+                    ${allPlayers.map(n => `<option value="${n}">${n}</option>`).join('')}
+                </select>
+                <label class="flex items-center gap-1.5 text-xs text-slate-200 bg-cmd-bg border border-slate-700 px-2 py-1.5 rounded-lg cursor-pointer">
+                    <input type="checkbox" id="sp-perm-audit" class="rounded text-amber-500 bg-slate-900 border-slate-600 focus:ring-0">
+                    <span class="font-bold">السماح برؤية سجل التدقيق والنشاط</span>
+                </label>
+                <button onclick="saveMemberSpecialPerms()" class="bg-amber-500 text-slate-950 px-3 py-1.5 rounded-lg text-xs font-black shadow hover:bg-amber-400">حفظ</button>
+            </div>
+        </div>
+        `;
+    }
+
+    function loadMemberSpecialPerms() {
+        const memberName = document.getElementById('sp-member-select').value;
+        const checkbox = document.getElementById('sp-perm-audit');
+        if (!memberName) {
+            checkbox.checked = false;
+            return;
+        }
+        if (!state.customPermissions) state.customPermissions = {};
+        const perms = state.customPermissions[memberName] || [];
+        checkbox.checked = perms.includes('audit_view');
+    }
+
+    async function saveMemberSpecialPerms() {
+        const memberName = document.getElementById('sp-member-select').value;
+        if (!memberName) return showToast('اختر العضو أولاً');
+        const checkbox = document.getElementById('sp-perm-audit');
+
+        if (!state.customPermissions) state.customPermissions = {};
+
+        if (checkbox.checked) {
+            state.customPermissions[memberName] = ['audit_view'];
+        } else {
+            state.customPermissions[memberName] = [];
+        }
+
+        await pushAllianceStateToCloud();
+        logAuditAction('تعديل صلاحية فردية', memberName, checkbox.checked ? 'منح صلاحية سجل التدقيق' : 'سحب صلاحية سجل التدقيق');
+        showToast('تم حفظ الصلاحية الفردية بنجاح');
+        
+        // تحديث الواجهة لإظهار الزر إذا تم منح الصلاحية لنفس المستخدم
+        const auditTabBtn = document.getElementById('al-sub-stats');
+        if (auditTabBtn) {
+            auditTabBtn.style.display = (isOwner() || hasPermission('audit_view')) ? 'inline-flex' : 'none';
+        }
+    }
+    // ---------------------------------------------------------
+
     function logAuditAction(actionType, targetItem, detailsText = '') {
       const actor = state.loggedInUserName || 'Abo S3D';
       const actorRole = state.currentRole || 'Owner R4';
@@ -1272,7 +1334,6 @@
       }
     }
 
-    // إرسال الإشعار الخارجي لتيليجرام وديسكورد
     async function sendAllianceExternalAlert(title, detailsText, colorHex = 0xf59e0b) {
       try {
         const response = await fetch('/api/alert', {
@@ -1367,6 +1428,9 @@
           state.announcements = p.announcements || [];
           state.notifications = p.notifications || [];
           if (Array.isArray(p.auditLog)) state.auditLog = p.auditLog;
+          
+          // جلب الصلاحيات المستقلة بأمان (خطوة 1)
+          state.customPermissions = p.customPermissions || {};
         }
         refreshLoggedUserRole();
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -1377,7 +1441,6 @@
       }
     }
 
-    // 3. تحويل أي اسم تشكيلة قديم إلى التسميات العربية الرسمية
     function normalizeFormation(form) {
       if (!form) return 'دبابات';
       const clean = form.toLowerCase().trim();
@@ -1417,6 +1480,7 @@
         });
 
         if (error && error.message && error.message.includes('can_notify')) {
+          delete payload.can_notify;
           await sbClient.from('hfo_members').upsert(payload);
         }
       } catch (e) {
@@ -1438,7 +1502,9 @@
             trainVip: state.trainVip,
             announcements: state.announcements,
             notifications: state.notifications,
-            auditLog: state.auditLog
+            auditLog: state.auditLog,
+            // حفظ الصلاحيات المستقلة (خطوة 1)
+            customPermissions: state.customPermissions || {}
           },
           updated_at: new Date().toISOString()
         });
@@ -1471,6 +1537,7 @@
       document.getElementById('auth-gate-modal').classList.remove('hidden');
     }
 
+    // ========== دالة تسجيل الدخول الأصلية التي طلب المستخدم عدم المساس بها نهائياً ==========
     async function handleMemberLogin() {
       const name = document.getElementById('login-name').value.trim();
       const rawPin = document.getElementById('login-pin').value.trim();
@@ -1498,6 +1565,7 @@
       showToast(`أهلاً بك يا ${found.name}`);
     }
 
+    // ========== دالة التسجيل الأصلية التي طلب المستخدم عدم المساس بها نهائياً ==========
     async function handleMemberRegister() {
       const name = document.getElementById('reg-name').value.trim();
       const rawPin = document.getElementById('reg-pin').value.trim();
@@ -1544,6 +1612,7 @@
       showToast('تم التسجيل بنجاح');
       sendAllianceExternalAlert('عضو جديد انضم للتحالف', `انضم اللاعب **${name}** (HQ ${hq} - ${power}M - فيلق ${formation}) إلى مركز القيادة.`, 0x10b981);
     }
+    // =========================================================================================
 
     function setLoggedUserSession(playerName) {
       state.loggedInUserName = playerName;
@@ -1606,6 +1675,12 @@
       const badge = document.getElementById('current-role-badge');
       badge.textContent = isActOwner ? 'Owner R4' : state.currentRole;
       badge.className = isActOwner ? 'px-1.5 py-0.2 rounded bg-amber-500 text-slate-950 text-[10px] font-hud font-black' : 'px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 text-[10px] font-hud font-bold';
+
+      // عرض زر سجل التدقيق للمالك أو لمن يملك صلاحية audit_view
+      const auditTabBtn = document.getElementById('al-sub-stats');
+      if (auditTabBtn) {
+        auditTabBtn.style.display = (isActOwner || hasPermission('audit_view')) ? 'inline-flex' : 'none';
+      }
 
       document.querySelectorAll('.role-protected-owner').forEach(el => el.style.display = isActOwner ? '' : 'none');
       document.querySelectorAll('.role-protected-leader').forEach(el => el.style.display = canManageAlliance() ? '' : 'none');
@@ -1709,6 +1784,13 @@
     }
 
     function switchAllianceSubTab(sub) {
+      // حماية إضافية للزر لعدم السماح بفتحه من الدفيلوبر تولز لمن ليس له صلاحية
+      if (sub === 'stats') {
+        if (!isOwner() && !hasPermission('audit_view')) {
+          return showToast('هذا القسم محمي ومخصص للمالك فقط');
+        }
+      }
+
       document.querySelectorAll('.al-subpanel').forEach(el => el.classList.add('hidden'));
       document.getElementById(`al-panel-${sub}`).classList.remove('hidden');
       document.querySelectorAll('.al-subtab-btn').forEach(b => b.classList.remove('subtab-active'));
@@ -2487,6 +2569,12 @@
       toggleModal('confirm-delete-modal');
     }
 
+    function renderAttendanceTable() {
+      document.getElementById('attendance-table-body').innerHTML = state.members.map(m => `
+        <tr><td class="py-2 px-3 text-white font-bold">${m.name}</td><td colspan="5" class="text-slate-400">مسجل في التحالف</td></tr>
+      `).join('');
+    }
+
     function renderTrainTab() {
       const conductor = state.trainConductor || 'Abo S3D';
       const vip = state.trainVip || '— غير محدد —';
@@ -2551,6 +2639,12 @@
     function renderAllianceTab() {
       const permBox = document.getElementById('permissions-management-list');
       if (!permBox) return;
+      
+      // رسم قسم الصلاحيات للمالك (خطوة 1)
+      const specialPermsContainer = document.getElementById('special-permissions-container');
+      if (specialPermsContainer) {
+          specialPermsContainer.innerHTML = renderSpecialPermissionsUI();
+      }
 
       const q = (document.getElementById('perm-search')?.value || '').trim().toLowerCase();
       let list = state.members.filter(m => !q || m.name.toLowerCase().includes(q));
@@ -2805,11 +2899,9 @@
       ensureOwnerExists();
       initSupabaseConnection();
 
-      // 1. تشغيل ساعة توقيت الرياض فوراً
       updateClock();
       setInterval(updateClock, 1000);
 
-      // 11. التحقق من جلسة تسجيل الدخول؛ إن لم تكن موجودة تظهر صفحة الدخول مباشرة
       const savedSessionUser = localStorage.getItem(SESSION_USER_KEY);
       if (savedSessionUser) {
         setLoggedUserSession(savedSessionUser);

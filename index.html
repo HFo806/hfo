@@ -218,7 +218,7 @@
             </select>
           </div>
         </div>
-        <button id="reg-btn-submit" onclick="handleMemberRegister()" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm shadow-lg">
+        <button id="reg-btn-submit" onclick="handleMemberRegister()" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm shadow-lg transition">
           <i class="fa-solid fa-user-check ml-1"></i> تسجيل حسابي في التحالف
         </button>
       </div>
@@ -266,6 +266,11 @@
             <span id="header-user-name" class="font-black text-white">Abo S3D</span>
             <span id="current-role-badge" class="px-1.5 py-0.2 rounded bg-amber-500 text-slate-950 text-[10px] font-hud font-black">Owner R4</span>
           </div>
+
+          <button onclick="toggleModal('notifications-modal')" class="relative p-2.5 rounded-xl bg-cmd-panel border border-cmd-border hover:border-cyan-500 transition" title="الإشعارات">
+            <i class="fa-solid fa-bell text-slate-200 text-sm"></i>
+            <span id="notif-badge" class="hidden absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-black items-center justify-center">0</span>
+          </button>
 
           <button onclick="openAuthModal()" class="p-2.5 rounded-xl bg-cyan-500/15 border border-cyan-500/30 hover:bg-cyan-500/25 text-cyan-300 transition text-xs font-bold flex items-center gap-1" title="تبديل أو تسجيل عضو جديد">
             <i class="fa-solid fa-user-plus text-sm"></i>
@@ -494,7 +499,6 @@
                 <line x1="68" y1="32" x2="88" y2="12" stroke="#ef4444" stroke-width="0.7" stroke-dasharray="2,2" />
                 <line x1="15" y1="50" x2="85" y2="50" stroke="#f59e0b" stroke-width="0.5" stroke-dasharray="1.5,1.5" />
                 <line x1="50" y1="14" x2="50" y2="86" stroke="#f59e0b" stroke-width="0.5" stroke-dasharray="1.5,1.5" />
-                <circle cx="50" cy="50" r="12" fill="none" stroke="#f59e0b" stroke-width="0.5" stroke-dasharray="2,2" />
               </svg>
               <div class="absolute left-[3%] bottom-[3%] bg-blue-950/95 border-2 border-blue-400 rounded-xl px-3 py-2 shadow-xl">
                 <div class="text-[11px] font-hud font-black text-blue-300">🟦 ALLY SPAWN [HFO]</div>
@@ -590,7 +594,7 @@
       <div id="ev-panel-upcoming" class="ev-subpanel hidden space-y-4">
         <div class="flex items-center justify-between">
           <h3 class="font-black text-base text-white">الفعاليات القادمة للتحالف</h3>
-          <button id="btn-create-event" onclick="openCreateEventModal()" class="px-3.5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-black shadow flex items-center gap-1.5">
+          <button onclick="openCreateEventModal()" class="role-protected-officer px-3.5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-black shadow flex items-center gap-1.5">
             <i class="fa-solid fa-plus"></i> إنشاء فعالية جديدة
           </button>
         </div>
@@ -601,7 +605,7 @@
       <div id="ev-panel-polls" class="ev-subpanel hidden space-y-4">
         <div class="flex items-center justify-between">
           <h3 class="font-black text-base text-white">استفتاءات التحالف والتصويت الحي</h3>
-          <button id="btn-create-poll" onclick="openCreatePollModal()" class="px-3.5 py-2 rounded-xl bg-cyan-500 text-slate-950 font-black text-xs shadow flex items-center gap-1.5">
+          <button onclick="openCreatePollModal()" class="role-protected-officer px-3.5 py-2 rounded-xl bg-cyan-500 text-slate-950 font-black text-xs shadow flex items-center gap-1.5">
             <i class="fa-solid fa-square-poll-vertical"></i> إنشاء استفتاء جديد
           </button>
         </div>
@@ -630,7 +634,7 @@
       </div>
     </section>
 
-    <!-- 3. تبويب قطار التحالف (7. فصل التعيين عن النشر المباشر) -->
+    <!-- 3. تبويب قطار التحالف -->
     <section id="view-train" class="tab-view hidden space-y-4">
       <div class="max-w-3xl mx-auto space-y-4">
         <div class="bg-cmd-card border border-cmd-border rounded-2xl p-4 md:p-6 space-y-4">
@@ -640,11 +644,11 @@
               <h3 class="font-black text-lg text-white mt-1">قطار تحالف HFO الذهبي الأحد</h3>
               <p class="text-xs text-slate-400">يمكنك تحديد السائق والراكب دون نشر، ثم الضغط على زر «نشر» عند الاعتماد</p>
             </div>
-            <div id="train-actions-bar" class="flex items-center gap-2">
-              <button onclick="generateTrainVipTable()" class="px-3 py-2 rounded-xl bg-cmd-panel border border-slate-700 text-slate-200 font-bold text-xs flex items-center gap-1.5 shadow">
+            <div class="flex items-center gap-2">
+              <button onclick="generateTrainVipTable()" class="role-protected-officer px-3 py-2 rounded-xl bg-cmd-panel border border-slate-700 text-slate-200 font-bold text-xs flex items-center gap-1.5 shadow">
                 <i class="fa-solid fa-rotate"></i> تدوير عادل
               </button>
-              <button onclick="publishTrainSchedule()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center gap-1.5 shadow-lg">
+              <button onclick="publishTrainSchedule()" class="role-protected-officer px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center gap-1.5 shadow-lg">
                 <i class="fa-solid fa-bullhorn"></i> نشر جدول القطار
               </button>
             </div>
@@ -670,7 +674,7 @@
                 <span class="text-[11px] text-amber-400 font-bold block"><i class="fa-solid fa-train-subway ml-1"></i> قائد القطار (Conductor)</span>
                 <div class="flex items-center justify-between">
                   <strong class="text-lg text-white font-black" id="train-conductor-name">Abo S3D</strong>
-                  <select id="train-conductor-select" onchange="stageChangeConductor(this.value)" class="export-hide bg-cmd-card border border-amber-500/40 rounded px-2 py-1 text-xs text-amber-300 font-bold"></select>
+                  <select id="train-conductor-select" onchange="stageChangeConductor(this.value)" class="export-hide role-protected-officer bg-cmd-card border border-amber-500/40 rounded px-2 py-1 text-xs text-amber-300 font-bold"></select>
                 </div>
               </div>
 
@@ -678,7 +682,7 @@
                 <span class="text-[11px] text-cyan-400 font-bold block"><i class="fa-solid fa-crown ml-1"></i> راكب الـ VIP (VIP Passenger)</span>
                 <div class="flex items-center justify-between">
                   <strong class="text-lg text-white font-black" id="train-vip-name">— غير محدد —</strong>
-                  <select id="train-vip-select" onchange="stageChangeVip(this.value)" class="export-hide bg-cmd-card border border-cyan-500/40 rounded px-2 py-1 text-xs text-cyan-300 font-bold"></select>
+                  <select id="train-vip-select" onchange="stageChangeVip(this.value)" class="export-hide role-protected-officer bg-cmd-card border border-cyan-500/40 rounded px-2 py-1 text-xs text-cyan-300 font-bold"></select>
                 </div>
               </div>
             </div>
@@ -777,6 +781,7 @@
         <button onclick="switchAllianceSubTab('permissions')" id="al-sub-permissions" class="al-subtab-btn subtab-active px-3.5 py-2 rounded-xl text-xs font-bold shrink-0">🔑 الصلاحيات والرتب</button>
         <button onclick="switchAllianceSubTab('announcements')" id="al-sub-announcements" class="al-subtab-btn px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 shrink-0">📢 الإعلانات</button>
         <button onclick="switchAllianceSubTab('recruitment')" id="al-sub-recruitment" class="al-subtab-btn px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 shrink-0">🪪 بطاقة التجنيد</button>
+        <!-- يظهر للمالك ولمن يُمنح الصلاحية فقط -->
         <button onclick="switchAllianceSubTab('stats')" id="al-sub-stats" class="al-subtab-btn hidden px-3.5 py-2 rounded-xl text-xs font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 shrink-0">
           <i class="fa-solid fa-list-check ml-1"></i> سجل التدقيق والنشاط
         </button>
@@ -786,7 +791,7 @@
       <div id="al-panel-permissions" class="al-subpanel bg-cmd-card border border-cmd-border rounded-2xl p-4 space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
           <div>
-            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-400">لوحة المالك الرسمية</span>
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-400">لوحة الإدارة</span>
             <h3 class="font-black text-base text-white mt-1">تخصيص صلاحيات الأعضاء المستقلة</h3>
             <p class="text-xs text-slate-400">اختر عضواً لعرض وتعديل صلاحياته بدقة، بما في ذلك صلاحية الاطلاع على سجل التدقيق</p>
           </div>
@@ -814,7 +819,7 @@
         <div class="space-y-2.5" id="announcements-list"></div>
       </div>
 
-      <!-- بطاقة التجنيد بالنص المطابق تماماً والمثبت -->
+      <!-- بطاقة التجنيد -->
       <div id="al-panel-recruitment" class="al-subpanel hidden grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div class="bg-cmd-card border border-cmd-border rounded-2xl p-4 space-y-3 text-xs flex flex-col justify-between">
           <div class="space-y-2">
@@ -855,11 +860,11 @@
         </div>
       </div>
 
-      <!-- سجل التدقيق والنشاط (مستقل ومخفي بشكل دائم عن أي عضو غير المالك أو المصرح له) -->
+      <!-- سجل التدقيق والنشاط المحفوظ في hfo_alliance_state -->
       <div id="al-panel-stats" class="al-subpanel hidden space-y-3">
         <div class="flex items-center justify-between border-b border-slate-800 pb-2">
           <div>
-            <h4 class="font-black text-sm text-amber-400"><i class="fa-solid fa-shield-halved text-amber-400 ml-1"></i> سجل التدقيق والنشاط</h4>
+            <h4 class="font-black text-sm text-amber-400"><i class="fa-solid fa-list-check text-amber-400 ml-1"></i> سجل التدقيق والنشاط</h4>
             <span class="text-xs text-slate-400">متاح للمالك وللمصرح لهم فقط • توقيت الرياض</span>
           </div>
           <button onclick="renderAllianceTab()" class="px-3 py-1 bg-cmd-panel border border-slate-700 text-slate-200 rounded-lg text-xs font-bold">
@@ -980,7 +985,7 @@
         <textarea id="poll-edit-desc" placeholder="توضيح مختصر للأعضاء..." class="w-full bg-cmd-bg border rounded-xl p-2 text-white" rows="2"></textarea>
       </div>
       <div>
-        <label class="text-slate-400 block mb-1">خيارات التصويت المخصصة:</label>
+        <label class="text-slate-400 block mb-1">خيارات التصويت (اكتب خياراً واضغط إضافة):</label>
         <div class="flex gap-2">
           <input type="text" id="poll-new-opt-input" placeholder="اسم الخيار الجديد..." class="flex-1 bg-cmd-bg border rounded-xl p-2 text-white" />
           <button onclick="addCustomPollOption()" class="px-3 py-2 bg-amber-500 text-slate-950 font-black rounded-xl">+ خيار</button>
@@ -1079,35 +1084,7 @@
     </div>
   </div>
 
-  <div id="notifications-modal" class="fixed inset-0 z-50 hidden bg-black/75 flex items-center justify-center p-4">
-    <div class="bg-cmd-card border border-cmd-border rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-        <h3 class="font-black text-base text-white"><i class="fa-solid fa-bell text-cyan-400 ml-1"></i> الإشعارات</h3>
-        <button onclick="markAllNotificationsRead()" class="text-xs text-cyan-400 font-bold">تحديد كمقروء</button>
-      </div>
-      <div id="notifications-list" class="space-y-2 max-h-80 overflow-y-auto"></div>
-      <button onclick="toggleModal('notifications-modal')" class="w-full py-2.5 rounded-xl bg-cmd-panel text-slate-200 text-xs font-bold">إغلاق</button>
-    </div>
-  </div>
-
-  <div id="add-account-modal" class="fixed inset-0 z-50 hidden bg-black/75 flex items-center justify-center p-4">
-    <div class="bg-cmd-card border border-cmd-border rounded-2xl max-w-md w-full p-4 space-y-3 text-xs">
-      <h3 class="font-black text-base text-white">إضافة حساب فرعي (Alt / Farm)</h3>
-      <input type="text" id="new-acc-name" placeholder="اسم الحساب الفرعي" class="w-full bg-cmd-bg border rounded-xl p-2.5 text-white font-bold" />
-      <select id="new-acc-tag" class="w-full bg-cmd-bg border rounded-xl p-2.5 text-white font-bold">
-        <option value="Alt">حساب فرعي (Alt)</option><option value="Farm">حساب مزرعة (Farm)</option>
-      </select>
-      <div class="grid grid-cols-2 gap-2">
-        <input type="number" id="new-acc-hq" placeholder="HQ" value="27" class="bg-cmd-bg border rounded-xl p-2.5 text-white font-bold" />
-        <input type="number" id="new-acc-power" placeholder="القوة (M)" value="0" step="0.1" class="bg-cmd-bg border rounded-xl p-2.5 text-white font-bold" />
-      </div>
-      <div class="flex gap-2">
-        <button onclick="addNewSubAccount()" class="flex-1 py-2 rounded-xl bg-cyan-500 text-slate-950 font-black">إضافة</button>
-        <button onclick="toggleModal('add-account-modal')" class="flex-1 py-2 rounded-xl bg-cmd-panel text-slate-300 font-bold">إلغاء</button>
-      </div>
-    </div>
-  </div>
-
+  <!-- صندوق تنبيه محصن من التعليق والاختفاء (z-[99999]) -->
   <div id="toast-box" class="fixed top-10 left-1/2 -translate-x-1/2 z-[99999] hidden px-5 py-3 rounded-2xl bg-emerald-500 text-slate-950 font-black text-xs shadow-2xl flex items-center gap-2 whitespace-nowrap transition-all duration-200">
     <i class="fa-solid fa-circle-check"></i> <span id="toast-msg">تم</span>
   </div>
@@ -1181,6 +1158,7 @@
       }
     ];
 
+    // دالة تنبيهات محصنة
     function showToast(msg, isError = false) {
       let box = document.getElementById('toast-box');
       if (!box) { alert(msg); return; }
@@ -1194,6 +1172,7 @@
       setTimeout(() => box.classList.add('hidden'), 3500);
     }
 
+    // دالة تشفير محصنة
     async function hashPin(pinString) {
       if (!pinString) return '';
       const clean = String(pinString).trim();
@@ -1243,6 +1222,7 @@
 
     let state = loadState();
 
+    // السجل مدمج في state الأصلي دون خادم خارجي معقد
     function recordAuditLog(actionType, targetItem, detailsText = '') {
       const actor = state.loggedInUserName || 'Abo S3D';
       const actorRole = state.currentRole || 'Owner R4';
@@ -1405,7 +1385,13 @@
           state.notifications = p.notifications || [];
           
           if (Array.isArray(p.auditLog)) state.auditLog = p.auditLog;
-          if (p.customPermissions) state.customPermissions = p.customPermissions;
+          
+          // تأمين مصفوفة الصلاحيات من أي خطأ
+          if (p.customPermissions) {
+            state.customPermissions = p.customPermissions;
+          } else if (!state.customPermissions) {
+            state.customPermissions = {};
+          }
         }
         
         refreshLoggedUserRole();
@@ -1465,6 +1451,9 @@
     async function pushAllianceStateToCloud() {
       if (!sbClient) return;
       try {
+        // حماية أخيرة لضمان وجود الكائن قبل الرفع
+        if (!state.customPermissions) state.customPermissions = {};
+        
         await sbClient.from('hfo_alliance_state').upsert({
           id: 'HFO_806',
           payload: {
@@ -1477,7 +1466,7 @@
             announcements: state.announcements,
             notifications: state.notifications,
             auditLog: state.auditLog,
-            customPermissions: state.customPermissions // حفظ الصلاحيات المستقلة هنا حصراً
+            customPermissions: state.customPermissions
           },
           updated_at: new Date().toISOString()
         });
@@ -1493,10 +1482,14 @@
       return activeName === OWNER_RESERVED_NAME.toLowerCase();
     }
 
+    // دالة التحقق من الصلاحيات محصنة بالكامل
     function hasPermission(permKey) {
       if (isOwner()) return true; 
       const user = state.members.find(m => m.name.toLowerCase() === (state.loggedInUserName || '').toLowerCase());
       if (!user) return false;
+      
+      // الحماية الأساسية: إذا كان الكائن غير موجود، أنشئه فوراً لمنع الانهيار
+      if (!state.customPermissions) state.customPermissions = {};
       
       const perms = state.customPermissions[user.id];
       if (Array.isArray(perms) && perms.length > 0) {
@@ -1575,6 +1568,10 @@
           if (rawPin === '806' || rawPin === '1234') {
             setLoggedUserSession(OWNER_RESERVED_NAME);
             document.getElementById('auth-gate-modal')?.classList.add('hidden');
+            
+            // حماية مبكرة للـ state قبل الريندر
+            if (!state.customPermissions) state.customPermissions = {};
+            
             renderAll();
             showToast(`مرحباً بك يا ${OWNER_RESERVED_NAME} (المالك) 👑`);
             syncFromCloud(false).catch(()=>{});
@@ -1619,13 +1616,16 @@
         
         setTimeout(() => recordAuditLog('تسجيل دخول', found.name, 'دخول ناجح إلى مركز القيادة'), 500);
         
+        // حماية قبل الريندر النهائي
+        if (!state.customPermissions) state.customPermissions = {};
+        
         renderAll();
         showToast(`أهلاً بك يا ${found.name}`);
         syncFromCloud(false).catch(()=>{});
 
       } catch (err) {
-        showToast('حدث خطأ أثناء الدخول', true);
-        console.error(err);
+        showToast('حدث خطأ أثناء الدخول، يرجى المحاولة مجدداً', true);
+        console.error('Login Error:', err);
       } finally {
         if(btn){ btn.innerHTML = '<i class="fa-solid fa-right-to-bracket ml-1"></i> دخول إلى مركز القيادة'; btn.disabled = false; }
       }
@@ -1693,6 +1693,8 @@
         setTimeout(() => recordAuditLog('تسجيل عضو جديد', name, `HQ ${hq} - القوة ${power}M`), 500);
         
         document.getElementById('auth-gate-modal').classList.add('hidden');
+        if (!state.customPermissions) state.customPermissions = {};
+        
         renderAll();
         showToast('تم التسجيل بنجاح');
         sendAllianceExternalAlert('عضو جديد انضم للتحالف', `انضم اللاعب **${name}** (HQ ${hq} - ${power}M - فيلق ${formation}) إلى مركز القيادة.`, 0x10b981);
@@ -1835,6 +1837,17 @@
 
     function openAuthModal() {
       document.getElementById('auth-gate-modal').classList.remove('hidden');
+    }
+
+    function renderSmartActionBanner() {
+      const acc = getActiveAccount();
+      document.getElementById('smart-banner-acc-name').textContent = acc.name;
+      document.getElementById('smart-actions-grid').innerHTML = `
+        <div onclick="switchMainTab('profile')" class="cursor-pointer p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-2 text-xs"><span>🟢</span><div><strong class="text-emerald-400 block">حسابك: ${acc.name} (${acc.power}M)</strong><span class="text-slate-300 text-[11px]">تحديث قوتك وتشكيلاتك</span></div></div>
+        <div onclick="switchMainTab('events');switchEventsSubTab('desert')" class="cursor-pointer p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center gap-2 text-xs"><span>🏜️</span><div><strong class="text-cyan-400 block">عاصفة الصحراء</strong><span class="text-slate-300 text-[11px]">توزيع الصومعة والمصانع</span></div></div>
+        <div onclick="switchMainTab('events');switchEventsSubTab('canyon')" class="cursor-pointer p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center gap-2 text-xs"><span>⛰️</span><div><strong class="text-blue-400 block">عاصفة الوادي</strong><span class="text-slate-300 text-[11px]">مخطط اللعبة (3 مسارات)</span></div></div>
+        <div onclick="switchMainTab('train')" class="cursor-pointer p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-2 text-xs"><span>🚂</span><div><strong class="text-amber-400 block">قطار التحالف الأحد</strong><span class="text-slate-300 text-[11px]">السائق والـ VIP</span></div></div>
+      `;
     }
 
     function renderPowerSummaryCards() {
@@ -2726,6 +2739,8 @@
       }
 
       const isTargetOwner = isOwnerName(member.name);
+      // حماية استباقية لقراءة الصلاحيات
+      if (!state.customPermissions) state.customPermissions = {};
       const userPerms = isTargetOwner ? ['*'] : (state.customPermissions[member.id] || []);
 
       box.innerHTML = `
@@ -2864,190 +2879,4 @@
       if (!m) return;
       m.canNotify = !m.canNotify;
       await pushMemberToCloud(m);
-      recordAuditLog('صلاحية إرسال التنبيهات', m.name, m.canNotify ? 'تفعيل' : 'تعطيل');
-      renderAll();
-      showToast(`صلاحية إرسال التنبيهات لـ ${m.name}: ${m.canNotify ? 'مفعلة' : 'معطلة'}`);
-    }
-
-    function publishAnnouncement() {
-      const acc = getActiveAccount();
-      if (!isOwner() && !acc.canNotify && !hasPermission('announcements_publish')) {
-        recordAuditLog('محاولة مرفوضة', 'نشر إعلان', 'لا يملك صلاحية announcements_publish');
-        return showToast('ليس لديك صلاحية نشر الإعلانات', true);
-      }
-      const title = document.getElementById('ann-title').value.trim();
-      const body = document.getElementById('ann-body').value.trim();
-      if (!title || !body) return showToast('يرجى كتابة عنوان ونص الإعلان', true);
-
-      state.announcements.unshift({ id: 'a_' + Date.now(), title, body, category: 'إعلان', pinned: true, author: acc.name, time: 'الآن' });
-      document.getElementById('ann-title').value = '';
-      document.getElementById('ann-body').value = '';
-      recordAuditLog('نشر إعلان قيادي', title);
-      renderAllianceTab();
-      showToast('تم النشر وإرسال التنبيهات لتيليجرام وديسكورد');
-      sendAllianceExternalAlert(`📢 إعلان قيادي: ${title}`, body, 0x06b6d4);
-    }
-
-    function populateProfileForm() {
-      const acc = getActiveAccount();
-      document.getElementById('prof-avatar').textContent = acc.name.charAt(0).toUpperCase();
-      document.getElementById('prof-header-name').textContent = `${acc.name} (${acc.role || 'R4'})`;
-      document.getElementById('prof-header-meta').textContent = `Server #806 • تحالف HFO • ${isOwnerName(acc.name) ? 'المالك R4' : acc.sysRole}`;
-      document.getElementById('prof-name').value = acc.name;
-      document.getElementById('prof-pin').value = '';
-      document.getElementById('prof-hq').value = acc.hq || 30;
-      document.getElementById('prof-power').value = acc.power || 0;
-      document.getElementById('prof-sq1').value = acc.sq1 || 0;
-      document.getElementById('prof-sq2').value = acc.sq2 || 0;
-      document.getElementById('prof-sq3').value = acc.sq3 || 0;
-      document.getElementById('prof-formation').value = normalizeFormation(acc.formation);
-    }
-
-    async function saveActiveProfile() {
-      const acc = getActiveAccount();
-      acc.hq = Number(document.getElementById('prof-hq').value) || 30;
-      acc.power = Number(document.getElementById('prof-power').value) || 0;
-      acc.sq1 = Number(document.getElementById('prof-sq1').value) || 0;
-      acc.sq2 = Number(document.getElementById('prof-sq2').value) || 0;
-      acc.sq3 = Number(document.getElementById('prof-sq3').value) || 0;
-      acc.formation = normalizeFormation(document.getElementById('prof-formation').value);
-      
-      const newPin = document.getElementById('prof-pin').value.trim();
-      if (newPin) acc.pin = await hashPin(newPin);
-      acc.updated = 'الآن';
-
-      let foundIndex = state.members.findIndex(m => m.name.toLowerCase() === acc.name.toLowerCase());
-      if (foundIndex === -1) {
-        state.members.unshift(acc);
-      } else {
-        state.members[foundIndex] = acc;
-      }
-
-      await pushMemberToCloud(acc);
-      recordAuditLog('تحديث ملف شخصي', acc.name, `القوة: ${acc.power}M - المقر: ${acc.hq}`);
-      renderAll();
-      showToast('تم حفظ ومزامنة بياناتك في جدول القوة');
-    }
-
-    function exportOfficialBattlePNG(elementId, filename) {
-      const el = document.getElementById(elementId);
-      if (!el || typeof html2canvas === 'undefined') return;
-      const hiddenControls = el.querySelectorAll('.export-hide');
-      hiddenControls.forEach(c => c.style.display = 'none');
-      const viewports = el.querySelectorAll('.map-touch-viewport');
-      const stages = el.querySelectorAll('.map-touch-stage');
-      const prevViewportStyles = []; const prevStageTransforms = [];
-      viewports.forEach((vp, i) => { prevViewportStyles[i] = { width: vp.style.width, height: vp.style.height }; vp.style.width = '980px'; vp.style.height = '640px'; });
-      stages.forEach((st, i) => { prevStageTransforms[i] = st.style.transform; st.style.transform = 'none'; });
-      const prevElWidth = el.style.width; if (viewports.length > 0) el.style.width = '1020px';
-
-      showToast('جاري تصدير الصورة بدقة HD...');
-      html2canvas(el, { backgroundColor: '#070a12', scale: 2, windowWidth: 1280, scrollX: 0, scrollY: -window.scrollY, useCORS: true }).then(canvas => {
-        hiddenControls.forEach(c => c.style.display = '');
-        el.style.width = prevElWidth;
-        viewports.forEach((vp, i) => { vp.style.width = prevViewportStyles[i].width; vp.style.height = prevViewportStyles[i].height; });
-        stages.forEach((st, i) => { st.style.transform = prevStageTransforms[i]; });
-        const link = document.createElement('a');
-        link.download = filename; link.href = canvas.toDataURL('image/png'); link.click();
-        showToast('تم تحميل الصورة بنجاح');
-      });
-    }
-
-    function exportRosterCSV() {
-      const headers = ['Name,Role,HQ,TotalPower,Squad1,Squad2,Squad3,Formation,Activity'];
-      const rows = state.members.map(m => `"${m.name}",${m.role},${m.hq},${m.power},${m.sq1},${m.sq2},${m.sq3},"${normalizeFormation(m.formation)}","${m.activity}"`);
-      downloadTextFile(headers.concat(rows).join('\n'), 'HFO-806-Roster.csv', 'text/csv;charset=utf-8;');
-    }
-
-    function exportRosterJSON() {
-      downloadTextFile(JSON.stringify(state.members, null, 2), 'HFO-806-Roster.json', 'application/json');
-    }
-
-    function downloadTextFile(content, fileName, mime) {
-      const blob = new Blob(['\uFEFF' + content], { type: mime });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    function runCalculators() {
-      const sq1 = parseFloat(document.getElementById('calc-sq1')?.value) || 0;
-      const sq2 = parseFloat(document.getElementById('calc-sq2')?.value) || 0;
-      const sq3 = parseFloat(document.getElementById('calc-sq3')?.value) || 0;
-      const enemy = parseFloat(document.getElementById('calc-enemy-power')?.value) || 0;
-      const totalSq = sq1 + sq2 + sq3;
-      const avgSq = totalSq / 3;
-      const diff = totalSq - enemy;
-
-      document.getElementById('res-sq-total').textContent = `${totalSq.toFixed(2)} M`;
-      document.getElementById('res-sq-avg').textContent = `${avgSq.toFixed(2)} M`;
-      document.getElementById('res-sq-max').textContent = `${Math.max(sq1, sq2, sq3).toFixed(2)} M`;
-      const diffEl = document.getElementById('res-sq-diff');
-      if (diffEl) {
-        diffEl.textContent = `${diff >= 0 ? '+' : ''}${diff.toFixed(2)} M`;
-        diffEl.className = diff >= 0 ? 'text-emerald-400 font-black' : 'text-red-400 font-black';
-      }
-
-      const curr = parseFloat(document.getElementById('calc-prog-curr')?.value) || 0;
-      const targ = parseFloat(document.getElementById('calc-prog-targ')?.value) || 1;
-      document.getElementById('res-prog-rem').textContent = Math.max(0, targ - curr);
-      document.getElementById('res-prog-pct').textContent = `${Math.min(100, (curr/targ)*100).toFixed(1)}%`;
-      document.getElementById('res-prog-bar').style.width = `${Math.min(100, (curr/targ)*100)}%`;
-
-      const sorted = [...state.members].sort((a, b) => b.power - a.power);
-      const totalAll = sorted.reduce((s, m) => s + Number(m.power || 0), 0);
-      document.getElementById('alliance-calc-box').innerHTML = `
-        <div class="flex justify-between"><span>قوة HFO:</span><strong class="text-cyan-400">${totalAll.toFixed(1)}M</strong></div>
-        <div class="flex justify-between"><span>الأعضاء:</span><strong class="text-white">${state.members.length}</strong></div>
-      `;
-    }
-
-    function renderAll() {
-      applyRolePermissions();
-      renderAccountsChips();
-      renderSmartActionBanner();
-      renderRoster();
-      renderDesertStorm();
-      renderCanyonStorm();
-      renderEventsTimeline();
-      renderPolls();
-      renderTrainTab();
-      renderAllianceTab();
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      ensureOwnerExists();
-      initSupabaseConnection();
-
-      updateClock();
-      setInterval(updateClock, 1000);
-
-      const savedSessionUser = localStorage.getItem(SESSION_USER_KEY);
-      if (savedSessionUser) {
-        setLoggedUserSession(savedSessionUser);
-        document.getElementById('auth-gate-modal').classList.add('hidden');
-      } else {
-        openAuthModal();
-      }
-
-      renderAll();
-      initTouchMapEngine('desert');
-      initTouchMapEngine('canyon');
-      fitInteractiveMap('desert');
-      fitInteractiveMap('canyon');
-
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration skipped:', err));
-      }
-    });
-
-    window.addEventListener('resize', () => {
-      fitInteractiveMap('desert');
-      fitInteractiveMap('canyon');
-    });
-  </script>
-</body>
-</html>
+      recordAuditLog('صلاحية إرسال التنبيهات', m.name, m.canNotify ? 'تفعيل' : 'تعط

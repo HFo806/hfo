@@ -2956,9 +2956,19 @@
     }
     function migrateTrainWeekSchedule() {
       if (!state.trainWeekSchedule || typeof state.trainWeekSchedule !== 'object') state.trainWeekSchedule = {};
+      // One-time reset: start the current weekly schedule with no conductor or VIP selected.
+      // The flag is local to this browser so it does not erase choices on every render.
+      const blankDefaultsKey = 'LEGIONMATE_TRAIN_BLANK_DEFAULTS_V1';
+      if (localStorage.getItem(blankDefaultsKey) !== 'done') {
+        getTrainWeekDays().forEach(day => {
+          state.trainWeekSchedule[day.date] = { ...(state.trainWeekSchedule[day.date] || {}), conductor: '', vip: '' };
+        });
+        localStorage.setItem(blankDefaultsKey, 'done');
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      }
       getTrainWeekDays().forEach(day => {
         const old = state.trainWeekSchedule[day.date] || {};
-        if (!old.conductor) old.conductor = state.trainConductor || 'Abo S3D';
+        if (typeof old.conductor !== 'string') old.conductor = '';
         if (typeof old.vip !== 'string') old.vip = '';
         state.trainWeekSchedule[day.date] = old;
       });
@@ -2966,7 +2976,7 @@
 
     function getTrainDayConfig(date) {
       migrateTrainWeekSchedule();
-      return state.trainWeekSchedule[date] || { conductor: state.trainConductor || 'Abo S3D', vip: state.trainVip || '' };
+      return state.trainWeekSchedule[date] || { conductor: '', vip: '' };
     }
 
     function saveTrainDayConfig(date, field, value) {
@@ -2996,7 +3006,7 @@
           <div class="flex items-center justify-between gap-2"><div><strong class="text-sm ${day.isToday?'text-amber-300':'text-white'}">${day.name}</strong><div class="text-[11px] text-slate-300 mt-1">${formatWeeklyDate(day.date)}</div></div>${day.isToday?'<span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 font-black">اليوم</span>':''}</div>
           <div class="text-[11px] text-amber-300 font-black">🚂 9:00 مساءً</div>
           <label class="block text-[10px] text-amber-400 font-bold">قائد القطار</label>
-          <select data-permission="manage_train" class="export-hide role-protected-officer w-full bg-cmd-card border border-amber-500/40 rounded-lg px-2 py-1.5 text-xs text-amber-200 font-bold" onchange="saveTrainDayConfig('${day.date}','conductor',this.value)">${players.map(n=>`<option value="${n}" ${n===cfg.conductor?'selected':''}>${n}</option>`).join('')}</select>
+          <select data-permission="manage_train" class="export-hide role-protected-officer w-full bg-cmd-card border border-amber-500/40 rounded-lg px-2 py-1.5 text-xs text-amber-200 font-bold" onchange="saveTrainDayConfig('${day.date}','conductor',this.value)"><option value="" ${!cfg.conductor?'selected':''}>-- بدون تحديد --</option>${players.map(n=>`<option value="${n}" ${n===cfg.conductor?'selected':''}>${n}</option>`).join('')}</select>
           <label class="block text-[10px] text-cyan-400 font-bold">راكب VIP</label>
           <select data-permission="manage_train" class="export-hide role-protected-officer w-full bg-cmd-card border border-cyan-500/40 rounded-lg px-2 py-1.5 text-xs text-cyan-200 font-bold" onchange="saveTrainDayConfig('${day.date}','vip',this.value)"><option value="">-- بدون تحديد --</option>${players.map(n=>`<option value="${n}" ${n===cfg.vip?'selected':''}>${n}</option>`).join('')}</select>
         </div>`;

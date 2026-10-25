@@ -683,7 +683,7 @@
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
               <div class="bg-cmd-bg border border-amber-500/40 rounded-xl p-3">
-                <span class="text-[10px] text-amber-400 font-bold block">قائد القطار الافتراضي</span>
+                <span class="text-[10px] text-amber-400 font-bold block">قائد القطار</span>
                 <strong class="text-base text-white font-black" id="train-conductor-name">Abo S3D</strong>
               </div>
               <div class="bg-cmd-bg border border-cyan-500/40 rounded-xl p-3">
@@ -785,18 +785,25 @@
       </div>
 
       <!-- 8. إدارة الصلاحيات والرتب والإشعارات مع ظهور أسماء جميع الأعضاء بوضوح -->
-      <div id="al-panel-permissions" class="al-subpanel bg-cmd-card border border-cmd-border rounded-2xl p-3 space-y-2">
+      <div id="al-panel-permissions" class="al-subpanel bg-cmd-card border border-cmd-border rounded-2xl p-3 space-y-3">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
           <div>
             <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-400">لوحة المالك (Abo S3D - Owner R4)</span>
             <h3 class="font-black text-base text-white mt-1">تحرير رتب الأعضاء (R1 إلى R5) وصلاحية إرسال التنبيهات</h3>
-            <p class="text-xs text-slate-400">حدد العضو لتعديل رتبته وصلاحياته الإدارية، وتفعيل أو حجب حقه في إرسال التنبيهات</p>
+            <p class="text-xs text-slate-400">اختر عضوًا من القائمة لعرض صلاحياته وتعديلها</p>
           </div>
           <div class="w-full sm:w-auto">
             <input type="text" id="perm-search" oninput="renderAllianceTab()" placeholder="بحث في الأعضاء..." class="w-full bg-cmd-bg border border-cmd-border rounded-xl px-3 py-1.5 text-xs text-white" />
           </div>
         </div>
-        <div id="permissions-management-list" class="space-y-1.5"></div>
+        <div class="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto] gap-2 items-end">
+          <div class="space-y-1">
+            <label for="perm-member-select" class="block text-xs font-bold text-cyan-300">العضو</label>
+            <select id="perm-member-select" onchange="selectPermissionMember(this.value)" class="w-full bg-cmd-bg border border-cmd-border rounded-xl px-3 py-2 text-sm text-white"></select>
+          </div>
+          <div class="text-xs text-slate-500 pb-2" id="perm-member-count"></div>
+        </div>
+        <div id="permissions-management-list" class="space-y-2"></div>
       </div>
 
       <div id="al-panel-announcements" class="al-subpanel hidden space-y-4">
@@ -3097,20 +3104,36 @@
       applyRolePermissions();
     }
 
+    let selectedPermissionMemberId = '';
+
+    function selectPermissionMember(memberId) {
+      selectedPermissionMemberId = memberId || '';
+      renderAllianceTab();
+    }
+
     function renderAllianceTab() {
       ensurePermissionState();
       const permBox = document.getElementById('permissions-management-list');
+      const memberSelect = document.getElementById('perm-member-select');
+      const memberCount = document.getElementById('perm-member-count');
       if (!permBox) return;
 
       if (!canManagePermissions()) {
-        permBox.innerHTML = `<div class="bg-cmd-bg border border-slate-800 rounded-xl p-4 text-center text-xs text-slate-400">
-          إدارة الصلاحيات الفردية متاحة للمالك أو من مُنح هذه الصلاحية.
-        </div>`;
+        if (memberSelect) memberSelect.innerHTML = '';
+        permBox.innerHTML = `<div class="bg-cmd-bg border border-slate-800 rounded-xl p-4 text-center text-xs text-slate-400">إدارة الصلاحيات الفردية متاحة للمالك أو من مُنح هذه الصلاحية.</div>`;
       } else {
         const q = (document.getElementById('perm-search')?.value || '').trim().toLowerCase();
-        const list = state.members.filter(m => !q || m.name.toLowerCase().includes(q));
-
-        permBox.innerHTML = list.map(m => {
+        const list = state.members.filter(m => !q || String(m.name || '').toLowerCase().includes(q));
+        if (memberCount) memberCount.textContent = `${list.length} عضو`;
+        if (memberSelect) {
+          if (!list.some(m => m.id === selectedPermissionMemberId)) selectedPermissionMemberId = list[0]?.id || '';
+          memberSelect.innerHTML = list.map(m => `<option value="${m.id}" ${m.id === selectedPermissionMemberId ? 'selected' : ''}>${m.name} — ${m.role || 'R3'}</option>`).join('');
+          memberSelect.disabled = !list.length;
+        }
+        const m = list.find(x => x.id === selectedPermissionMemberId);
+        if (!m) {
+          permBox.innerHTML = `<div class="bg-cmd-bg border border-slate-800 rounded-xl p-4 text-center text-sm text-slate-400">لا يوجد أعضاء مطابقون للبحث.</div>`;
+        } else {
           const isMainOwner = isOwnerName(m.name);
           const memberPerms = state.customPermissions[m.id] || {};
           const grouped = {};
@@ -3118,62 +3141,39 @@
             if (!grouped[def.group]) grouped[def.group] = [];
             grouped[def.group].push([key, def]);
           });
-
           const groupsHtml = PERMISSION_GROUP_ORDER.map(group => {
             const items = grouped[group] || [];
             return `
-              <div class="border border-slate-800 rounded-xl p-2.5">
-                <div class="text-[11px] font-black text-cyan-400 mb-2">${group}</div>
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1">
+              <div class="border border-slate-800 rounded-xl p-3">
+                <div class="text-sm font-black text-cyan-400 mb-2">${group}</div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                   ${items.map(([key, def]) => `
-                    <label class="flex items-center gap-1.5 bg-cmd-bg border border-slate-800 rounded-lg px-1.5 py-1.5 cursor-pointer hover:border-cyan-500/40 min-h-[34px]">
-                      <input type="checkbox"
-                        ${memberPerms[key] ? 'checked' : ''}
-                        ${isMainOwner ? 'checked disabled' : ''}
-                        onchange="updateCustomPermission('${m.id}', '${key}', this.checked)"
-                        class="accent-cyan-500 w-3.5 h-3.5 shrink-0" />
-                      <span class="text-[9px] text-slate-300 leading-tight">${def.label}</span>
+                    <label class="flex items-center gap-2 bg-cmd-bg border border-slate-800 rounded-lg px-2.5 py-2 cursor-pointer hover:border-cyan-500/40 min-h-[40px]">
+                      <input type="checkbox" ${memberPerms[key] ? 'checked' : ''} ${isMainOwner ? 'checked disabled' : ''}
+                        onchange="updateCustomPermission('${m.id}', '${key}', this.checked)" class="accent-cyan-500 w-4 h-4 shrink-0" />
+                      <span class="text-xs text-slate-200 leading-snug">${def.label}</span>
                     </label>
                   `).join('')}
                 </div>
-              </div>
-            `;
+              </div>`;
           }).join('');
-
-          return `
+          permBox.innerHTML = `
             <div class="bg-cmd-bg border border-cmd-border rounded-xl p-3 space-y-3 shadow">
               <div class="flex flex-wrap items-center justify-between gap-2">
-                <div class="flex items-center gap-2">
-                  <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-hud font-bold">${m.role || 'R3'}</span>
-                  <div>
-                    <strong class="text-white text-sm">${m.name}</strong>
-                    <span class="text-slate-400 text-[11px] mr-2">HQ ${m.hq} • ${Number(m.power).toFixed(1)}M • ${normalizeFormation(m.formation)}</span>
-                  </div>
-                  ${isMainOwner ? '<span class="px-2 py-0.5 rounded bg-amber-500 text-slate-950 font-hud font-black text-[10px]">OWNER R4 👑 • كل الصلاحيات</span>' : ''}
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="px-2 py-1 rounded bg-amber-500/20 text-amber-400 font-bold text-xs">${m.role || 'R3'}</span>
+                  <div><strong class="text-white text-base">${m.name}</strong><div class="text-slate-400 text-xs mt-0.5">HQ ${m.hq} • ${Number(m.power).toFixed(1)}M • ${normalizeFormation(m.formation)}</div></div>
+                  ${isMainOwner ? '<span class="px-2 py-1 rounded bg-amber-500 text-slate-950 font-black text-xs">OWNER R4 👑 • كل الصلاحيات</span>' : ''}
                 </div>
-                ${isMainOwner ? '' : `
-                  <div class="flex items-center gap-1.5">
-                    <button onclick="setAllMemberPermissions('${m.id}', true)" class="px-2.5 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-black">تفعيل الكل</button>
-                    <button onclick="setAllMemberPermissions('${m.id}', false)" class="px-2.5 py-1.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-[10px] font-black">إلغاء الكل</button>
-                  </div>
-                `}
+                ${isMainOwner ? '' : `<div class="flex items-center gap-2"><button onclick="setAllMemberPermissions('${m.id}', true)" class="px-3 py-2 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-black">تفعيل الكل</button><button onclick="setAllMemberPermissions('${m.id}', false)" class="px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-xs font-black">إلغاء الكل</button></div>`}
               </div>
-
               <div class="flex items-center gap-2 flex-wrap border-t border-slate-800 pt-2">
-                <span class="text-[10px] text-slate-500">الرتبة الحالية: ${m.role || 'R3'}</span>
-                ${isMainOwner ? '' : (hasPermission('change_ranks') ? `
-                  <select onchange="updateMemberRankByOwner('${m.id}', this.value)" class="bg-cmd-card border border-amber-500/40 rounded-lg px-2 py-1 text-[10px] font-bold text-amber-300 font-hud">
-                    ${['R5', 'R4', 'R3', 'R2', 'R1'].map(r => `<option value="${r}" ${m.role === r ? 'selected' : ''}>${r}</option>`).join('')}
-                  </select>
-                ` : '')}
+                <span class="text-xs text-slate-400">الرتبة الحالية: ${m.role || 'R3'}</span>
+                ${isMainOwner ? '' : (hasPermission('change_ranks') ? `<select onchange="updateMemberRankByOwner('${m.id}', this.value)" class="bg-cmd-card border border-amber-500/40 rounded-lg px-2 py-1.5 text-xs font-bold text-amber-300">${['R5','R4','R3','R2','R1'].map(r => `<option value="${r}" ${m.role === r ? 'selected' : ''}>${r}</option>`).join('')}</select>` : '')}
               </div>
-
-              <div class="space-y-2">
-                ${groupsHtml}
-              </div>
-            </div>
-          `;
-        }).join('');
+              <div class="space-y-3">${groupsHtml}</div>
+            </div>`;
+        }
       }
 
       const logBox = document.getElementById('audit-log-container');

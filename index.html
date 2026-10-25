@@ -651,25 +651,27 @@
           <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
             <div>
               <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-400">جدول القطار الأسبوعي</span>
-              <h3 class="font-black text-lg text-white mt-1">قطار تحالف HFO الذهبي الأحد</h3>
-              <p class="text-xs text-slate-400">يمكنك تحديد السائق والراكب دون نشر، ثم الضغط على زر «نشر» عند الاعتماد</p>
+              <h3 class="font-black text-lg text-white mt-1">قطار تحالف HFO — يوميًا</h3>
+              <p class="text-xs text-slate-400">الانطلاق يوميًا الساعة <strong class="text-amber-300">9:00 مساءً</strong> بتوقيت الرياض، ويظهر تاريخ كل يوم تلقائيًا.</p>
             </div>
-            <div class="flex items-center gap-2">
-              <button data-permission="manage_train" onclick="generateTrainVipTable()" class="role-protected-officer px-3 py-2 rounded-xl bg-cmd-panel border border-slate-700 text-slate-200 font-bold text-xs flex items-center gap-1.5 shadow">
-                <i class="fa-solid fa-rotate"></i> تدوير عادل
-              </button>
-              <button data-permission="publish_train" onclick="publishTrainSchedule()" class="role-protected-officer px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center gap-1.5 shadow-lg">
-                <i class="fa-solid fa-bullhorn"></i> نشر جدول القطار
-              </button>
+            <div class="flex flex-wrap items-center gap-2">
+              <button data-permission="manage_train" onclick="generateTrainVipTable()" class="role-protected-officer px-3 py-2 rounded-xl bg-cmd-panel border border-slate-700 text-slate-200 font-bold text-xs flex items-center gap-1.5 shadow"><i class="fa-solid fa-rotate"></i> تدوير عادل</button>
+              <button data-permission="publish_train" onclick="publishTrainSchedule()" class="role-protected-officer px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center gap-1.5 shadow-lg"><i class="fa-solid fa-bullhorn"></i> نشر جدول القطار</button>
             </div>
           </div>
+          <div class="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2">
 
-          <div id="train-export-card" class="bg-gradient-to-br from-[#111927] via-[#090d16] to-[#111927] border-2 border-amber-500/50 rounded-2xl p-5 shadow-2xl space-y-4">
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-2"><h4 class="font-black text-sm text-white">مواعيد القطار من الأحد إلى السبت</h4><span class="text-[10px] text-slate-500">كل يوم • 21:00 الرياض</span></div>
+            <div id="train-weekly-days" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2"></div>
+          </div>
+          <div id="train-export-card class="bg-gradient-to-br from-[#111927] via-[#090d16] to-[#111927] border-2 border-amber-500/50 rounded-2xl p-5 shadow-2xl space-y-4">
             <div class="flex items-center justify-between border-b border-slate-800 pb-3">
               <div class="flex items-center gap-3">
                 <img src="/icon-192.png?v=3" onerror="this.src='https://img.icons8.com/color/192/shield.png'" class="w-12 h-12 rounded-2xl object-cover shadow" alt="HFO" />
                 <div>
-                  <h3 class="font-black text-base md:text-lg text-white">قطار تحالف HFO الذهبي الأحد</h3>
+                  <h3 class="font-black text-base md:text-lg text-white">قطار تحالف HFO — جدول اليوم</h3>
                   <p class="text-xs text-cyan-400 font-bold">Server #806 • Alliance Train VIP Schedule</p>
                 </div>
               </div>
@@ -699,7 +701,7 @@
           </div>
 
           <div class="flex justify-end pt-1">
-            <button data-permission="export_battle_plans" onclick="exportOfficialBattlePNG('train-export-card', 'HFO-806-Train-Sunday.png')" class="px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg">
+            <button data-permission="export_battle_plans" onclick="exportOfficialBattlePNG('train-export-card', 'HFO-806-Train-Daily.png')" class="px-5 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg">
               <i class="fa-solid fa-camera"></i> تصدير جدول القطار الأسبوعي PNG
             </button>
           </div>
@@ -2955,22 +2957,36 @@
       toggleModal('confirm-delete-modal');
     }
 
+    function getTrainWeekDays() {
+      const now = riyadhNowParts();
+      const today = new Date(Date.UTC(now.year, now.month - 1, now.day, 12));
+      const sunday = new Date(today.getTime()); sunday.setUTCDate(sunday.getUTCDate() - sunday.getUTCDay());
+      const names = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+      return names.map((name, i) => { const d=new Date(sunday.getTime()); d.setUTCDate(d.getUTCDate()+i); const date=`${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`; return {name,date,isToday:date===dateKeyFromParts(now)}; });
+    }
+    function renderTrainWeeklyDays() {
+      const node=document.getElementById('train-weekly-days'); if(!node)return;
+      node.innerHTML=getTrainWeekDays().map(day=>`<div class="rounded-xl border ${day.isToday?'border-amber-400/60 bg-amber-500/10':'border-slate-700 bg-cmd-bg'} p-3"><div class="flex items-center justify-between gap-2"><strong class="text-sm ${day.isToday?'text-amber-300':'text-white'}">${day.name}</strong>${day.isToday?'<span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 font-black">اليوم</span>':''}</div><div class="text-[11px] text-slate-300 mt-1">${formatWeeklyDate(day.date)}</div><div class="text-[11px] text-amber-300 font-black mt-1">🚂 9:00 مساءً</div></div>`).join('');
+    }
     function renderTrainTab() {
-      const conductor = state.trainConductor || 'Abo S3D';
-      const vip = state.trainVip || '— غير محدد —';
-      document.getElementById('train-conductor-name').textContent = conductor;
-      document.getElementById('train-vip-name').textContent = vip;
-
-      const playerPool = getAvailablePlayerNames();
-      const condSelect = document.getElementById('train-conductor-select');
-      const vipSelect = document.getElementById('train-vip-select');
-
-      if (condSelect) {
-        condSelect.innerHTML = (playerPool.length ? playerPool : ['Abo S3D']).map(n => `<option value="${n}" ${n === conductor ? 'selected' : ''}>تغيير السائق: ${n}</option>`).join('');
-      }
-      if (vipSelect) {
-        vipSelect.innerHTML = `<option value="">-- اختر راكب VIP --</option>` + (playerPool.length ? playerPool : []).map(n => `<option value="${n}" ${n === vip ? 'selected' : ''}>تعيين VIP: ${n}</option>`).join('');
-      }
+      const conductor=state.trainConductor||'Abo S3D', vip=state.trainVip||'— غير محدد —';
+      document.getElementById('train-conductor-name').textContent=conductor; document.getElementById('train-vip-name').textContent=vip;
+      const playerPool=getAvailablePlayerNames(), condSelect=document.getElementById('train-conductor-select'), vipSelect=document.getElementById('train-vip-select');
+      if(condSelect) condSelect.innerHTML=(playerPool.length?playerPool:['Abo S3D']).map(n=>`<option value="${n}" ${n===conductor?'selected':''}>تغيير السائق: ${n}</option>`).join('');
+      if(vipSelect) vipSelect.innerHTML=`<option value="">-- اختر راكب VIP --</option>`+(playerPool.length?playerPool:[]).map(n=>`<option value="${n}" ${n===vip?'selected':''}>تعيين VIP: ${n}</option>`).join('');
+      renderTrainWeeklyDays();
+    }
+    function getTrainReminderKey(){ return `HFO_TRAIN_REMINDER_${dateKeyFromParts(riyadhNowParts())}`; }
+    async function sendDailyTrainReminder(force=false){
+      if(!hasPermission('publish_train')) return false; const now=riyadhNowParts();
+      if(!force&&(now.hour!==20||now.minute!==0)) return false; const key=getTrainReminderKey();
+      if(!force&&localStorage.getItem(key)==='sent') return false;
+      const result=await sendAllianceExternalAlert('🔔 تذكير قطار HFO اليومي',`🚂 تذكير يومي لأعضاء تحالف HFO\n📅 ${formatWeeklyDate(dateKeyFromParts(now))}\n⏰ موعد انطلاق القطار: **9:00 مساءً بتوقيت الرياض**\n🔔 وقت التذكير: 8:00 مساءً بتوقيت الرياض\n\nيرجى الاستعداد للقطار في الموعد.\nHFO • Server 806`,0xf59e0b);
+      if(result){ localStorage.setItem(key,'sent'); logAuditAction('تذكير يومي للقطار',dateKeyFromParts(now),'إرسال تذكير 20:00 بتوقيت الرياض إلى ديسكورد وتيليجرام'); const st=document.getElementById('train-reminder-status'); if(st)st.textContent='تم إرسال تذكير اليوم'; return true; } return false;
+    }
+    function startDailyTrainReminderWatcher(){
+      const tick=async()=>{ const now=riyadhNowParts(), k=`${now.year}-${now.month}-${now.day}-${now.hour}-${now.minute}`; if(now.hour===20&&now.minute===0&&window.__lastTrainReminderMinute!==k){window.__lastTrainReminderMinute=k; await sendDailyTrainReminder(false);} };
+      tick(); setInterval(tick,30000);
     }
 
     function stageChangeConductor(name) {
@@ -3003,17 +3019,12 @@
     }
 
     async function publishTrainSchedule() {
-      if (!hasPermission('publish_train')) return showToast('لا تملك صلاحية نشر جدول القطار');
-      document.getElementById('train-status-badge').textContent = 'منشور ومعتمد ✅';
-      document.getElementById('train-status-badge').className = 'text-xs font-black text-emerald-400 block';
-
-      logAuditAction('نشر جدول القطار', `السائق: ${state.trainConductor} | الـ VIP: ${state.trainVip || '—'}`);
-      await sendAllianceExternalAlert(
-        '🚂 قطار تحالف HFO الذهبي الأحد (رسمي)',
-        `👨‍✈️ قائد القطار: **${state.trainConductor}**\n👑 راكب الـ VIP: **${state.trainVip || '—'}**\nموعد الانطلاق: الأحد بتوقيت الرياض.`,
-        0x10b981
-      );
-      showToast('تم نشر جدول القطار وإرسال التنبيه للأعضاء بنجاح');
+      if(!hasPermission('publish_train')) return showToast('لا تملك صلاحية نشر جدول القطار');
+      document.getElementById('train-status-badge').textContent='منشور ومعتمد يوميًا ✅'; document.getElementById('train-status-badge').className='text-xs font-black text-emerald-400 block';
+      const schedule=getTrainWeekDays().map(d=>`• ${d.name}: ${formatWeeklyDate(d.date)} — 9:00 مساءً`).join('\n');
+      logAuditAction('نشر جدول القطار الأسبوعي','الأحد إلى السبت',`الانطلاق يوميًا 21:00 | السائق: ${state.trainConductor} | VIP: ${state.trainVip||'—'}`);
+      await sendAllianceExternalAlert('🚂 جدول قطار تحالف HFO الأسبوعي (رسمي)',`🚂 موعد القطار يوميًا: 9:00 مساءً بتوقيت الرياض\n\n${schedule}\n\n👨‍✈️ قائد القطار الحالي: **${state.trainConductor}**\n👑 راكب الـ VIP: **${state.trainVip||'—'}**\n\nHFO • Server 806`,0x10b981);
+      showToast('تم نشر جدول القطار الأسبوعي وإرسال التنبيه بنجاح');
     }
 
     function updateCustomPermission(memberId, permissionKey, enabled) {

@@ -3005,7 +3005,17 @@
     }
 
     function renderTrainExportCard() {
-      const list=document.getElementById('train-export-weekly-list'); if(!list)return;
+      const card=document.getElementById('train-export-card');
+      const list=document.getElementById('train-export-weekly-list'); if(!card || !list)return;
+      // Remove legacy global conductor/VIP summary cards (without a weekday).
+      // The export card should contain only its header and the Sunday–Saturday rows.
+      card.querySelectorAll('#train-conductor-name, #train-vip-name, [data-train-global-summary="true"], .train-global-summary').forEach(el=>el.remove());
+      [...card.children].forEach(child=>{
+        if(child !== list && !child.querySelector('#train-export-weekly-list') && child !== card.firstElementChild) {
+          const text=(child.innerText || child.textContent || '').replace(/\s+/g,' ').trim();
+          if(/قائد القطار|راكب VIP/.test(text) && !/الأحد|الاثنين|الثلاثاء|الأربعاء|الخميس|الجمعة|السبت/.test(text)) child.remove();
+        }
+      });
       migrateTrainWeekSchedule();
       list.innerHTML=getTrainWeekDays().map(day=>{
         const cfg=getTrainDayConfig(day.date);
@@ -3014,14 +3024,11 @@
     }
     function renderTrainTab() {
       migrateTrainWeekSchedule();
-      const conductor=state.trainConductor||'Abo S3D', vip=state.trainVip||'— غير محدد —';
-      const conductorName=document.getElementById('train-conductor-name');
-      const vipName=document.getElementById('train-vip-name');
-      if(conductorName) conductorName.textContent=conductor;
-      if(vipName) vipName.textContent=vip;
-      const playerPool=getAvailablePlayerNames(), condSelect=document.getElementById('train-conductor-select'), vipSelect=document.getElementById('train-vip-select');
-      if(condSelect) condSelect.innerHTML=(playerPool.length?playerPool:['Abo S3D']).map(n=>`<option value="${n}" ${n===conductor?'selected':''}>تغيير السائق: ${n}</option>`).join('');
-      if(vipSelect) vipSelect.innerHTML=`<option value="">-- اختر راكب VIP --</option>`+(playerPool.length?playerPool:[]).map(n=>`<option value="${n}" ${n===vip?'selected':''}>تعيين VIP: ${n}</option>`).join('');
+      // Weekly assignments are configured per day only; do not render legacy global conductor/VIP rows.
+      ['train-conductor-name','train-vip-name','train-conductor-select','train-vip-select'].forEach(id=>{
+        const legacy=document.getElementById(id);
+        if(legacy){ const wrapper=legacy.closest('[data-train-global-summary="true"], .train-global-summary') || legacy.parentElement; if(wrapper && wrapper !== document.getElementById('train-export-weekly-list')) wrapper.remove(); }
+      });
       renderTrainWeeklyDays();
       renderTrainExportCard();
     }

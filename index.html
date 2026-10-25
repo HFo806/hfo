@@ -681,16 +681,6 @@
                 <span class="text-[11px] text-slate-400 font-bold">806 Abo S3D - HFo</span>
               </div>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-              <div class="bg-cmd-bg border border-amber-500/40 rounded-xl p-3">
-                <span class="text-[10px] text-amber-400 font-bold block">قائد القطار</span>
-                <strong class="text-base text-white font-black" id="train-conductor-name">Abo S3D</strong>
-              </div>
-              <div class="bg-cmd-bg border border-cyan-500/40 rounded-xl p-3">
-                <span class="text-[10px] text-cyan-400 font-bold block">راكب VIP الافتراضي</span>
-                <strong class="text-base text-white font-black" id="train-vip-name">— غير محدد —</strong>
-              </div>
-            </div>
             <div id="train-export-weekly-list" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
           </div>
         </div>
@@ -3025,7 +3015,10 @@
     function renderTrainTab() {
       migrateTrainWeekSchedule();
       const conductor=state.trainConductor||'Abo S3D', vip=state.trainVip||'— غير محدد —';
-      document.getElementById('train-conductor-name').textContent=conductor; document.getElementById('train-vip-name').textContent=vip;
+      const conductorName=document.getElementById('train-conductor-name');
+      const vipName=document.getElementById('train-vip-name');
+      if(conductorName) conductorName.textContent=conductor;
+      if(vipName) vipName.textContent=vip;
       const playerPool=getAvailablePlayerNames(), condSelect=document.getElementById('train-conductor-select'), vipSelect=document.getElementById('train-vip-select');
       if(condSelect) condSelect.innerHTML=(playerPool.length?playerPool:['Abo S3D']).map(n=>`<option value="${n}" ${n===conductor?'selected':''}>تغيير السائق: ${n}</option>`).join('');
       if(vipSelect) vipSelect.innerHTML=`<option value="">-- اختر راكب VIP --</option>`+(playerPool.length?playerPool:[]).map(n=>`<option value="${n}" ${n===vip?'selected':''}>تعيين VIP: ${n}</option>`).join('');
